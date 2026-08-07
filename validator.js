@@ -399,6 +399,9 @@ const skins = skinsJson.skins || [];
 
     const name = skin.localization_name || "(sin localization_name)";
 
+    const errorsBefore = report.stats.errors;
+    const warningsBefore = report.stats.warnings;
+
     // localization_name duplicado
     if (usedNames.has(name)) {
       push(
@@ -697,12 +700,17 @@ const skins = skinsJson.skins || [];
     }
 
     // Datos para el apartado de previsualización de skins
+    const hasIssue =
+      report.stats.errors > errorsBefore ||
+      report.stats.warnings > warningsBefore;
+
     report.skinDetails.push({
       name,
       displayName,
       geometry: skin.geometry || null,
       cape: skin.cape || null,
-      animations: skin.animations || null
+      animations: skin.animations || null,
+      hasIssue
     });
 
   }

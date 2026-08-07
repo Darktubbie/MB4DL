@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minecraft SkinPack Validator 4D</title>
+  <title>MB4DL — Minecraft Bedrock 4D SkinPack Validator</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,63 +19,68 @@
 <header class="topbar">
   <div class="container nav">
     <div class="brand">
-      <span class="brand-minecraft">MINECRAFT</span>
-      <span class="brand-validator">4D VALIDATOR</span>
+      <span class="brand-mb4dl" data-i18n-skip>MB4DL</span>
     </div>
 
     <nav class="nav-links">
-      <a href="#validator">Validador</a>
-      <a href="#checks">Comprobaciones</a>
-      <a href="#about">Acerca de</a>
+      <a href="#validator" data-i18n="nav.validator">Validator</a>
+      <a href="#checks" data-i18n="nav.checks">Checks</a>
+      <a href="#about" data-i18n="nav.about">About</a>
     </nav>
+
+    <div class="lang-switch" id="langSwitch">
+      <button type="button" class="lang-btn" data-lang="es">ES</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
   </div>
 </header>
 
 <section class="hero">
   <div class="hero-overlay"></div>
+  <div class="hero-particles" aria-hidden="true"></div>
 
   <div class="container hero-content">
 
     <div class="hero-text">
 
-      <h1>REVISA TU SKINPACK 4D ANTES DE INSTALARLO</h1>
+      <h1 data-i18n="hero.title">CHECK YOUR 4D SKINPACK BEFORE YOU INSTALL IT</h1>
 
-      <p>
-        Analiza automáticamente archivos de Minecraft Bedrock como
+      <p data-i18n-html="hero.subtitle">
+        Automatically analyzes Minecraft Bedrock files like
         <strong>skins.json</strong>,
         <strong>geometry.json</strong>,
         <strong>manifest.json</strong>,
         <strong>skinpacks.json</strong>,
         <strong>texts/*.lang</strong>
-        y todas las texturas del paquete.
+        and every texture in the pack.
       </p>
 
       <div class="hero-buttons">
-        <a href="#validator" class="btn btn-primary">Comenzar análisis</a>
-        <a href="#checks" class="btn btn-secondary">Ver comprobaciones</a>
+        <a href="#validator" class="btn btn-primary" data-i18n="hero.btnStart">Start analysis</a>
+        <a href="#checks" class="btn btn-secondary" data-i18n="hero.btnChecks">See checks</a>
       </div>
 
     </div>
 
     <div class="hero-card">
 
-      <div class="pixel-title">Estado del sistema</div>
+      <div class="pixel-title" data-i18n="hero.statusTitle">System status</div>
 
       <div class="hero-status">
 
         <div class="status-item">
           <span class="dot online"></span>
-          <span>Validador listo</span>
+          <span data-i18n="hero.statusReady">Validator ready</span>
         </div>
 
         <div class="status-item">
           <span class="dot online"></span>
-          <span>Modo offline</span>
+          <span data-i18n="hero.statusInstant">Instant analysis</span>
         </div>
 
         <div class="status-item">
           <span class="dot online"></span>
-          <span>Sin subir archivos a internet</span>
+          <span data-i18n="hero.statusPrivate">No files uploaded to any server</span>
         </div>
 
       </div>
@@ -84,12 +89,12 @@
 
         <div class="mini-card">
           <div class="mini-number" id="miniSkins">0</div>
-          <div class="mini-label">Skins</div>
+          <div class="mini-label" data-i18n="hero.miniSkins">Skins</div>
         </div>
 
         <div class="mini-card">
           <div class="mini-number" id="miniErrors">0</div>
-          <div class="mini-label">Errores</div>
+          <div class="mini-label" data-i18n="hero.miniErrors">Errors</div>
         </div>
 
       </div>
@@ -101,11 +106,11 @@
 
 <main>
 
-<section id="validator" class="section">
+<section id="validator" class="section reveal">
 
   <div class="container">
 
-    <h2 class="section-title">ANALIZAR PAQUETE</h2>
+    <h2 class="section-title" data-i18n="validator.sectionTitle">ANALYZE PACKAGE</h2>
 
     <div class="validator-layout">
 
@@ -115,23 +120,23 @@
 
           <div class="drop-icon">⬆</div>
 
-          <h3>ARRASTRA TU SKINPACK</h3>
+          <h3 data-i18n="validator.dropTitle">DRAG YOUR SKINPACK</h3>
 
-          <p>
-            Admite archivos
+          <p data-i18n-html="validator.dropText">
+            Accepts
             <strong>.zip</strong>
-            y
+            and
             <strong>.mcpack</strong>
-            de skins de Minecraft Bedrock.
+            Minecraft Bedrock skin pack files.
           </p>
 
           <label class="file-button">
-            Seleccionar archivo
+            <span data-i18n="validator.selectFile">Select file</span>
             <input type="file" id="zipInput" accept=".zip,.mcpack" hidden>
           </label>
 
-          <div id="selectedFile" class="selected-file">
-            Ningún archivo seleccionado
+          <div id="selectedFile" class="selected-file" data-i18n="validator.noFile">
+            No file selected
           </div>
 
         </div>
@@ -140,40 +145,40 @@
 
       <div class="card summary-card">
 
-        <h3 class="pixel-title">Resumen</h3>
+        <h3 class="pixel-title" data-i18n="validator.summary">Summary</h3>
 
         <div class="stats-grid">
 
           <div class="stat-box">
             <div class="stat-number" id="skinsCount">0</div>
-            <div class="stat-label">Skins detectadas</div>
+            <div class="stat-label" data-i18n="validator.statSkins">Skins detected</div>
           </div>
 
           <div class="stat-box">
             <div class="stat-number error" id="errorsCount">0</div>
-            <div class="stat-label">Errores</div>
+            <div class="stat-label" data-i18n="validator.statErrors">Errors</div>
           </div>
 
           <div class="stat-box">
             <div class="stat-number warning" id="warningsCount">0</div>
-            <div class="stat-label">Advertencias</div>
+            <div class="stat-label" data-i18n="validator.statWarnings">Warnings</div>
           </div>
 
           <div class="stat-box">
             <div class="stat-number success" id="successCount">0</div>
-            <div class="stat-label">Correctos</div>
+            <div class="stat-label" data-i18n="validator.statSuccess">Passed</div>
           </div>
 
         </div>
 
         <div class="summary-info">
 
-          <p>
-            El análisis se ejecuta completamente en tu navegador.
+          <p data-i18n="validator.infoBrowser">
+            The analysis runs entirely in your browser.
           </p>
 
-          <p>
-            Ningún archivo es enviado a servidores externos.
+          <p data-i18n="validator.infoPrivate">
+            No file is ever sent to any external server.
           </p>
 
         </div>
@@ -186,19 +191,19 @@
 
   <div class="results-header">
 
-    <h3 class="pixel-title">
-      Resultados del análisis
+    <h3 class="pixel-title" data-i18n="validator.resultsTitle">
+      Analysis results
     </h3>
 
-    <button id="analyzeBtn" class="btn btn-primary" disabled>
-      Analizar paquete
+    <button id="analyzeBtn" class="btn btn-primary" disabled data-i18n="validator.analyzeBtn">
+      Analyze package
     </button>
 
   </div>
 
   <label class="option-inline">
     <input type="checkbox" id="resolveAmbiguousGeometry">
-    Resolver ambigüedades de geometría automáticamente (usar la primera coincidencia cuando el nombre base del modelo, ej. "NombreDelModelo", aparece en más de una geometría distinta como "geometry.NombreDelModelo" y "geometry.custom.NombreDelModelo")
+    <span data-i18n="validator.ambiguousOption">Automatically resolve geometry ambiguities (use the first match when a model's base name, e.g. "ModelName", appears in more than one geometry such as "geometry.ModelName" and "geometry.custom.ModelName")</span>
   </label>
 
 
@@ -208,10 +213,10 @@
 
       <div class="placeholder-icon">🧱</div>
 
-      <h4>Esperando un paquete</h4>
+      <h4 data-i18n="validator.waitingTitle">Waiting for a package</h4>
 
-      <p>
-        Selecciona o arrastra un archivo ZIP para comenzar el análisis.
+      <p data-i18n="validator.waitingText">
+        Select or drag a ZIP or MCPACK file to start the analysis.
       </p>
 
     </div>
@@ -227,12 +232,12 @@
 <div class="card fix-card" id="fixPanel" style="display:none;">
 
   <h3 class="pixel-title">
-    🛠 Correcciones disponibles
+    🛠 <span data-i18n="fix.title">Available fixes</span>
   </h3>
 
 
-  <p class="fix-subtitle">
-    Selecciona las reparaciones que quieres aplicar.
+  <p class="fix-subtitle" data-i18n="fix.subtitle">
+    Select the repairs you want to apply.
   </p>
 
 
@@ -242,8 +247,8 @@
       <input type="checkbox" id="fixJson" checked>
       <span class="fix-option-icon">🧩</span>
       <span class="fix-option-text">
-        <strong>Reparar JSON</strong>
-        <small>Corrige errores comunes de sintaxis (comas sobrantes, etc.)</small>
+        <strong data-i18n="fix.jsonTitle">Repair JSON</strong>
+        <small data-i18n="fix.jsonDesc">Fixes common syntax errors (trailing commas, etc.)</small>
       </span>
     </label>
 
@@ -251,8 +256,8 @@
       <input type="checkbox" id="fixLocalization" checked>
       <span class="fix-option-icon">🌐</span>
       <span class="fix-option-text">
-        <strong>Sincronizar localization_name</strong>
-        <small>Vincula cada skin con su entrada en texts/*.lang</small>
+        <strong data-i18n="fix.locTitle">Sync localization_name</strong>
+        <small data-i18n="fix.locDesc">Links each skin to its entry in texts/*.lang</small>
       </span>
     </label>
 
@@ -260,8 +265,8 @@
       <input type="checkbox" id="fixTexts" checked>
       <span class="fix-option-icon">📝</span>
       <span class="fix-option-text">
-        <strong>Crear textos faltantes</strong>
-        <small>Genera entradas faltantes en los archivos de idioma</small>
+        <strong data-i18n="fix.textsTitle">Create missing text entries</strong>
+        <small data-i18n="fix.textsDesc">Generates missing entries in language files</small>
       </span>
     </label>
 
@@ -269,8 +274,8 @@
       <input type="checkbox" id="fixCase">
       <span class="fix-option-icon">🔠</span>
       <span class="fix-option-text">
-        <strong>Corregir mayúsculas/minúsculas</strong>
-        <small>Detecta archivos con diferencias de capitalización</small>
+        <strong data-i18n="fix.caseTitle">Fix upper/lowercase</strong>
+        <small data-i18n="fix.caseDesc">Fixes texture/cape references in skins.json to match real file names</small>
       </span>
     </label>
 
@@ -278,8 +283,8 @@
       <input type="checkbox" id="fixGeometry">
       <span class="fix-option-icon">📐</span>
       <span class="fix-option-text">
-        <strong>Revisar geometrías</strong>
-        <small>Comprueba que cada modelo exista en geometry.json</small>
+        <strong data-i18n="fix.geoTitle">Check geometries</strong>
+        <small data-i18n="fix.geoDesc">Checks that every model exists in geometry.json</small>
       </span>
     </label>
 
@@ -287,78 +292,44 @@
       <input type="checkbox" id="removeDuplicatesOrUnused">
       <span class="fix-option-icon">🗑️</span>
       <span class="fix-option-text">
-        <strong>Remover skins repetidas o no usadas</strong>
-        <small>Elimina duplicados y skins cuya textura no existe</small>
+        <strong data-i18n="fix.dupTitle">Remove duplicate or unused skins</strong>
+        <small data-i18n="fix.dupDesc">Removes duplicates and skins whose texture doesn't exist</small>
       </span>
     </label>
 
   </div>
 
 
-  <button id="repairButton" class="btn btn-primary fix-repair-btn">
-    Crear ZIP corregido
+  <button id="repairButton" class="btn btn-primary fix-repair-btn" data-i18n="fix.repairBtn">
+    Create fixed ZIP
   </button>
 
 
 </div>
-    <div class="checks-grid">
 
-      <article class="card check-card">
-        <h3>Geometrías</h3>
-        <p>
-          Verifica que los identificadores usados en
-          <strong>skins.json</strong>
-          existan realmente en
-          <strong>geometry.json</strong>.
-        </p>
-      </article>
+  </div>
 
-      <article class="card check-card">
-        <h3>Texturas</h3>
-        <p>
-          Comprueba que todas las imágenes referenciadas por las skins existan
-          físicamente dentro del paquete y detecta diferencias por mayúsculas y
-          minúsculas.
-        </p>
-      </article>
+</section>
 
-      <article class="card check-card">
-        <h3>Texts / Lang</h3>
-        <p>
-          Revisa que cada
-          <strong>localization_name</strong>
-          tenga su entrada correspondiente en
-          <strong>texts/*.lang</strong>
-          y detecta claves faltantes o sobrantes.
-        </p>
-      </article>
+<section id="about" class="section reveal">
 
-      <article class="card check-card">
-        <h3>Manifest</h3>
-        <p>
-          Valida
-          <strong>UUID</strong>,
-          <strong>format_version</strong>,
-          módulos presentes y otros problemas comunes de
-          <strong>manifest.json</strong>.
-        </p>
-      </article>
+  <div class="container about-layout">
 
-      <article class="card check-card">
-        <h3>JSON</h3>
-        <p>
-          Detecta archivos JSON con errores de sintaxis y muestra la ubicación
-          aproximada del problema cuando sea posible.
-        </p>
-      </article>
+    <div class="about-text">
 
-      <article class="card check-card">
-        <h3>Consistencia</h3>
-        <p>
-          Compara nombres, rutas, referencias duplicadas y coherencia general
-          entre todos los archivos del skinpack.
-        </p>
-      </article>
+      <h2 class="section-title" data-i18n="about.title">BUILT FOR 4D SKINPACKS</h2>
+
+      <p data-i18n-html="about.p1">
+        This tool is designed specifically for
+        <strong>Minecraft Bedrock 4D</strong>
+        projects, including custom geometries, complex models and packs with
+        multiple language files.
+      </p>
+
+      <p data-i18n="about.p2">
+        The goal is to catch exactly the mistakes that usually make a skin
+        not show up in-game, a model fail to load, or textures break.
+      </p>
 
     </div>
 
@@ -366,50 +337,70 @@
 
 </section>
 
-<section id="about" class="section">
+<section id="checks" class="section reveal checks-section">
 
-  <div class="container about-layout">
+  <div class="container">
 
-    <div>
+    <h2 class="section-title" data-i18n="checks.sectionTitle">WHAT WE CHECK</h2>
 
-      <h2 class="section-title">HECHO PARA SKINPACKS 4D</h2>
+    <div class="checks-grid">
 
-      <p>
-        Esta herramienta está pensada específicamente para proyectos de
-        <strong>Minecraft Bedrock 4D</strong>,
-        incluyendo geometrías personalizadas, modelos complejos y paquetes con
-        múltiples archivos de idioma.
-      </p>
+      <article class="card check-card">
+        <h3 data-i18n="checks.geoTitle">Geometries</h3>
+        <p data-i18n-html="checks.geoText">
+          Verifies that the identifiers used in
+          <strong>skins.json</strong>
+          actually exist in
+          <strong>geometry.json</strong>.
+        </p>
+      </article>
 
-      <p>
-        El objetivo es detectar exactamente los errores que suelen provocar que
-        una skin no aparezca en el juego, que el modelo no cargue o que las
-        texturas se rompan.
-      </p>
+      <article class="card check-card">
+        <h3 data-i18n="checks.texTitle">Textures</h3>
+        <p data-i18n="checks.texText">
+          Checks that every image referenced by a skin physically exists
+          inside the package and detects upper/lowercase mismatches.
+        </p>
+      </article>
 
-    </div>
+      <article class="card check-card">
+        <h3 data-i18n="checks.langTitle">Texts / Lang</h3>
+        <p data-i18n-html="checks.langText">
+          Checks that every
+          <strong>localization_name</strong>
+          has its matching entry in
+          <strong>texts/*.lang</strong>
+          and detects missing or extra keys.
+        </p>
+      </article>
 
-    <div class="card about-card">
+      <article class="card check-card">
+        <h3 data-i18n="checks.manifestTitle">Manifest</h3>
+        <p data-i18n-html="checks.manifestText">
+          Validates
+          <strong>UUID</strong>,
+          <strong>format_version</strong>,
+          present modules and other common issues in
+          <strong>manifest.json</strong>.
+        </p>
+      </article>
 
-  <div class="pixel-title">
-    Características
-  </div>
+      <article class="card check-card">
+        <h3 data-i18n="checks.jsonTitle">JSON</h3>
+        <p data-i18n="checks.jsonText">
+          Detects JSON files with syntax errors and shows the approximate
+          location of the problem whenever possible.
+        </p>
+      </article>
 
+      <article class="card check-card">
+        <h3 data-i18n="checks.consTitle">Consistency</h3>
+        <p data-i18n="checks.consText">
+          Compares names, paths, duplicate references and overall
+          consistency across every file in the skinpack.
+        </p>
+      </article>
 
-  <ul class="feature-list">
-
-    <li>Vista previa de texturas</li>
-
-    <li>Corrección automática modular</li>
-
-    <li>Exportación de ZIP reparado</li>
-
-    <li>Detección de errores 4D específicos</li>
-
-  </ul>
-
-</div>
- 
     </div>
 
   </div>
@@ -423,11 +414,11 @@
   <div class="container footer-content">
 
     <div class="footer-brand">
-      Minecraft SkinPack Validator 4D
+      MB4DL
     </div>
 
-    <div class="footer-text">
-      Inspirado visualmente en Minecraft.net · Funciona completamente offline
+    <div class="footer-text" data-i18n="footer.text">
+      Visually inspired by Minecraft.net
     </div>
 
   </div>

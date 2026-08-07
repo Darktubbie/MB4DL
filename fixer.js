@@ -366,36 +366,88 @@ const Fixer = {
     async fixFileCase(zip, changes){
 
 
-        let files =
-            Object.keys(zip.files);
+        let skinFile =
+            Object.keys(zip.files)
+            .find(x => /(^|\/)skins\.json$/i.test(x));
 
 
-
-        for(let file of files){
-
-
-            let lower =
-                file.toLowerCase();
+        if(!skinFile)
+            return;
 
 
-            let same =
-                files.find(
-                    x =>
-                    x.toLowerCase()
-                    === lower
-                );
+        let skins;
+
+        try{
+            skins = JSON.parse(
+                await zip.files[skinFile].async("string")
+            );
+        }catch(e){
+            return;
+        }
 
 
-            if(
-                same &&
-                same !== file
-            ){
+        let pngFiles =
+            Object.keys(zip.files)
+            .filter(
+                f =>
+                /\.png$/i.test(f) &&
+                !zip.files[f].dir
+            );
 
-                changes.push(
-                    `Coincidencia encontrada: ${file}`
-                );
 
-            }
+        let modified = false;
+
+
+        for(let skin of skins.skins || []){
+
+            ["texture","cape"].forEach(field=>{
+
+                if(!skin[field])
+                    return;
+
+
+                let exactMatch =
+                    pngFiles.some(
+                        f =>
+                        f.split("/").pop() === skin[field]
+                    );
+
+                if(exactMatch)
+                    return;
+
+
+                let ciMatch =
+                    pngFiles.find(
+                        f =>
+                        f.split("/").pop().toLowerCase()
+                        === skin[field].toLowerCase()
+                    );
+
+                if(ciMatch){
+
+                    let realName =
+                        ciMatch.split("/").pop();
+
+                    changes.push(
+                        `Corregido "${field}" de "${skin.localization_name || "(sin nombre)"}": "${skin[field]}" → "${realName}"`
+                    );
+
+                    skin[field] = realName;
+                    modified = true;
+
+                }
+
+            });
+
+        }
+
+
+        if(modified){
+
+            zip.file(
+                skinFile,
+                JSON.stringify(skins, null, 2)
+            );
 
         }
 

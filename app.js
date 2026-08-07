@@ -11,6 +11,318 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const selectedFile = document.getElementById("selectedFile");
 const results = document.getElementById("results");
 
+// ---------- i18n ----------
+const I18N = {
+  en: {
+    nav: { validator: "Validator", checks: "Checks", about: "About" },
+    hero: {
+      title: "CHECK YOUR 4D SKINPACK BEFORE YOU INSTALL IT",
+      subtitle: `Automatically analyzes Minecraft Bedrock files like
+        <strong>skins.json</strong>,
+        <strong>geometry.json</strong>,
+        <strong>manifest.json</strong>,
+        <strong>skinpacks.json</strong>,
+        <strong>texts/*.lang</strong>
+        and every texture in the pack.`,
+      btnStart: "Start analysis",
+      btnChecks: "See checks",
+      statusTitle: "System status",
+      statusReady: "Validator ready",
+      statusInstant: "Instant analysis",
+      statusPrivate: "No files uploaded to any server",
+      miniSkins: "Skins",
+      miniErrors: "Errors"
+    },
+    validator: {
+      sectionTitle: "ANALYZE PACKAGE",
+      dropTitle: "DRAG YOUR SKINPACK",
+      dropText: `Accepts
+        <strong>.zip</strong>
+        and
+        <strong>.mcpack</strong>
+        Minecraft Bedrock skin pack files.`,
+      selectFile: "Select file",
+      noFile: "No file selected",
+      summary: "Summary",
+      statSkins: "Skins detected",
+      statErrors: "Errors",
+      statWarnings: "Warnings",
+      statSuccess: "Passed",
+      infoBrowser: "The analysis runs entirely in your browser.",
+      infoPrivate: "No file is ever sent to any external server.",
+      resultsTitle: "Analysis results",
+      analyzeBtn: "Analyze package",
+      ambiguousOption: `Automatically resolve geometry ambiguities (use the first match when a model's base name, e.g. "ModelName", appears in more than one geometry such as "geometry.ModelName" and "geometry.custom.ModelName")`,
+      waitingTitle: "Waiting for a package",
+      waitingText: "Select or drag a ZIP or MCPACK file to start the analysis.",
+      loadingTitle: "Analyzing package",
+      loadingText: "Reading files and checking references...",
+      loadingBtn: "Loading...",
+      analyzingBtn: "Analyzing...",
+      readyTitle: "Package ready to analyze",
+      invalidExtTitle: "Unsupported format",
+      invalidExtText: "Files must be Minecraft Bedrock skin packs (.zip or .mcpack).",
+      invalidExtSelected: "Only .zip or .mcpack files are allowed.",
+      notPackTitle: "Incompatible package",
+      notPackText: `Must be a compatible Minecraft Bedrock skin pack (skins.json is required, and a "skin_pack" module if manifest.json is present).`,
+      notPackSelected: "The file doesn't look like a Minecraft Bedrock skin pack.",
+      invalidFileTitle: "Invalid file",
+      invalidFileText: "The selected file couldn't be opened correctly.",
+      invalidFileSelected: "Couldn't open the file.",
+      internalErrorTitle: "Internal error",
+      internalErrorText: "Something went wrong during the package analysis.",
+      needPackAlert: "Load a skinpack first."
+    },
+    fix: {
+      title: "Available fixes",
+      subtitle: "Select the repairs you want to apply.",
+      jsonTitle: "Repair JSON",
+      jsonDesc: "Fixes common syntax errors (trailing commas, etc.)",
+      locTitle: "Sync localization_name",
+      locDesc: "Links each skin to its entry in texts/*.lang",
+      textsTitle: "Create missing text entries",
+      textsDesc: "Generates missing entries in language files",
+      caseTitle: "Fix upper/lowercase",
+      caseDesc: "Fixes texture/cape references in skins.json to match real file names",
+      geoTitle: "Check geometries",
+      geoDesc: "Checks that every model exists in geometry.json",
+      dupTitle: "Remove duplicate or unused skins",
+      dupDesc: "Removes duplicates and skins whose texture doesn't exist",
+      repairBtn: "Create fixed ZIP"
+    },
+    about: {
+      title: "BUILT FOR 4D SKINPACKS",
+      p1: `This tool is designed specifically for
+        <strong>Minecraft Bedrock 4D</strong>
+        projects, including custom geometries, complex models and packs with
+        multiple language files.`,
+      p2: "The goal is to catch exactly the mistakes that usually make a skin not show up in-game, a model fail to load, or textures break."
+    },
+    checks: {
+      sectionTitle: "WHAT WE CHECK",
+      geoTitle: "Geometries",
+      geoText: `Verifies that the identifiers used in
+        <strong>skins.json</strong>
+        actually exist in
+        <strong>geometry.json</strong>.`,
+      texTitle: "Textures",
+      texText: "Checks that every image referenced by a skin physically exists inside the package and detects upper/lowercase mismatches.",
+      langTitle: "Texts / Lang",
+      langText: `Checks that every
+        <strong>localization_name</strong>
+        has its matching entry in
+        <strong>texts/*.lang</strong>
+        and detects missing or extra keys.`,
+      manifestTitle: "Manifest",
+      manifestText: `Validates
+        <strong>UUID</strong>,
+        <strong>format_version</strong>,
+        present modules and other common issues in
+        <strong>manifest.json</strong>.`,
+      jsonTitle: "JSON",
+      jsonText: "Detects JSON files with syntax errors and shows the approximate location of the problem whenever possible.",
+      consTitle: "Consistency",
+      consText: "Compares names, paths, duplicate references and overall consistency across every file in the skinpack."
+    },
+    footer: { text: "Visually inspired by Minecraft.net" },
+    js: {
+      skinsPreviewTitle: "👕 Detected skins",
+      skinPreviewMissingLang: "(no name in lang)",
+      rowName: "Name:",
+      rowModel: "Model:",
+      rowCape: "Cape:",
+      animationsLabel: "Animations",
+      defaultPackDescription: "4D skin pack"
+    }
+  },
+  es: {
+    nav: { validator: "Validador", checks: "Comprobaciones", about: "Acerca de" },
+    hero: {
+      title: "REVISA TU SKINPACK 4D ANTES DE INSTALARLO",
+      subtitle: `Analiza automáticamente archivos de Minecraft Bedrock como
+        <strong>skins.json</strong>,
+        <strong>geometry.json</strong>,
+        <strong>manifest.json</strong>,
+        <strong>skinpacks.json</strong>,
+        <strong>texts/*.lang</strong>
+        y todas las texturas del paquete.`,
+      btnStart: "Comenzar análisis",
+      btnChecks: "Ver comprobaciones",
+      statusTitle: "Estado del sistema",
+      statusReady: "Validador listo",
+      statusInstant: "Análisis instantáneo",
+      statusPrivate: "Ningún archivo se sube a un servidor",
+      miniSkins: "Skins",
+      miniErrors: "Errores"
+    },
+    validator: {
+      sectionTitle: "ANALIZAR PAQUETE",
+      dropTitle: "ARRASTRA TU SKINPACK",
+      dropText: `Admite archivos
+        <strong>.zip</strong>
+        y
+        <strong>.mcpack</strong>
+        de skins de Minecraft Bedrock.`,
+      selectFile: "Seleccionar archivo",
+      noFile: "Ningún archivo seleccionado",
+      summary: "Resumen",
+      statSkins: "Skins detectadas",
+      statErrors: "Errores",
+      statWarnings: "Advertencias",
+      statSuccess: "Correctos",
+      infoBrowser: "El análisis se ejecuta completamente en tu navegador.",
+      infoPrivate: "Ningún archivo es enviado a servidores externos.",
+      resultsTitle: "Resultados del análisis",
+      analyzeBtn: "Analizar paquete",
+      ambiguousOption: `Resolver ambigüedades de geometría automáticamente (usar la primera coincidencia cuando el nombre base del modelo, ej. "NombreDelModelo", aparece en más de una geometría distinta como "geometry.NombreDelModelo" y "geometry.custom.NombreDelModelo")`,
+      waitingTitle: "Esperando un paquete",
+      waitingText: "Selecciona o arrastra un archivo ZIP o MCPACK para comenzar el análisis.",
+      loadingTitle: "Analizando paquete",
+      loadingText: "Leyendo archivos y comprobando referencias...",
+      loadingBtn: "Cargando...",
+      analyzingBtn: "Analizando...",
+      readyTitle: "Paquete listo para analizar",
+      invalidExtTitle: "Formato no compatible",
+      invalidExtText: "Deben ser paquetes de skins de Minecraft Bedrock (.zip o .mcpack).",
+      invalidExtSelected: "Solo se permiten archivos .zip o .mcpack.",
+      notPackTitle: "Paquete no compatible",
+      notPackText: `Deben ser skins de Minecraft Bedrock compatibles (se requiere skins.json y, si hay manifest.json, un módulo de tipo "skin_pack").`,
+      notPackSelected: "El archivo no parece ser un skinpack de Minecraft Bedrock.",
+      invalidFileTitle: "Archivo inválido",
+      invalidFileText: "El archivo seleccionado no pudo abrirse correctamente.",
+      invalidFileSelected: "No se pudo abrir el archivo.",
+      internalErrorTitle: "Error interno",
+      internalErrorText: "Ocurrió un problema durante el análisis del paquete.",
+      needPackAlert: "Primero carga un skinpack."
+    },
+    fix: {
+      title: "Correcciones disponibles",
+      subtitle: "Selecciona las reparaciones que quieres aplicar.",
+      jsonTitle: "Reparar JSON",
+      jsonDesc: "Corrige errores comunes de sintaxis (comas sobrantes, etc.)",
+      locTitle: "Sincronizar localization_name",
+      locDesc: "Vincula cada skin con su entrada en texts/*.lang",
+      textsTitle: "Crear textos faltantes",
+      textsDesc: "Genera entradas faltantes en los archivos de idioma",
+      caseTitle: "Corregir mayúsculas/minúsculas",
+      caseDesc: "Corrige las referencias texture/cape en skins.json para que coincidan con el nombre real del archivo",
+      geoTitle: "Revisar geometrías",
+      geoDesc: "Comprueba que cada modelo exista en geometry.json",
+      dupTitle: "Remover skins repetidas o no usadas",
+      dupDesc: "Elimina duplicados y skins cuya textura no existe",
+      repairBtn: "Crear ZIP corregido"
+    },
+    about: {
+      title: "HECHO PARA SKINPACKS 4D",
+      p1: `Esta herramienta está pensada específicamente para proyectos de
+        <strong>Minecraft Bedrock 4D</strong>,
+        incluyendo geometrías personalizadas, modelos complejos y paquetes con
+        múltiples archivos de idioma.`,
+      p2: "El objetivo es detectar exactamente los errores que suelen provocar que una skin no aparezca en el juego, que el modelo no cargue o que las texturas se rompan."
+    },
+    checks: {
+      sectionTitle: "QUÉ COMPROBAMOS",
+      geoTitle: "Geometrías",
+      geoText: `Verifica que los identificadores usados en
+        <strong>skins.json</strong>
+        existan realmente en
+        <strong>geometry.json</strong>.`,
+      texTitle: "Texturas",
+      texText: "Comprueba que todas las imágenes referenciadas por las skins existan físicamente dentro del paquete y detecta diferencias por mayúsculas y minúsculas.",
+      langTitle: "Texts / Lang",
+      langText: `Revisa que cada
+        <strong>localization_name</strong>
+        tenga su entrada correspondiente en
+        <strong>texts/*.lang</strong>
+        y detecta claves faltantes o sobrantes.`,
+      manifestTitle: "Manifest",
+      manifestText: `Valida
+        <strong>UUID</strong>,
+        <strong>format_version</strong>,
+        módulos presentes y otros problemas comunes de
+        <strong>manifest.json</strong>.`,
+      jsonTitle: "JSON",
+      jsonText: "Detecta archivos JSON con errores de sintaxis y muestra la ubicación aproximada del problema cuando sea posible.",
+      consTitle: "Consistencia",
+      consText: "Compara nombres, rutas, referencias duplicadas y coherencia general entre todos los archivos del skinpack."
+    },
+    footer: { text: "Inspirado visualmente en Minecraft.net" },
+    js: {
+      skinsPreviewTitle: "👕 Skins detectadas",
+      skinPreviewMissingLang: "(sin nombre en el lang)",
+      rowName: "Nombre:",
+      rowModel: "Modelo:",
+      rowCape: "Capa:",
+      animationsLabel: "Animaciones",
+      defaultPackDescription: "Paquete de skins 4D"
+    }
+  }
+};
+
+let currentLang = "en";
+
+function t(key) {
+  const parts = key.split(".");
+  let node = I18N[currentLang];
+  for (const p of parts) {
+    if (!node) return key;
+    node = node[p];
+  }
+  return typeof node === "string" ? node : key;
+}
+
+function applyLanguage(lang) {
+  if (!I18N[lang]) return;
+  currentLang = lang;
+
+  try { localStorage.setItem("mb4dl_lang", lang); } catch (e) {}
+
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    el.innerHTML = t(el.getAttribute("data-i18n-html"));
+  });
+
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+  });
+
+  // Re-render dynamic content already on screen so it matches the new language
+  if (!currentReport) {
+    clearResults();
+  } else {
+    renderReport(currentReport);
+  }
+
+  if (analyzeBtn && analyzeBtn.textContent.trim() !== t("validator.loadingBtn") && analyzeBtn.textContent.trim() !== t("validator.analyzingBtn")) {
+    analyzeBtn.textContent = t("validator.analyzeBtn");
+  }
+}
+
+document.querySelectorAll(".lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => applyLanguage(btn.getAttribute("data-lang")));
+});
+
+// ---------- Animaciones de aparición al hacer scroll ----------
+if ("IntersectionObserver" in window) {
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in-view");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+} else {
+  document.querySelectorAll(".reveal").forEach(el => el.classList.add("in-view"));
+}
+
 // ---------- Estadísticas ----------
 function resetStats() {
   document.getElementById("skinsCount").textContent = "0";
@@ -37,8 +349,8 @@ function clearResults() {
     results.innerHTML = `
     <div class="result-placeholder">
         <div class="placeholder-icon">🧱</div>
-        <h4>Esperando un paquete</h4>
-        <p>Selecciona o arrastra un archivo ZIP para comenzar el análisis.</p>
+        <h4>${t("validator.waitingTitle")}</h4>
+        <p>${t("validator.waitingText")}</p>
     </div>
     `;
 }
@@ -47,8 +359,8 @@ function showLoading() {
     results.innerHTML = `
     <div class="result-placeholder">
         <div class="placeholder-icon">⏳</div>
-        <h4>Analizando paquete</h4>
-        <p>Leyendo archivos y comprobando referencias...</p>
+        <h4>${t("validator.loadingTitle")}</h4>
+        <p>${t("validator.loadingText")}</p>
     </div>
     `;
 }
@@ -205,14 +517,21 @@ function renderPackInfo(packInfo) {
   if (!packInfo) return "";
 
   const iconHtml = packInfo.iconDataUrl
-    ? `<img src="${packInfo.iconDataUrl}" alt="Icono del paquete">`
+    ? `<img src="${packInfo.iconDataUrl}" alt="Pack icon">`
     : `<div class="pack-icon-default">🧊</div>`;
+
+  // El validador usa "Paquete de skins 4D" como descripción por defecto;
+  // la traducimos aquí para respetar el idioma activo de la interfaz.
+  const description =
+    packInfo.description === "Paquete de skins 4D"
+      ? t("js.defaultPackDescription")
+      : packInfo.description;
 
   return `
     <div class="pack-info-banner">
       <div class="pack-info-text">
         <div class="pack-info-name">${mcFormatToHtml(packInfo.name)}</div>
-        <div class="pack-info-description">${mcFormatToHtml(packInfo.description)}</div>
+        <div class="pack-info-description">${mcFormatToHtml(description)}</div>
       </div>
       <div class="pack-info-icon">
         ${iconHtml}
@@ -229,25 +548,33 @@ function renderSkinsPreview(skinDetails) {
 
     const displayNameHtml = skin.displayName
       ? mcFormatToHtml(skin.displayName)
-      : `<span class="skin-preview-missing">(sin nombre en el lang)</span>`;
+      : `<span class="skin-preview-missing">${t("js.skinPreviewMissingLang")}</span>`;
 
     let animationsHtml = "";
     if (skin.animations && Object.keys(skin.animations).length) {
+      const animCount = Object.keys(skin.animations).length;
       animationsHtml = `
-        <div class="skin-preview-animations">
-          ${Object.entries(skin.animations).map(([slot, val]) =>
-            `<div class="skin-preview-anim-row"><code>${escapeHtml(slot)}</code> ➡️ <code>${escapeHtml(val)}</code></div>`
-          ).join("")}
-        </div>
+        <details class="skin-preview-animations">
+          <summary>${t("js.animationsLabel")} (${animCount})</summary>
+          <div class="skin-preview-animations-body">
+            ${Object.entries(skin.animations).map(([slot, val]) =>
+              `<div class="skin-preview-anim-row"><code>${escapeHtml(slot)}</code> <span class="anim-arrow">➡️</span> <code>${escapeHtml(val)}</code></div>`
+            ).join("")}
+          </div>
+        </details>
       `;
     }
 
+    const cardClass = skin.hasIssue
+      ? "skin-preview-card skin-preview-card-warning"
+      : "skin-preview-card";
+
     return `
-      <div class="skin-preview-card">
+      <div class="${cardClass}">
         <div class="skin-preview-displayname">${displayNameHtml}</div>
-        <div class="skin-preview-row"><span>Nombre:</span> ${escapeHtml(skin.name)}</div>
-        <div class="skin-preview-row"><span>Modelo:</span> ${escapeHtml(skin.geometry || "—")}</div>
-        ${skin.cape ? `<div class="skin-preview-row"><span>Capa:</span> ${escapeHtml(skin.cape)}</div>` : ""}
+        <div class="skin-preview-row"><span>${t("js.rowName")}</span> ${escapeHtml(skin.name)}</div>
+        <div class="skin-preview-row"><span>${t("js.rowModel")}</span> ${escapeHtml(skin.geometry || "—")}</div>
+        ${skin.cape ? `<div class="skin-preview-row"><span>${t("js.rowCape")}</span> ${escapeHtml(skin.cape)}</div>` : ""}
         ${animationsHtml}
       </div>
     `;
@@ -255,7 +582,7 @@ function renderSkinsPreview(skinDetails) {
 
   return `
     <div class="card skins-preview-card">
-      <h3 class="pixel-title">👕 Skins detectadas</h3>
+      <h3 class="pixel-title">${t("js.skinsPreviewTitle")}</h3>
       <div class="skins-preview-grid">
         ${cards}
       </div>
@@ -272,12 +599,12 @@ async function handleFile(file) {
   const validExtension = lowerName.endsWith(".zip") || lowerName.endsWith(".mcpack");
 
   if (!validExtension) {
-    selectedFile.textContent = "Solo se permiten archivos .zip o .mcpack.";
+    selectedFile.textContent = t("validator.invalidExtSelected");
     results.innerHTML = `
       <div class="result-placeholder">
         <div class="placeholder-icon">❌</div>
-        <h4>Formato no compatible</h4>
-        <p>Deben ser paquetes de skins de Minecraft Bedrock (.zip o .mcpack).</p>
+        <h4>${t("validator.invalidExtTitle")}</h4>
+        <p>${t("validator.invalidExtText")}</p>
       </div>
     `;
     return;
@@ -287,7 +614,7 @@ async function handleFile(file) {
   currentZipName = file.name;
 
   analyzeBtn.disabled = true;
-  analyzeBtn.textContent = "Cargando...";
+  analyzeBtn.textContent = t("validator.loadingBtn");
 
   try {
     currentZip = await JSZip.loadAsync(file);
@@ -298,15 +625,15 @@ async function handleFile(file) {
       currentZip = null;
 
       analyzeBtn.disabled = true;
-      analyzeBtn.textContent = "Analizar paquete";
+      analyzeBtn.textContent = t("validator.analyzeBtn");
 
-      selectedFile.textContent = "El archivo no parece ser un skinpack de Minecraft Bedrock.";
+      selectedFile.textContent = t("validator.notPackSelected");
 
       results.innerHTML = `
         <div class="result-placeholder">
           <div class="placeholder-icon">❌</div>
-          <h4>Paquete no compatible</h4>
-          <p>Deben ser skins de Minecraft Bedrock compatibles (se requiere skins.json y, si hay manifest.json, un módulo de tipo "skin_pack").</p>
+          <h4>${t("validator.notPackTitle")}</h4>
+          <p>${t("validator.notPackText")}</p>
         </div>
       `;
 
@@ -314,13 +641,13 @@ async function handleFile(file) {
     }
 
     analyzeBtn.disabled = false;
-    analyzeBtn.textContent = "Analizar paquete";
+    analyzeBtn.textContent = t("validator.analyzeBtn");
 
     results.innerHTML = `
       <div class="result-placeholder">
         <div class="placeholder-icon">📦</div>
-        <h4>Paquete listo para analizar</h4>
-        <p>${file.name}</p>
+        <h4>${t("validator.readyTitle")}</h4>
+        <p>${escapeHtml(file.name)}</p>
       </div>
     `;
   } catch (err) {
@@ -329,18 +656,37 @@ async function handleFile(file) {
     currentZip = null;
 
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = "Analizar paquete";
+    analyzeBtn.textContent = t("validator.analyzeBtn");
 
-    selectedFile.textContent = "No se pudo abrir el archivo.";
+    selectedFile.textContent = t("validator.invalidFileSelected");
 
     results.innerHTML = `
       <div class="result-placeholder">
         <div class="placeholder-icon">❌</div>
-        <h4>Archivo inválido</h4>
-        <p>El archivo seleccionado no pudo abrirse correctamente.</p>
+        <h4>${t("validator.invalidFileTitle")}</h4>
+        <p>${t("validator.invalidFileText")}</p>
       </div>
     `;
   }
+}
+
+// ---------- Renderiza un reporte completo en #results ----------
+function renderReport(report) {
+  beginResults();
+
+  if (report.packInfo) {
+    results.insertAdjacentHTML("beforeend", renderPackInfo(report.packInfo));
+  }
+
+  report.results.forEach(r => {
+    addResult(r.type, r.title, r.message);
+  });
+
+  if (report.skinDetails && report.skinDetails.length) {
+    results.insertAdjacentHTML("beforeend", renderSkinsPreview(report.skinDetails));
+  }
+
+  setStats(report.stats);
 }
 
 // ---------- Ejecutar análisis ----------
@@ -348,7 +694,7 @@ analyzeBtn.addEventListener("click", async () => {
   if (!currentZip) return;
 
   analyzeBtn.disabled = true;
-  analyzeBtn.textContent = "Analizando...";
+  analyzeBtn.textContent = t("validator.analyzingBtn");
 
   showLoading();
 
@@ -361,27 +707,11 @@ analyzeBtn.addEventListener("click", async () => {
       resolveAmbiguousGeometry
     });
 
-const report = currentReport;
+    renderReport(currentReport);
 
-    beginResults();
-
-    if (report.packInfo) {
-      results.insertAdjacentHTML("beforeend", renderPackInfo(report.packInfo));
-    }
-
-    report.results.forEach(r => {
-      addResult(r.type, r.title, r.message);
-    });
-
-    if (report.skinDetails && report.skinDetails.length) {
-      results.insertAdjacentHTML("beforeend", renderSkinsPreview(report.skinDetails));
-    }
-
-    setStats(report.stats);
-
-document
-.getElementById("fixPanel")
-.style.display = "block";
+    document
+    .getElementById("fixPanel")
+    .style.display = "block";
 
   } catch (err) {
     console.error(err);
@@ -390,18 +720,25 @@ document
 
     addResult(
       "error",
-      "Error interno",
-      "Ocurrió un problema durante el análisis del paquete."
+      t("validator.internalErrorTitle"),
+      t("validator.internalErrorText")
     );
   }
 
   analyzeBtn.disabled = false;
-  analyzeBtn.textContent = "Analizar paquete";
+  analyzeBtn.textContent = t("validator.analyzeBtn");
 });
 
 // Inicializar
 resetStats();
-clearResults();
+
+let savedLang = "en";
+try {
+  const stored = localStorage.getItem("mb4dl_lang");
+  if (stored === "es" || stored === "en") savedLang = stored;
+} catch (e) {}
+
+applyLanguage(savedLang);
 
 
 const repairButton =
@@ -413,7 +750,7 @@ if(repairButton){
 repairButton.addEventListener("click", async ()=>{
 
 if(!currentZip){
-    alert("Primero carga un skinpack.");
+    alert(t("validator.needPackAlert"));
     return;
 }
 
