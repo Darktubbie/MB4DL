@@ -10,6 +10,7 @@
 
   --red:#ff5a5a;
   --yellow:#ffd85a;
+  --info:#7c9bff;
 
   --text:#f2f3f4;
   --muted:#b9bec4;
@@ -56,12 +57,47 @@ html{
 }
 
 body{
+  position:relative;
   background:
     radial-gradient(circle at top,#1d3b1d55,transparent 60%),
     linear-gradient(180deg,#0f1011,#151618 35%,#101113);
   color:var(--text);
   font-family:'Inter',sans-serif;
   line-height:1.6;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:-50px;
+  z-index:-2;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(98,216,78,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(98,216,78,.06) 1px, transparent 1px);
+  background-size:42px 42px;
+  animation:bgDrift 26s linear infinite;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:-30% ;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(circle, rgba(98,216,78,.10), transparent 45%);
+  animation:bgGlowShift 18s ease-in-out infinite;
+}
+
+@keyframes bgDrift{
+  from{ background-position:0 0, 0 0; }
+  to{ background-position:420px 420px, 420px 420px; }
+}
+
+@keyframes bgGlowShift{
+  0%,100%{ transform:translate(-10%,-10%); }
+  50%{ transform:translate(30%,20%); }
 }
 
 img{
@@ -105,12 +141,24 @@ a{
 .brand-mb4dl{
   font-size:20px;
   letter-spacing:1px;
-  background:linear-gradient(120deg,#7cf25a 0%,#62d84e 35%,#3ea52a 65%,#2f8a1f 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  text-shadow:2px 2px 0 rgba(0,0,0,.35);
-  filter:drop-shadow(0 0 6px rgba(98,216,78,.35));
+  color:#f4f6f2;
+  text-shadow:
+    2px 0 0 #1c1e21,
+    -2px 0 0 #1c1e21,
+    0 2px 0 #1c1e21,
+    0 -2px 0 #1c1e21,
+    3px 3px 0 rgba(0,0,0,.55);
+}
+
+.brand-accent{
+  color:var(--green);
+  text-shadow:
+    2px 0 0 #1c1e21,
+    -2px 0 0 #1c1e21,
+    0 2px 0 #1c1e21,
+    0 -2px 0 #1c1e21,
+    3px 3px 0 rgba(0,0,0,.55),
+    0 0 10px rgba(98,216,78,.6);
 }
 
 .nav-links{
@@ -564,6 +612,10 @@ a{
 
 .result-item.error{
   border-left-color:var(--red);
+}
+
+.result-item.info{
+  border-left-color:var(--info);
 }
 
 .result-item h4{

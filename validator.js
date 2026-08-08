@@ -1,7 +1,146 @@
 // validator.js
 // Analizador principal para skinpacks 4D de Minecraft Bedrock
 
+// ----------------------------
+// Diccionario de mensajes (ES/EN)
+// ----------------------------
+const VALIDATOR_MESSAGES = {
+  es: {
+    geometriesTitle: "Geometrías",
+    unusedTextureTitle: "Textura sin usar",
+    unusedGeometryTitle: "Geometría sin usar",
+    finalResultTitle: "Resultado final",
+    packLocNameTitle: "localization_name (paquete)",
+    geometryNullTitle: "geometry.null",
+
+    packageLoaded: (c, n) => `Se detectaron ${c} archivos en ${n}.`,
+    fileFound: "Archivo encontrado.",
+    manifestNotFound: "No se encontró manifest.json.",
+    manifestReadError: (m) => `No se pudo leer el nombre/descripción del paquete: ${m}`,
+    skinsJsonNotFound: "No se encontró skins.json. El skinpack no puede analizarse correctamente.",
+    geometryNotFound: "No se encontró el archivo geometry.json.",
+    geometryFileFound: "Se encontró el archivo geometry.json.",
+    jsonValid: "JSON válido.",
+    jsonInvalid: "El archivo contiene un JSON inválido.",
+    geometrySyntaxError: (p, m) => `${p} contiene un error de sintaxis JSON: ${m}`,
+    geometryConfirmContinue: (m) =>
+      `geometry.json tiene un error de sintaxis (${m}).\n\n¿Deseas continuar el análisis de todas formas usando una búsqueda de respaldo basada en texto (menos precisa, ya que el archivo no es JSON válido)?`,
+    geometryStopped: (p, m) =>
+      `Análisis detenido: no fue posible interpretar ${p} (${m}). Revisa comas sobrantes u otros errores de sintaxis (por ejemplo "geometry.null": {},) y vuelve a intentarlo.`,
+    geometryFallbackContinue: "Continuando con una búsqueda de respaldo basada en texto. Los resultados de geometría pueden ser menos precisos.",
+    geometryReadOk: (p, c) => `${p} leído correctamente (${c} geometría(s) encontrada(s)).`,
+    geometryNullDetected: (p) =>
+      `Se detectó la entrada de relleno "geometry.null" en ${p}. Se activará la validación adicional de animaciones en skins.json.`,
+    geometryNullUnused: `"geometry.null" es una entrada de relleno habitual en paquetes 4D y no necesita estar asociada a ninguna skin.`,
+    geometryReadFailed: (p, m) => `${p} no pudo leerse: ${m}`,
+    langFilesDetected: (c) => `Se detectaron ${c} archivo(s) .lang.`,
+    langFilesNotFound: "No se encontró ningún archivo texts/.lang.",
+    enUsFound: "Archivo encontrado.",
+    enUsNotFound: "No se encontró en_US.lang. Minecraft Bedrock requiere este archivo como idioma principal (fallback) del paquete.",
+    packLocNameFound: (n) => `Se detectó el identificador de paquete "${n}", usado como prefijo en en_US.lang.`,
+    packLocNameMissing: "No se encontró un \"localization_name\" a nivel de paquete en skins.json. Las claves de en_US.lang podrían no coincidir con el formato esperado (skin.<paquete>.<skin>).",
+    dupLocName: "localization_name duplicado.",
+    noGeometryAssigned: "La skin no tiene geometry asignada.",
+    geometryResolvedByBaseName: (g, id) => `La geometría "${g}" no coincide exactamente, pero se resolvió por nombre base de modelo con "${id}".`,
+    geometryAmbiguousResolved: (g, c, list, id) => `La geometría "${g}" es ambigua: se encontraron ${c} coincidencias por nombre base (${list}). Se continuó de todas formas y se usó "${id}" por ser la primera encontrada.`,
+    geometryAmbiguousError: (g, c, list) => `La geometría "${g}" es ambigua: existen ${c} geometrías distintas con el mismo nombre base (${list}). El validador no puede elegir una automáticamente. Activa la opción "Resolver ambigüedades de geometría automáticamente" y vuelve a analizar si quieres continuar de todas formas; de lo contrario, corrige el "geometry" de la skin para que apunte exactamente a una de las coincidencias listadas.`,
+    geometryNotFoundForSkin: (g) => `La geometría "${g}" no existe en geometry.json.`,
+    geometrySuggestion: (s) => `Posible coincidencia encontrada: "${s}".`,
+    geometryCaseMismatch: (g, m) => `La geometría "${g}" existe como "${m}" pero difiere en mayúsculas/minúsculas.`,
+    geometryBuiltin: (g) => `Usa una geometría oficial de Minecraft: ${g}.`,
+    geometryOk: "La geometría existe y coincide.",
+    noTextureAssigned: "La skin no tiene textura asignada.",
+    textureNotFound: (t) => `La textura "${t}" no existe en el paquete.`,
+    textureFound: (t) => `Textura encontrada: ${t}.`,
+    capeNotFound: (c) => `La capa "${c}" no existe en el paquete.`,
+    capeFound: (c) => `Capa detectada correctamente: ${c}.`,
+    locKeyMissingEnUs: (k) => `Falta la clave "${k}" en en_US.lang. Aplica la corrección "Sincronizar localization_name con texts/.lang" para crearla.`,
+    locKeyFoundEnUs: (k) => `Localization encontrada correctamente en en_US.lang ("${k}").`,
+    locKeyMissingLang: (k) => `Falta la clave "${k}" en texts/.lang.`,
+    locKeyFoundOtherLang: (k) => `Clave "${k}" encontrada en un archivo .lang, pero no en en_US.lang (idioma principal).`,
+    animationsInvalid: (list) => `Animaciones con valores inválidos: ${list}.`,
+    animationsValid: (c) => `Animaciones válidas (${c}).`,
+    unusedTexture: (t) => `${t} existe pero no está referenciada por ninguna skin.`,
+    unusedGeometry: (id) => `${id} existe en geometry.json pero no está referenciada por ninguna skin.`,
+    skinpacksOk: "Archivo detectado y leído correctamente.",
+    skinpacksUnusualStructure: "El archivo fue leído, pero su estructura parece inusual.",
+    finalOk: "No se encontraron errores críticos. El skinpack parece estar correctamente configurado.",
+    finalIssues: (e, w) => `Se detectaron ${e} error(es) y ${w} advertencia(s).`,
+    defaultPackDescription: "Paquete de skins 4D"
+  },
+  en: {
+    geometriesTitle: "Geometries",
+    unusedTextureTitle: "Unused texture",
+    unusedGeometryTitle: "Unused geometry",
+    finalResultTitle: "Final result",
+    packLocNameTitle: "localization_name (package)",
+    geometryNullTitle: "geometry.null",
+
+    packageLoaded: (c, n) => `Detected ${c} files in ${n}.`,
+    fileFound: "File found.",
+    manifestNotFound: "manifest.json was not found.",
+    manifestReadError: (m) => `Couldn't read the pack's name/description: ${m}`,
+    skinsJsonNotFound: "skins.json was not found. The skinpack can't be analyzed correctly.",
+    geometryNotFound: "The geometry.json file was not found.",
+    geometryFileFound: "geometry.json was found.",
+    jsonValid: "Valid JSON.",
+    jsonInvalid: "The file contains invalid JSON.",
+    geometrySyntaxError: (p, m) => `${p} has a JSON syntax error: ${m}`,
+    geometryConfirmContinue: (m) =>
+      `geometry.json has a syntax error (${m}).\n\nDo you want to continue the analysis anyway using a text-based fallback search (less accurate, since the file isn't valid JSON)?`,
+    geometryStopped: (p, m) =>
+      `Analysis stopped: couldn't parse ${p} (${m}). Check for trailing commas or other syntax errors (e.g. "geometry.null": {},) and try again.`,
+    geometryFallbackContinue: "Continuing with a text-based fallback search. Geometry results may be less accurate.",
+    geometryReadOk: (p, c) => `${p} read successfully (${c} geometrie(s) found).`,
+    geometryNullDetected: (p) =>
+      `Detected the placeholder entry "geometry.null" in ${p}. Additional animation validation in skins.json will be enabled.`,
+    geometryNullUnused: `"geometry.null" is a common placeholder entry in 4D packs and doesn't need to be linked to any skin.`,
+    geometryReadFailed: (p, m) => `${p} couldn't be read: ${m}`,
+    langFilesDetected: (c) => `Detected ${c} .lang file(s).`,
+    langFilesNotFound: "No texts/.lang file was found.",
+    enUsFound: "File found.",
+    enUsNotFound: "en_US.lang was not found. Minecraft Bedrock requires this file as the pack's main (fallback) language.",
+    packLocNameFound: (n) => `Detected the package identifier "${n}", used as a prefix in en_US.lang.`,
+    packLocNameMissing: "No package-level \"localization_name\" was found in skins.json. Keys in en_US.lang might not match the expected format (skin.<package>.<skin>).",
+    dupLocName: "Duplicate localization_name.",
+    noGeometryAssigned: "The skin has no geometry assigned.",
+    geometryResolvedByBaseName: (g, id) => `The geometry "${g}" doesn't match exactly, but it was resolved by the model's base name to "${id}".`,
+    geometryAmbiguousResolved: (g, c, list, id) => `The geometry "${g}" is ambiguous: ${c} matches were found by base name (${list}). Continued anyway and used "${id}" as it was the first match found.`,
+    geometryAmbiguousError: (g, c, list) => `The geometry "${g}" is ambiguous: there are ${c} different geometries with the same base name (${list}). The validator can't pick one automatically. Enable "Automatically resolve geometry ambiguities" and re-analyze if you want to continue anyway; otherwise, fix the skin's "geometry" so it points exactly to one of the listed matches.`,
+    geometryNotFoundForSkin: (g) => `The geometry "${g}" doesn't exist in geometry.json.`,
+    geometrySuggestion: (s) => `Possible match found: "${s}".`,
+    geometryCaseMismatch: (g, m) => `The geometry "${g}" exists as "${m}" but differs in upper/lowercase.`,
+    geometryBuiltin: (g) => `Uses an official Minecraft geometry: ${g}.`,
+    geometryOk: "The geometry exists and matches.",
+    noTextureAssigned: "The skin has no texture assigned.",
+    textureNotFound: (t) => `The texture "${t}" doesn't exist in the package.`,
+    textureFound: (t) => `Texture found: ${t}.`,
+    capeNotFound: (c) => `The cape "${c}" doesn't exist in the package.`,
+    capeFound: (c) => `Cape correctly detected: ${c}.`,
+    locKeyMissingEnUs: (k) => `The key "${k}" is missing from en_US.lang. Apply the "Sync localization_name with texts/.lang" fix to create it.`,
+    locKeyFoundEnUs: (k) => `Localization correctly found in en_US.lang ("${k}").`,
+    locKeyMissingLang: (k) => `The key "${k}" is missing from texts/.lang.`,
+    locKeyFoundOtherLang: (k) => `Key "${k}" found in a .lang file, but not in en_US.lang (main language).`,
+    animationsInvalid: (list) => `Animations with invalid values: ${list}.`,
+    animationsValid: (c) => `Valid animations (${c}).`,
+    unusedTexture: (t) => `${t} exists but isn't referenced by any skin.`,
+    unusedGeometry: (id) => `${id} exists in geometry.json but isn't referenced by any skin.`,
+    skinpacksOk: "File detected and read successfully.",
+    skinpacksUnusualStructure: "The file was read, but its structure looks unusual.",
+    finalOk: "No critical errors were found. The skinpack looks correctly configured.",
+    finalIssues: (e, w) => `Detected ${e} error(s) and ${w} warning(s).`,
+    defaultPackDescription: "4D skin pack"
+  }
+};
+
 async function validateSkinPack(zip, zipName, options = {}) {
+
+  const lang = (options.lang === "en") ? "en" : "es";
+  const M = VALIDATOR_MESSAGES[lang];
+
+  // Devuelve solo el nombre de archivo (sin la ruta de carpetas), ya que
+  // la carpeta contenedora no afecta el proceso de validación en sí.
+  const bn = (p) => (p ? p.split("/").pop() : p);
 
   // Si es true, cuando el nombre base de un modelo (p. ej. "NombreDelModelo"
   // en "geometry.NombreDelModelo") coincide con MÁS DE UNA geometría distinta
@@ -29,6 +168,8 @@ async function validateSkinPack(zip, zipName, options = {}) {
     if (type === "error") report.stats.errors++;
     if (type === "warning") report.stats.warnings++;
     if (type === "success") report.stats.success++;
+    // el tipo "info" no se cuenta en las estadísticas: no es un
+    // error/advertencia/éxito, se usa para notas neutrales (ej. geometry.null)
   }
 
   // ----------------------------
@@ -38,8 +179,8 @@ async function validateSkinPack(zip, zipName, options = {}) {
 
   push(
     "success",
-    "Paquete cargado",
-    `Se detectaron ${fileList.length} archivos en ${zipName}.`
+    lang === "es" ? "Paquete cargado" : "Package loaded",
+    M.packageLoaded(fileList.length, zipName)
   );
 
   // ----------------------------
@@ -63,9 +204,9 @@ async function validateSkinPack(zip, zipName, options = {}) {
   // Verificar existencia
   // ----------------------------
   if (manifestPath)
-    push("success", "manifest.json", "Archivo encontrado.");
+    push("success", "manifest.json", M.fileFound);
   else
-    push("warning", "manifest.json", "No se encontró manifest.json.");
+    push("warning", "manifest.json", M.manifestNotFound);
 
   // ----------------------------
   // Información del paquete (nombre, descripción, icono)
@@ -87,11 +228,7 @@ async function validateSkinPack(zip, zipName, options = {}) {
         }
 
       } catch (e) {
-        push(
-          "warning",
-          "manifest.json",
-          `No se pudo leer el nombre/descripción del paquete: ${e.message}`
-        );
+        push("warning", "manifest.json", M.manifestReadError(e.message));
       }
     }
 
@@ -109,34 +246,22 @@ async function validateSkinPack(zip, zipName, options = {}) {
 
     report.packInfo = {
       name: packName || zipName.replace(/\.(zip|mcpack)$/i, ""),
-      description: packDescription || "Paquete de skins 4D",
+      description: packDescription || M.defaultPackDescription,
       iconDataUrl
     };
   }
 
   if (!skinsPath) {
-    push(
-      "error",
-      "skins.json",
-      "No se encontró skins.json. El skinpack no puede analizarse correctamente."
-    );
+    push("error", "skins.json", M.skinsJsonNotFound);
     return report;
   }
 
   if (!geometryPath) {
-    push(
-      "error",
-      "Geometry",
-      "No se encontró el archivo geometry.json."
-    );
+    push("error", M.geometriesTitle, M.geometryNotFound);
     return report;
   }
 
-  push(
-    "success",
-    "Geometrías",
-    "Se encontró el archivo geometry.json."
-  );
+  push("success", M.geometriesTitle, M.geometryFileFound);
 
   // ----------------------------
   // Leer JSON
@@ -145,13 +270,9 @@ async function validateSkinPack(zip, zipName, options = {}) {
 
   try {
     skinsJson = JSON.parse(await zip.file(skinsPath).async("string"));
-    push("success", "skins.json", "JSON válido.");
+    push("success", "skins.json", M.jsonValid);
   } catch (e) {
-    push(
-      "error",
-      "skins.json",
-      "El archivo contiene un JSON inválido."
-    );
+    push("error", "skins.json", M.jsonInvalid);
     return report;
   }
 
@@ -209,41 +330,22 @@ async function validateSkinPack(zip, zipName, options = {}) {
 
     if (geometryParseError) {
 
-      push(
-        "error",
-        "Geometry",
-        `${geometryPath} contiene un error de sintaxis JSON: ${geometryParseError.message}`
-      );
+      push("error", M.geometriesTitle, M.geometrySyntaxError(bn(geometryPath), geometryParseError.message));
 
       let continueAnyway = false;
 
       if (typeof confirm === "function") {
-        continueAnyway = confirm(
-          `geometry.json tiene un error de sintaxis (${geometryParseError.message}).\n\n` +
-          `¿Deseas continuar el análisis de todas formas usando una búsqueda de respaldo ` +
-          `basada en texto (menos precisa, ya que el archivo no es JSON válido)?`
-        );
+        continueAnyway = confirm(M.geometryConfirmContinue(geometryParseError.message));
       }
 
       if (!continueAnyway) {
-
-        push(
-          "error",
-          "Geometry",
-          `Análisis detenido: no fue posible interpretar ${geometryPath} (${geometryParseError.message}). ` +
-          `Revisa comas sobrantes u otros errores de sintaxis (por ejemplo "geometry.null": {},) y vuelve a intentarlo.`
-        );
-
+        push("error", M.geometriesTitle, M.geometryStopped(bn(geometryPath), geometryParseError.message));
         return report;
       }
 
       usingFallbackOnly = true;
 
-      push(
-        "warning",
-        "Geometry",
-        "Continuando con una búsqueda de respaldo basada en texto. Los resultados de geometría pueden ser menos precisos."
-      );
+      push("warning", M.geometriesTitle, M.geometryFallbackContinue);
 
     }
 
@@ -270,17 +372,15 @@ async function validateSkinPack(zip, zipName, options = {}) {
     deepMatches.forEach(m => addGeometryIdentifier(m.slice(1, -1)));
 
     if (!geometryParseError) {
-      push(
-        "success",
-        "Geometry",
-        `${geometryPath} leído correctamente (${geometryIdentifiers.size} geometría(s) encontrada(s)).`
-      );
+      push("success", M.geometriesTitle, M.geometryReadOk(bn(geometryPath), geometryIdentifiers.size));
     }
 
     // ----------------------------
     // Detección de "geometry.null" (entrada de relleno típica de
     // paquetes 4D). Cuando aparece, se activa además la validación
-    // de animaciones dentro de skins.json.
+    // de animaciones dentro de skins.json. No se marca como advertencia
+    // (amarillo): es una nota neutral, se usa el tipo "info" con su
+    // propio color, distinto de error/advertencia/éxito.
     // ----------------------------
     const hasGeometryNull =
       geometryIdentifiers.has("geometry.null") ||
@@ -289,19 +389,11 @@ async function validateSkinPack(zip, zipName, options = {}) {
     if (hasGeometryNull) {
       report.checkAnimations = true;
 
-      push(
-        "warning",
-        "Geometry",
-        `Se detectó la entrada de relleno "geometry.null" en ${geometryPath}. Se activará la validación adicional de animaciones en skins.json.`
-      );
+      push("info", M.geometryNullTitle, M.geometryNullDetected(bn(geometryPath)));
     }
 
   } catch (e) {
-    push(
-      "error",
-      "Geometry",
-      `${geometryPath} no pudo leerse: ${e.message}`
-    );
+    push("error", M.geometriesTitle, M.geometryReadFailed(bn(geometryPath), e.message));
   }
 
   // ----------------------------
@@ -336,36 +428,32 @@ async function validateSkinPack(zip, zipName, options = {}) {
   }
 
   if (langPaths.length)
-    push("success", "texts", `Se detectaron ${langPaths.length} archivo(s) .lang.`);
+    push("success", "texts", M.langFilesDetected(langPaths.length));
   else
-    push("warning", "texts", "No se encontró ningún archivo texts/*.lang.");
+    push("warning", "texts", M.langFilesNotFound);
 
   if (langPaths.length) {
     if (enUsPath)
-      push("success", "en_US.lang", "Archivo encontrado.");
+      push("success", "en_US.lang", M.enUsFound);
     else
-      push(
-        "warning",
-        "en_US.lang",
-        "No se encontró en_US.lang. Minecraft Bedrock requiere este archivo como idioma principal (fallback) del paquete."
-      );
+      push("warning", "en_US.lang", M.enUsNotFound);
   }
 
   // ----------------------------
   // Validar skins
   // ----------------------------
-// ----------------------------
-// Geometrías oficiales de Minecraft Bedrock
-// (válidas aunque no existan dentro del ZIP)
-// ----------------------------
-const builtinGeometries = new Set([
-  "geometry.humanoid.custom",      // Steve
-  "geometry.humanoid.customSlim",  // Alex
-  "geometry.humanoid",
-  "geometry.humanoid.slim"
-]);
-  
-const skins = skinsJson.skins || [];
+  // ----------------------------
+  // Geometrías oficiales de Minecraft Bedrock
+  // (válidas aunque no existan dentro del ZIP)
+  // ----------------------------
+  const builtinGeometries = new Set([
+    "geometry.humanoid.custom",      // Steve
+    "geometry.humanoid.customSlim",  // Alex
+    "geometry.humanoid",
+    "geometry.humanoid.slim"
+  ]);
+
+  const skins = skinsJson.skins || [];
 
   // localization_name del PAQUETE (top-level, junto a "serialize_name",
   // no pertenece a ninguna skin). En_US.lang usa este valor como
@@ -376,17 +464,9 @@ const skins = skinsJson.skins || [];
       : null;
 
   if (packLocalizationName) {
-    push(
-      "success",
-      "localization_name (paquete)",
-      `Se detectó el identificador de paquete "${packLocalizationName}", usado como prefijo en en_US.lang.`
-    );
+    push("success", M.packLocNameTitle, M.packLocNameFound(packLocalizationName));
   } else {
-    push(
-      "warning",
-      "localization_name (paquete)",
-      "No se encontró un \"localization_name\" a nivel de paquete en skins.json. Las claves de en_US.lang podrían no coincidir con el formato esperado (skin.<paquete>.<skin>)."
-    );
+    push("warning", M.packLocNameTitle, M.packLocNameMissing);
   }
 
   report.stats.skins = skins.length;
@@ -404,11 +484,7 @@ const skins = skinsJson.skins || [];
 
     // localization_name duplicado
     if (usedNames.has(name)) {
-      push(
-        "warning",
-        name,
-        "localization_name duplicado."
-      );
+      push("warning", name, M.dupLocName);
     }
 
     usedNames.add(name);
@@ -416,135 +492,95 @@ const skins = skinsJson.skins || [];
     // geometry
     if (!skin.geometry) {
 
-      push(
-        "error",
-        name,
-        "La skin no tiene geometry asignada."
-      );
+      push("error", name, M.noGeometryAssigned);
 
     } else {
 
-  const geoLower = skin.geometry.toLowerCase();
-  const exactMatch = geometryIdentifiers.has(skin.geometry) || builtinGeometries.has(skin.geometry);
-  const matchedId = geometryIdentifiersLower.get(geoLower);
-  const builtinLower = [...builtinGeometries].find(b => b.toLowerCase() === geoLower);
-  const caseInsensitiveMatch = matchedId || builtinLower;
+      const geoLower = skin.geometry.toLowerCase();
+      const exactMatch = geometryIdentifiers.has(skin.geometry) || builtinGeometries.has(skin.geometry);
+      const matchedId = geometryIdentifiersLower.get(geoLower);
+      const builtinLower = [...builtinGeometries].find(b => b.toLowerCase() === geoLower);
+      const caseInsensitiveMatch = matchedId || builtinLower;
 
-  if (!exactMatch && !caseInsensitiveMatch) {
+      if (!exactMatch && !caseInsensitiveMatch) {
 
-      // ----------------------------------------------------------
-      // Paso adicional: coincidencia por NOMBRE BASE del modelo.
-      // Trata "geometry.custom.NombreDelModelo" como si fuera
-      // "geometry.NombreDelModelo" (y viceversa), comparando solo el
-      // último segmento del identificador.
-      // ----------------------------------------------------------
-      const skinBaseName = getGeometryBaseName(skin.geometry);
-      const baseCandidates = skinBaseName ? (geometryBaseNames.get(skinBaseName) || []) : [];
+        // ----------------------------------------------------------
+        // Paso adicional: coincidencia por NOMBRE BASE del modelo.
+        // Trata "geometry.custom.NombreDelModelo" como si fuera
+        // "geometry.NombreDelModelo" (y viceversa), comparando solo el
+        // último segmento del identificador.
+        // ----------------------------------------------------------
+        const skinBaseName = getGeometryBaseName(skin.geometry);
+        const baseCandidates = skinBaseName ? (geometryBaseNames.get(skinBaseName) || []) : [];
 
-      if (baseCandidates.length === 1) {
+        if (baseCandidates.length === 1) {
 
-        // Coincidencia única y sin ambigüedad: se puede resolver de forma segura.
-        const resolvedId = baseCandidates[0];
-        usedGeometries.add(resolvedId);
-
-        push(
-          "warning",
-          name,
-          `La geometría "${skin.geometry}" no coincide exactamente, pero se resolvió por nombre base de modelo con "${resolvedId}".`
-        );
-
-      } else if (baseCandidates.length > 1) {
-
-        // Ambigüedad: el mismo nombre base aparece en más de una geometría
-        // distinta dentro de geometry.json (p. ej. con y sin namespace).
-        // No se resuelve automáticamente para evitar asignar la geometría
-        // incorrecta, salvo que el usuario decida continuar de todas formas.
-        if (resolveAmbiguousGeometry) {
-
+          // Coincidencia única y sin ambigüedad: se puede resolver de forma segura.
           const resolvedId = baseCandidates[0];
           usedGeometries.add(resolvedId);
 
-          push(
-            "warning",
-            name,
-            `La geometría "${skin.geometry}" es ambigua: se encontraron ${baseCandidates.length} coincidencias por nombre base (${baseCandidates.join(", ")}). Se continuó de todas formas y se usó "${resolvedId}" por ser la primera encontrada.`
-          );
+          push("warning", name, M.geometryResolvedByBaseName(skin.geometry, resolvedId));
+
+        } else if (baseCandidates.length > 1) {
+
+          // Ambigüedad: el mismo nombre base aparece en más de una geometría
+          // distinta dentro de geometry.json (p. ej. con y sin namespace).
+          // No se resuelve automáticamente para evitar asignar la geometría
+          // incorrecta, salvo que el usuario decida continuar de todas formas.
+          if (resolveAmbiguousGeometry) {
+
+            const resolvedId = baseCandidates[0];
+            usedGeometries.add(resolvedId);
+
+            push("warning", name, M.geometryAmbiguousResolved(skin.geometry, baseCandidates.length, baseCandidates.join(", "), resolvedId));
+
+          } else {
+
+            push("error", name, M.geometryAmbiguousError(skin.geometry, baseCandidates.length, baseCandidates.join(", ")));
+
+          }
 
         } else {
 
-          push(
-            "error",
-            name,
-            `La geometría "${skin.geometry}" es ambigua: existen ${baseCandidates.length} geometrías distintas con el mismo nombre base (${baseCandidates.join(", ")}). El validador no puede elegir una automáticamente. Activa la opción "Resolver ambigüedades de geometría automáticamente" y vuelve a analizar si quieres continuar de todas formas; de lo contrario, corrige el "geometry" de la skin para que apunte exactamente a una de las coincidencias listadas.`
-          );
+          push("error", name, M.geometryNotFoundForSkin(skin.geometry));
+
+          // Intentar sugerencia: comparar tanto contra el propio texto de
+          // "geometry" como contra el localization_name de la skin.
+          const geoSuffix = skin.geometry.replace(/^geometry\./i, "").toLowerCase();
+          const nameLower = name.toLowerCase();
+
+          const suggestion = [...geometryIdentifiers].find(id => {
+            const idLower = id.toLowerCase();
+            return idLower.includes(geoSuffix) || idLower.includes(nameLower);
+          });
+
+          if (suggestion) {
+            push("warning", name, M.geometrySuggestion(suggestion));
+          }
 
         }
 
+      } else if (!exactMatch && caseInsensitiveMatch) {
+
+        usedGeometries.add(caseInsensitiveMatch);
+
+        push("warning", name, M.geometryCaseMismatch(skin.geometry, caseInsensitiveMatch));
+
+      } else if (builtinGeometries.has(skin.geometry)) {
+        push("success", name, M.geometryBuiltin(skin.geometry));
       } else {
 
-      push(
-        "error",
-        name,
-        `La geometría "${skin.geometry}" no existe en geometry.json.`
-      );
+        usedGeometries.add(skin.geometry);
 
-      // Intentar sugerencia: comparar tanto contra el propio texto de
-      // "geometry" como contra el localization_name de la skin.
-      const geoSuffix = skin.geometry.replace(/^geometry\./i, "").toLowerCase();
-      const nameLower = name.toLowerCase();
-
-      const suggestion = [...geometryIdentifiers].find(id => {
-        const idLower = id.toLowerCase();
-        return idLower.includes(geoSuffix) || idLower.includes(nameLower);
-      });
-
-      if (suggestion) {
-        push(
-          "warning",
-          name,
-          `Posible coincidencia encontrada: "${suggestion}".`
-        );
+        push("success", name, M.geometryOk);
       }
 
-      }
-
-  } else if (!exactMatch && caseInsensitiveMatch) {
-
-    usedGeometries.add(caseInsensitiveMatch);
-
-    push(
-      "warning",
-      name,
-      `La geometría "${skin.geometry}" existe como "${caseInsensitiveMatch}" pero difiere en mayúsculas/minúsculas.`
-    );
-
-  } else if (builtinGeometries.has(skin.geometry)) {
-    push(
-      "success",
-      name,
-      `Usa una geometría oficial de Minecraft: ${skin.geometry}.`
-    );
-  } else {
-
-    usedGeometries.add(skin.geometry);
-
-    push(
-      "success",
-      name,
-      "La geometría existe y coincide."
-    );
-  }
-
-}
+    }
 
     // texture
     if (!skin.texture) {
 
-      push(
-        "error",
-        name,
-        "La skin no tiene textura asignada."
-      );
+      push("error", name, M.noTextureAssigned);
 
     } else {
 
@@ -554,19 +590,11 @@ const skins = skinsJson.skins || [];
 
       if (!tex) {
 
-        push(
-          "error",
-          name,
-          `La textura "${skin.texture}" no existe en el paquete.`
-        );
+        push("error", name, M.textureNotFound(skin.texture));
 
       } else {
 
-        push(
-          "success",
-          name,
-          `Textura encontrada: ${skin.texture}.`
-        );
+        push("success", name, M.textureFound(skin.texture));
 
         usedTextures.add(tex);
 
@@ -583,19 +611,11 @@ const skins = skinsJson.skins || [];
 
       if (!capeTex) {
 
-        push(
-          "error",
-          name,
-          `La capa "${skin.cape}" no existe en el paquete.`
-        );
+        push("error", name, M.capeNotFound(skin.cape));
 
       } else {
 
-        push(
-          "success",
-          name,
-          `Capa detectada correctamente: ${skin.cape}.`
-        );
+        push("success", name, M.capeFound(skin.cape));
 
         usedTextures.add(capeTex);
 
@@ -622,21 +642,13 @@ const skins = skinsJson.skins || [];
 
       if (!matched) {
 
-        push(
-          "warning",
-          name,
-          `Falta la clave "${expectedKey}" en en_US.lang. Aplica la corrección "Sincronizar localization_name con texts/*.lang" para crearla.`
-        );
+        push("warning", name, M.locKeyMissingEnUs(expectedKey));
 
       } else {
 
         displayName = enUsEntries.get(matched);
 
-        push(
-          "success",
-          name,
-          `Localization encontrada correctamente en en_US.lang ("${matched}").`
-        );
+        push("success", name, M.locKeyFoundEnUs(matched));
 
       }
 
@@ -649,21 +661,13 @@ const skins = skinsJson.skins || [];
 
       if (!matched) {
 
-        push(
-          "warning",
-          name,
-          `Falta la clave "${expectedKey}" en texts/*.lang.`
-        );
+        push("warning", name, M.locKeyMissingLang(expectedKey));
 
       } else {
 
         displayName = langEntries.get(matched);
 
-        push(
-          "warning",
-          name,
-          `Clave "${matched}" encontrada en un archivo .lang, pero no en en_US.lang (idioma principal).`
-        );
+        push("warning", name, M.locKeyFoundOtherLang(matched));
 
       }
 
@@ -684,17 +688,9 @@ const skins = skinsJson.skins || [];
       });
 
       if (invalid.length) {
-        push(
-          "warning",
-          name,
-          `Animaciones con valores inválidos: ${invalid.join(", ")}.`
-        );
+        push("warning", name, M.animationsInvalid(invalid.join(", ")));
       } else {
-        push(
-          "success",
-          name,
-          `Animaciones válidas (${animEntries.length}).`
-        );
+        push("success", name, M.animationsValid(animEntries.length));
       }
 
     }
@@ -721,11 +717,7 @@ const skins = skinsJson.skins || [];
   pngFiles.forEach(tex => {
     if (/(^|\/)pack_icon\.png$/i.test(tex)) return; // no es una textura de skin
     if (!usedTextures.has(tex)) {
-      push(
-        "warning",
-        "Textura sin usar",
-        `${tex} existe pero no está referenciada por ninguna skin.`
-      );
+      push("warning", M.unusedTextureTitle, M.unusedTexture(tex));
     }
   });
 
@@ -733,13 +725,16 @@ const skins = skinsJson.skins || [];
   // Geometrías sin usar
   // ----------------------------
   geometryIdentifiers.forEach(id => {
-    if (!usedGeometries.has(id)) {
-      push(
-        "warning",
-        "Geometría sin usar",
-        `${id} existe en geometry.json pero no está referenciada por ninguna skin.`
-      );
+    if (usedGeometries.has(id)) return;
+
+    if (id.toLowerCase() === "geometry.null") {
+      // "geometry.null" es una entrada de relleno habitual: no se marca
+      // en amarillo/advertencia, se usa el tipo "info" (color distinto).
+      push("info", M.geometryNullTitle, M.geometryNullUnused);
+      return;
     }
+
+    push("warning", M.unusedGeometryTitle, M.unusedGeometry(id));
   });
 
   // ----------------------------
@@ -751,25 +746,13 @@ const skins = skinsJson.skins || [];
       const sp = JSON.parse(await zip.file(skinpacksPath).async("string"));
 
       if (Array.isArray(sp.serialize_name) || Array.isArray(sp.skinpacks)) {
-        push(
-          "success",
-          "skinpacks.json",
-          "Archivo detectado y leído correctamente."
-        );
+        push("success", "skinpacks.json", M.skinpacksOk);
       } else {
-        push(
-          "warning",
-          "skinpacks.json",
-          "El archivo fue leído, pero su estructura parece inusual."
-        );
+        push("warning", "skinpacks.json", M.skinpacksUnusualStructure);
       }
 
     } catch (e) {
-      push(
-        "error",
-        "skinpacks.json",
-        "El archivo contiene un JSON inválido."
-      );
+      push("error", "skinpacks.json", M.jsonInvalid);
     }
   }
 
@@ -777,21 +760,9 @@ const skins = skinsJson.skins || [];
   // Resultado final
   // ----------------------------
   if (report.stats.errors === 0) {
-
-    push(
-      "success",
-      "Resultado final",
-      "No se encontraron errores críticos. El skinpack parece estar correctamente configurado."
-    );
-
+    push("success", M.finalResultTitle, M.finalOk);
   } else {
-
-    push(
-      "warning",
-      "Resultado final",
-      `Se detectaron ${report.stats.errors} error(es) y ${report.stats.warnings} advertencia(s).`
-    );
-
+    push("warning", M.finalResultTitle, M.finalIssues(report.stats.errors, report.stats.warnings));
   }
 
   return report;

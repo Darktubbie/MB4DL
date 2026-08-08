@@ -22,7 +22,7 @@ const I18N = {
         <strong>geometry.json</strong>,
         <strong>manifest.json</strong>,
         <strong>skinpacks.json</strong>,
-        <strong>texts/*.lang</strong>
+        <strong>texts/.lang</strong>
         and every texture in the pack.`,
       btnStart: "Start analysis",
       btnChecks: "See checks",
@@ -79,7 +79,7 @@ const I18N = {
       jsonTitle: "Repair JSON",
       jsonDesc: "Fixes common syntax errors (trailing commas, etc.)",
       locTitle: "Sync localization_name",
-      locDesc: "Links each skin to its entry in texts/*.lang",
+      locDesc: "Links each skin to its entry in texts/.lang",
       textsTitle: "Create missing text entries",
       textsDesc: "Generates missing entries in language files",
       caseTitle: "Fix upper/lowercase",
@@ -111,7 +111,7 @@ const I18N = {
       langText: `Checks that every
         <strong>localization_name</strong>
         has its matching entry in
-        <strong>texts/*.lang</strong>
+        <strong>texts/.lang</strong>
         and detects missing or extra keys.`,
       manifestTitle: "Manifest",
       manifestText: `Validates
@@ -144,7 +144,7 @@ const I18N = {
         <strong>geometry.json</strong>,
         <strong>manifest.json</strong>,
         <strong>skinpacks.json</strong>,
-        <strong>texts/*.lang</strong>
+        <strong>texts/.lang</strong>
         y todas las texturas del paquete.`,
       btnStart: "Comenzar análisis",
       btnChecks: "Ver comprobaciones",
@@ -201,7 +201,7 @@ const I18N = {
       jsonTitle: "Reparar JSON",
       jsonDesc: "Corrige errores comunes de sintaxis (comas sobrantes, etc.)",
       locTitle: "Sincronizar localization_name",
-      locDesc: "Vincula cada skin con su entrada en texts/*.lang",
+      locDesc: "Vincula cada skin con su entrada en texts/.lang",
       textsTitle: "Crear textos faltantes",
       textsDesc: "Genera entradas faltantes en los archivos de idioma",
       caseTitle: "Corregir mayúsculas/minúsculas",
@@ -233,7 +233,7 @@ const I18N = {
       langText: `Revisa que cada
         <strong>localization_name</strong>
         tenga su entrada correspondiente en
-        <strong>texts/*.lang</strong>
+        <strong>texts/.lang</strong>
         y detecta claves faltantes o sobrantes.`,
       manifestTitle: "Manifest",
       manifestText: `Valida
@@ -271,7 +271,7 @@ function t(key) {
   return typeof node === "string" ? node : key;
 }
 
-function applyLanguage(lang) {
+async function applyLanguage(lang) {
   if (!I18N[lang]) return;
   currentLang = lang;
 
@@ -291,11 +291,28 @@ function applyLanguage(lang) {
     btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
   });
 
-  // Re-render dynamic content already on screen so it matches the new language
-  if (!currentReport) {
-    clearResults();
+  // Los mensajes del análisis quedan fijados en el idioma con el que se
+  // generaron, así que si ya hay un paquete cargado se vuelve a analizar
+  // en el nuevo idioma para que los resultados también queden traducidos.
+  if (currentZip) {
+
+    try {
+      const resolveAmbiguousGeometry =
+        document.getElementById("resolveAmbiguousGeometry")?.checked || false;
+
+      currentReport = await validateSkinPack(currentZip, currentZipName, {
+        resolveAmbiguousGeometry,
+        lang: currentLang
+      });
+
+      renderReport(currentReport);
+
+    } catch (e) {
+      console.error(e);
+    }
+
   } else {
-    renderReport(currentReport);
+    clearResults();
   }
 
   if (analyzeBtn && analyzeBtn.textContent.trim() !== t("validator.loadingBtn") && analyzeBtn.textContent.trim() !== t("validator.analyzingBtn")) {
@@ -704,7 +721,8 @@ analyzeBtn.addEventListener("click", async () => {
 
     // Esta función estará en validator.js
     currentReport = await validateSkinPack(currentZip, currentZipName, {
-      resolveAmbiguousGeometry
+      resolveAmbiguousGeometry,
+      lang: currentLang
     });
 
     renderReport(currentReport);
