@@ -43,6 +43,29 @@ function mcLayoutLegacyWide() {
 }
 
 // ----------------------------
+// Layout UV de la SEGUNDA CAPA (overlay/layer2): gorro, chaqueta,
+// mangas y pantalones. Solo existe en el formato de textura 64x64;
+// el formato antiguo 64x32 no tiene esta fila.
+// ----------------------------
+function mcOverlayWide() {
+  return {
+    hat:          { right:[32,8,8,8],  left:[48,8,8,8],  top:[40,0,8,8], bottom:[48,0,8,8], front:[40,8,8,8],  back:[56,8,8,8] },
+    jacket:       { right:[16,36,4,12],left:[28,36,4,12],top:[20,32,8,4],bottom:[28,32,8,4],front:[20,36,8,12],back:[32,36,8,12] },
+    rightSleeve:  { right:[40,36,4,12],left:[48,36,4,12],top:[44,32,4,4],bottom:[48,32,4,4],front:[44,36,4,12],back:[52,36,4,12] },
+    leftSleeve:   { right:[48,52,4,12],left:[56,52,4,12],top:[52,48,4,4],bottom:[56,48,4,4],front:[52,52,4,12],back:[60,52,4,12] },
+    rightPants:   { right:[0,36,4,12], left:[8,36,4,12],  top:[4,32,4,4], bottom:[8,32,4,4], front:[4,36,4,12], back:[12,36,4,12] },
+    leftPants:    { right:[0,52,4,12], left:[8,52,4,12],  top:[4,48,4,4], bottom:[8,48,4,4], front:[4,52,4,12], back:[12,52,4,12] }
+  };
+}
+
+function mcOverlaySlim() {
+  const layout = mcOverlayWide();
+  layout.rightSleeve = { right:[40,36,4,12], front:[44,36,3,12], left:[47,36,4,12], back:[51,36,3,12], top:[44,32,3,4], bottom:[47,32,3,4] };
+  layout.leftSleeve  = { right:[48,52,4,12], front:[52,52,3,12], left:[55,52,4,12], back:[59,52,3,12], top:[52,48,3,4], bottom:[55,48,3,4] };
+  return layout;
+}
+
+// ----------------------------
 // Aplica un layout de caras [x,y,w,h] (en píxeles) a un BoxGeometry,
 // usando el orden de caras estándar de THREE.BoxGeometry:
 // [+x right, -x left, +y top, -y bottom, +z front, -z back]
@@ -72,6 +95,17 @@ function setBoxUV(geometry, layout, texW, texH) {
 
 function makePart(w, h, d, layout, texW, texH, material) {
   const geo = new THREE.BoxGeometry(w, h, d);
+  setBoxUV(geo, layout, texW, texH);
+  return new THREE.Mesh(geo, material);
+}
+
+// La segunda capa (gorro/chaqueta/mangas/pantalones) se dibuja como una
+// caja ligeramente más grande que la pieza base, para que sobresalga
+// visualmente igual que en el juego. Las zonas transparentes del PNG se
+// descartan mediante alphaTest en el material.
+function makeOverlayPart(w, h, d, layout, texW, texH, material) {
+  const inflate = 0.5;
+  const geo = new THREE.BoxGeometry(w + inflate * 2, h + inflate * 2, d + inflate * 2);
   setBoxUV(geo, layout, texW, texH);
   return new THREE.Mesh(geo, material);
 }
@@ -121,6 +155,40 @@ function buildPlayerModel(texture, isSlim, texW, texH) {
   const leftLeg = makePart(4, 12, 4, layout.leftLeg, texW, texH, material);
   leftLeg.position.set(2, 6, 0);
   group.add(leftLeg);
+
+  // ----------------------------
+  // Segunda capa (gorro, chaqueta, mangas, pantalones). Solo existe en
+  // el formato de textura 64x64; el formato antiguo 64x32 no la tiene.
+  // ----------------------------
+  if (!legacy) {
+
+    const overlay = isSlim ? mcOverlaySlim() : mcOverlayWide();
+
+    const hat = makeOverlayPart(8, 8, 8, overlay.hat, texW, texH, material);
+    hat.position.copy(head.position);
+    group.add(hat);
+
+    const jacket = makeOverlayPart(8, 12, 4, overlay.jacket, texW, texH, material);
+    jacket.position.copy(body.position);
+    group.add(jacket);
+
+    const rightSleeve = makeOverlayPart(armW, 12, 4, overlay.rightSleeve, texW, texH, material);
+    rightSleeve.position.copy(rightArm.position);
+    group.add(rightSleeve);
+
+    const leftSleeve = makeOverlayPart(armW, 12, 4, overlay.leftSleeve, texW, texH, material);
+    leftSleeve.position.copy(leftArm.position);
+    group.add(leftSleeve);
+
+    const rightPants = makeOverlayPart(4, 12, 4, overlay.rightPants, texW, texH, material);
+    rightPants.position.copy(rightLeg.position);
+    group.add(rightPants);
+
+    const leftPants = makeOverlayPart(4, 12, 4, overlay.leftPants, texW, texH, material);
+    leftPants.position.copy(leftLeg.position);
+    group.add(leftPants);
+
+  }
 
   group.position.y = -12; // centra el modelo verticalmente
 

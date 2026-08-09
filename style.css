@@ -982,28 +982,6 @@ a{
   display:block;
 }
 
-/* ---------- Pestaña WIP ---------- */
-
-.wip-container{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:40vh;
-}
-
-.wip-badge{
-  font-family:'Press Start 2P',cursive;
-  font-size:42px;
-  color:var(--info);
-  letter-spacing:4px;
-  text-shadow:
-    3px 0 0 #1c1e21, -3px 0 0 #1c1e21,
-    0 3px 0 #1c1e21, 0 -3px 0 #1c1e21,
-    4px 4px 0 rgba(0,0,0,.55),
-    0 0 18px rgba(124,155,255,.5);
-  animation:pulseGlow 2.2s ease-in-out infinite;
-}
-
 /* ---------- Visor de skin packs ---------- */
 
 .viewer-intro{
@@ -1164,11 +1142,6 @@ a{
 
   .viewer-3d-canvas{
     height:220px;
-  }
-
-  .wip-badge{
-    font-size:26px;
-    letter-spacing:2px;
   }
 
 }

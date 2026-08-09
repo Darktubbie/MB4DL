@@ -45,25 +45,46 @@ const Fixer = {
 
             for(let file of Object.keys(zip.files)){
 
-                if(file.endsWith(".json")){
-
-                    let content =
-                        await zip.files[file].async("string");
+                if(zip.files[file].dir) continue;
+                if(!file.endsWith(".json")) continue;
 
 
-                    let fixed =
-                        this.cleanJSON(content);
+                let content =
+                    await zip.files[file].async("string");
 
 
-                    if(content !== fixed){
+                // Si ya es JSON válido, no lo tocamos.
+                try{
+                    JSON.parse(content);
+                    continue;
+                }catch(e){}
 
-                        zip.file(file, fixed);
 
-                        changes.push(
-                            `JSON reparado: ${file}`
-                        );
-                    }
+                let fixed =
+                    this.cleanJSON(content);
+
+
+                try{
+
+                    // Solo aplicamos el cambio si el resultado es
+                    // realmente JSON válido; de lo contrario no
+                    // sobrescribimos el archivo con algo a medio reparar.
+                    JSON.parse(fixed);
+
+                    zip.file(file, fixed);
+
+                    changes.push(
+                        `JSON reparado: ${file}`
+                    );
+
+                }catch(e){
+
+                    changes.push(
+                        `No se pudo reparar automáticamente ${file}: ${e.message}`
+                    );
+
                 }
+
             }
         }
 
@@ -167,13 +188,53 @@ const Fixer = {
 
     cleanJSON(text){
 
-        return text
+        let fixed = text;
 
-        // elimina comas antes de }
-        .replace(/,(\s*[}])/g, "$1")
 
-        // elimina comas antes de ]
-        .replace(/,(\s*])/g, "$1");
+        // Quitar BOM al inicio del archivo
+        fixed = fixed.replace(/^\uFEFF/, "");
+
+
+        // Comillas "inteligentes" (typográficas) -> comillas normales
+        fixed = fixed
+            .replace(/[\u201C\u201D]/g, '"')
+            .replace(/[\u2018\u2019]/g, "'");
+
+
+        // Comentarios de línea // ... y de bloque /* ... */
+        // (heurística simple; no distingue si están dentro de un string,
+        // pero es un caso muy poco frecuente en skins.json)
+        fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, "");
+        fixed = fixed.replace(/(^|[^:])\/\/[^\n\r]*/g, "$1");
+
+
+        // Comillas simples 'valor' -> comillas dobles "valor"
+        fixed = fixed.replace(
+            /'([^'\\]*(?:\\.[^'\\]*)*)'/g,
+            (m, inner) => `"${inner.replace(/"/g, '\\"')}"`
+        );
+
+
+        // Claves sin comillas: identificador: valor -> "identificador": valor
+        fixed = fixed.replace(
+            /([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)/g,
+            '$1"$2"$3'
+        );
+
+
+        // Comas sobrantes antes de } o ]
+        fixed = fixed.replace(/,(\s*[}])/g, "$1");
+        fixed = fixed.replace(/,(\s*])/g, "$1");
+
+
+        // Comas faltantes entre objetos/arreglos consecutivos: "}{" o "][",
+        // un error de sintaxis muy común al copiar/pegar skins a mano.
+        fixed = fixed.replace(/}(\s*){/g, "},$1{");
+        fixed = fixed.replace(/](\s*)\[/g, "],$1[");
+        fixed = fixed.replace(/"(\s*\n\s*)"(?=\s*[:,])/g, '",$1"');
+
+
+        return fixed;
 
     },
 
