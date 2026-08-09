@@ -13,6 +13,10 @@
 
   <!-- Librería para leer archivos ZIP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Librería para el visualizador 3D de skins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
@@ -23,8 +27,10 @@
     </div>
 
     <nav class="nav-links">
-      <a href="#validator" data-i18n="nav.validator">Validator</a>
-      <a href="#about" data-i18n="nav.about">About</a>
+      <a href="#validator" class="tab-link active" data-tab="validator" data-i18n="nav.validator">Validator</a>
+      <a href="#about" class="tab-link" data-tab="about" data-i18n="nav.about">About</a>
+      <a href="#viewer" class="tab-link" data-tab="viewer" data-i18n="nav.viewer">Skin Viewer</a>
+      <a href="#wip" class="tab-link tab-wip" data-i18n="nav.wip">WIP</a>
     </nav>
 
     <div class="lang-switch" id="langSwitch">
@@ -55,8 +61,8 @@
       </p>
 
       <div class="hero-buttons">
-        <a href="#validator" class="btn btn-primary" data-i18n="hero.btnStart">Start analysis</a>
-        <a href="#checks" class="btn btn-secondary" data-i18n="hero.btnChecks">See checks</a>
+        <a href="#validator" class="btn btn-primary tab-link" data-tab="validator" data-i18n="hero.btnStart">Start analysis</a>
+        <a href="#about" class="btn btn-secondary tab-link" data-tab="about" data-i18n="hero.btnChecks">See checks</a>
       </div>
 
     </div>
@@ -105,7 +111,7 @@
 
 <main>
 
-<section id="validator" class="section reveal">
+<section id="validator" class="section reveal tab-section active-tab">
 
   <div class="container">
 
@@ -310,7 +316,7 @@
 
 </section>
 
-<section id="about" class="section reveal">
+<section id="about" class="section reveal tab-section">
 
   <div class="container about-layout">
 
@@ -334,11 +340,7 @@
 
   </div>
 
-</section>
-
-<section id="checks" class="section reveal checks-section">
-
-  <div class="container">
+  <div class="container checks-section">
 
     <h2 class="section-title" data-i18n="checks.sectionTitle">WHAT WE CHECK</h2>
 
@@ -406,6 +408,60 @@
 
 </section>
 
+<section id="viewer" class="section reveal tab-section">
+
+  <div class="container">
+
+    <h2 class="section-title" data-i18n="viewer.sectionTitle">SKIN PACK VIEWER</h2>
+
+    <p class="viewer-intro" data-i18n="viewer.intro">
+      Load a regular (non-4D) Minecraft Bedrock skin pack to see each skin's
+      texture and preview it in 3D on its Steve or Alex model.
+    </p>
+
+    <div class="card upload-card">
+
+      <div id="viewerDropzone" class="dropzone">
+
+        <div class="drop-icon">⬆</div>
+
+        <h3 data-i18n="viewer.dropTitle">DRAG YOUR SKIN PACK</h3>
+
+        <p data-i18n-html="viewer.dropText">
+          Accepts
+          <strong>.zip</strong>
+          and
+          <strong>.mcpack</strong>
+          Minecraft Bedrock skin pack files.
+        </p>
+
+        <label class="file-button">
+          <span data-i18n="validator.selectFile">Select file</span>
+          <input type="file" id="viewerZipInput" accept=".zip,.mcpack" hidden>
+        </label>
+
+        <div id="viewerSelectedFile" class="selected-file" data-i18n="validator.noFile">
+          No file selected
+        </div>
+
+      </div>
+
+    </div>
+
+    <div id="viewerResults" class="skins-preview-grid viewer-grid"></div>
+
+  </div>
+
+</section>
+
+<section id="wip" class="section reveal tab-section">
+
+  <div class="container wip-container">
+    <div class="wip-badge">WIP</div>
+  </div>
+
+</section>
+
 </main>
 
 <footer class="footer">
@@ -427,6 +483,8 @@
 <script src="validator.js"></script>
 
 <script src="fixer.js"></script>
+
+<script src="viewer.js"></script>
 
 <script src="app.js"></script>
 

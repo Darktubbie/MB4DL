@@ -14,7 +14,7 @@ const results = document.getElementById("results");
 // ---------- i18n ----------
 const I18N = {
   en: {
-    nav: { validator: "Validator", checks: "Checks", about: "About" },
+    nav: { validator: "Validator", about: "About", viewer: "Skin Viewer", wip: "WIP" },
     hero: {
       title: "CHECK YOUR 4D SKINPACK BEFORE YOU INSTALL IT",
       subtitle: `Automatically analyzes Minecraft Bedrock files like
@@ -88,7 +88,9 @@ const I18N = {
       geoDesc: "Checks that every model exists in geometry.json",
       dupTitle: "Remove duplicate or unused skins",
       dupDesc: "Removes duplicates and skins whose texture doesn't exist",
-      repairBtn: "Create fixed ZIP"
+      repairBtn: "Create fixed ZIP",
+      repairing: "Building fixed package...",
+      repairError: "Something went wrong while building the fixed package. Check the console for details."
     },
     about: {
       title: "BUILT FOR 4D SKINPACKS",
@@ -125,6 +127,24 @@ const I18N = {
       consText: "Compares names, paths, duplicate references and overall consistency across every file in the skinpack."
     },
     footer: { text: "Visually inspired by Minecraft.net" },
+    viewer: {
+      sectionTitle: "SKIN PACK VIEWER",
+      intro: "Load a regular (non-4D) Minecraft Bedrock skin pack to see each skin's texture and preview it in 3D on its Steve or Alex model.",
+      dropTitle: "DRAG YOUR SKIN PACK",
+      dropText: `Accepts
+        <strong>.zip</strong>
+        and
+        <strong>.mcpack</strong>
+        Minecraft Bedrock skin pack files.`,
+      modelSteve: "Steve (Wide)",
+      modelAlex: "Alex (Slim)",
+      viewTexture: "View texture",
+      view3D: "View in 3D",
+      noTexture: "Texture not found in the package.",
+      notASkinPack: "This file doesn't look like a Minecraft Bedrock skin pack.",
+      noSkins: "No skins were found in this package.",
+      loading: "Loading package..."
+    },
     js: {
       skinsPreviewTitle: "👕 Detected skins",
       skinPreviewMissingLang: "(no name in lang)",
@@ -132,11 +152,12 @@ const I18N = {
       rowModel: "Model:",
       rowCape: "Cape:",
       animationsLabel: "Animations",
-      defaultPackDescription: "4D skin pack"
+      defaultPackDescription: "4D skin pack",
+      comingSoon: "Coming soon!"
     }
   },
   es: {
-    nav: { validator: "Validador", checks: "Comprobaciones", about: "Acerca de" },
+    nav: { validator: "Validador", about: "Acerca de", viewer: "Visor de Skins", wip: "WIP" },
     hero: {
       title: "REVISA TU SKINPACK 4D ANTES DE INSTALARLO",
       subtitle: `Analiza automáticamente archivos de Minecraft Bedrock como
@@ -210,7 +231,9 @@ const I18N = {
       geoDesc: "Comprueba que cada modelo exista en geometry.json",
       dupTitle: "Remover skins repetidas o no usadas",
       dupDesc: "Elimina duplicados y skins cuya textura no existe",
-      repairBtn: "Crear ZIP corregido"
+      repairBtn: "Crear ZIP corregido",
+      repairing: "Generando paquete corregido...",
+      repairError: "Ocurrió un problema al generar el paquete corregido. Revisa la consola para más detalles."
     },
     about: {
       title: "HECHO PARA SKINPACKS 4D",
@@ -247,6 +270,24 @@ const I18N = {
       consText: "Compara nombres, rutas, referencias duplicadas y coherencia general entre todos los archivos del skinpack."
     },
     footer: { text: "Inspirado visualmente en Minecraft.net" },
+    viewer: {
+      sectionTitle: "VISOR DE SKIN PACKS",
+      intro: "Carga un skin pack normal (no 4D) de Minecraft Bedrock para ver la textura de cada skin y previsualizarla en 3D sobre su modelo Steve o Alex.",
+      dropTitle: "ARRASTRA TU SKIN PACK",
+      dropText: `Admite archivos
+        <strong>.zip</strong>
+        y
+        <strong>.mcpack</strong>
+        de skins de Minecraft Bedrock.`,
+      modelSteve: "Steve (Wide)",
+      modelAlex: "Alex (Slim)",
+      viewTexture: "Ver textura",
+      view3D: "Ver en 3D",
+      noTexture: "No se encontró la textura en el paquete.",
+      notASkinPack: "El archivo no parece ser un skinpack de Minecraft Bedrock.",
+      noSkins: "No se encontraron skins en este paquete.",
+      loading: "Cargando paquete..."
+    },
     js: {
       skinsPreviewTitle: "👕 Skins detectadas",
       skinPreviewMissingLang: "(sin nombre en el lang)",
@@ -254,7 +295,8 @@ const I18N = {
       rowModel: "Modelo:",
       rowCape: "Capa:",
       animationsLabel: "Animaciones",
-      defaultPackDescription: "Paquete de skins 4D"
+      defaultPackDescription: "Paquete de skins 4D",
+      comingSoon: "¡Próximamente!"
     }
   }
 };
@@ -313,6 +355,10 @@ async function applyLanguage(lang) {
 
   } else {
     clearResults();
+  }
+
+  if (typeof viewerResults !== "undefined" && viewerResults && !viewerResults._skinsData) {
+    viewerShowMessage(t("validator.waitingText"));
   }
 
   if (analyzeBtn && analyzeBtn.textContent.trim() !== t("validator.loadingBtn") && analyzeBtn.textContent.trim() !== t("validator.analyzingBtn")) {
@@ -456,11 +502,18 @@ async function isLikelySkinPack(zip) {
 }
 
 // ---------- Códigos de formato de Minecraft (§) ----------
+// Códigos de formato de Minecraft BEDROCK (distintos de Java en algunos casos):
+// Bedrock reutiliza las letras "m" y "n" como colores adicionales de material
+// en vez de tachado/subrayado, y agrega los colores "g" a "u".
 const MC_COLORS = {
   "0": "#000000", "1": "#0000AA", "2": "#00AA00", "3": "#00AAAA",
   "4": "#AA0000", "5": "#AA00AA", "6": "#FFAA00", "7": "#AAAAAA",
   "8": "#555555", "9": "#5555FF", "a": "#55FF55", "b": "#55FFFF",
-  "c": "#FF5555", "d": "#FF55FF", "e": "#FFFF55", "f": "#FFFFFF"
+  "c": "#FF5555", "d": "#FF55FF", "e": "#FFFF55", "f": "#FFFFFF",
+  // Colores exclusivos de Bedrock (material/minecoin)
+  "g": "#DDD605", "h": "#E3D4D1", "i": "#CECACA", "j": "#443A3B",
+  "m": "#971607", "n": "#B4684D", "p": "#DEB12D", "q": "#47A036",
+  "s": "#2CBAA8", "t": "#21497B", "u": "#9A5CC6"
 };
 
 function escapeHtml(str) {
@@ -510,8 +563,6 @@ function mcFormatToHtml(text) {
         bold = italic = underline = strikethrough = obfuscated = false;
       } else if (code === "l") bold = true;
       else if (code === "o") italic = true;
-      else if (code === "n") underline = true;
-      else if (code === "m") strikethrough = true;
       else if (code === "k") obfuscated = true;
       else if (code === "r") {
         color = null;
@@ -747,17 +798,6 @@ analyzeBtn.addEventListener("click", async () => {
   analyzeBtn.textContent = t("validator.analyzeBtn");
 });
 
-// Inicializar
-resetStats();
-
-let savedLang = "en";
-try {
-  const stored = localStorage.getItem("mb4dl_lang");
-  if (stored === "es" || stored === "en") savedLang = stored;
-} catch (e) {}
-
-applyLanguage(savedLang);
-
 
 const repairButton =
 document.getElementById("repairButton");
@@ -795,32 +835,273 @@ document.getElementById("removeDuplicatesOrUnused").checked
 };
 
 
-let changes =
-await Fixer.apply(
-currentZip,
-options,
-currentReport
-);
+const originalBtnText = repairButton.textContent;
+repairButton.disabled = true;
+repairButton.textContent = t("fix.repairing");
 
-console.log(changes);
+try {
 
-let output =
-await currentZip.generateAsync({
-type:"blob"
-});
+    let changes =
+    await Fixer.apply(
+    currentZip,
+    options,
+    currentReport
+    );
 
+    console.log(changes);
 
-let link=document.createElement("a");
+    let output =
+    await currentZip.generateAsync({
+        type:"blob",
+        compression:"DEFLATE",
+        compressionOptions:{ level:6 }
+    });
 
-link.href =
-URL.createObjectURL(output);
+    // Nombre de salida: conserva la extensión original (.zip o .mcpack)
+    // en vez de asumir siempre ".zip", que dejaba el nombre sin cambios
+    // para archivos .mcpack.
+    const dotIndex = currentZipName.lastIndexOf(".");
+    const baseName = dotIndex > -1 ? currentZipName.slice(0, dotIndex) : currentZipName;
+    const ext = dotIndex > -1 ? currentZipName.slice(dotIndex) : ".mcpack";
+    const downloadName = `${baseName}_corregido${ext}`;
 
-link.download =
-currentZipName.replace(".zip","_corregido.mcpack");
+    const blobUrl = URL.createObjectURL(output);
 
-link.click();
+    let link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = downloadName;
+    link.style.display = "none";
 
+    // Algunos navegadores (Firefox, Safari) no disparan la descarga si el
+    // enlace no está insertado en el DOM al momento del click.
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Se revoca la URL luego de un momento para no interrumpir la descarga
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+
+} catch (err) {
+
+    console.error(err);
+    alert(t("fix.repairError"));
+
+} finally {
+
+    repairButton.disabled = false;
+    repairButton.textContent = originalBtnText;
+
+}
 
 });
 
 }
+
+// ==========================================================
+// Sistema de pestañas (Validador / Acerca de / Visor / WIP)
+// ==========================================================
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-section").forEach(sec => {
+    sec.classList.toggle("active-tab", sec.id === tabId);
+  });
+
+  document.querySelectorAll(".tab-link").forEach(link => {
+    link.classList.toggle("active", link.getAttribute("data-tab") === tabId);
+  });
+
+  // Si salimos de la pestaña del visor, liberamos la escena 3D activa
+  // para no seguir renderizando de fondo.
+  if (tabId !== "viewer" && typeof dispose3DViewer === "function") {
+    dispose3DViewer();
+  }
+
+  const target = document.getElementById(tabId);
+
+  if (target) {
+    target.classList.add("in-view");
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+document.querySelectorAll(".tab-link[data-tab]").forEach(link => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    switchTab(link.getAttribute("data-tab"));
+  });
+});
+
+document.querySelectorAll(".tab-wip").forEach(link => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    alert(t("js.comingSoon"));
+  });
+});
+
+// ==========================================================
+// Visor de skin packs normales (no 4D)
+// ==========================================================
+const viewerDropzone = document.getElementById("viewerDropzone");
+const viewerZipInput = document.getElementById("viewerZipInput");
+const viewerSelectedFile = document.getElementById("viewerSelectedFile");
+const viewerResults = document.getElementById("viewerResults");
+
+function viewerShowMessage(msg) {
+  viewerResults.innerHTML = `
+    <div class="result-placeholder">
+      <div class="placeholder-icon">🧱</div>
+      <p>${escapeHtml(msg)}</p>
+    </div>
+  `;
+}
+
+function renderViewerSkins(skins) {
+  if (!skins || !skins.length) {
+    viewerShowMessage(t("viewer.noSkins"));
+    return;
+  }
+
+  viewerResults.innerHTML = skins.map((skin, i) => {
+    const modelLabel = skin.isSlim ? t("viewer.modelAlex") : t("viewer.modelSteve");
+
+    return `
+      <div class="viewer-skin-card" data-index="${i}">
+        <div class="viewer-skin-header">
+          <div class="viewer-skin-name">${escapeHtml(skin.name)}</div>
+          <div class="viewer-skin-model">${modelLabel}</div>
+        </div>
+
+        <div class="viewer-skin-actions">
+          <button type="button" class="btn btn-secondary viewer-btn-texture" data-index="${i}">🖼 ${t("viewer.viewTexture")}</button>
+          <button type="button" class="btn btn-secondary viewer-btn-3d" data-index="${i}">🧊 ${t("viewer.view3D")}</button>
+        </div>
+
+        <div class="viewer-skin-content" id="viewerContent-${i}"></div>
+      </div>
+    `;
+  }).join("");
+
+  // Guardamos los datos para que los botones puedan usarlos
+  viewerResults._skinsData = skins;
+
+  viewerResults.querySelectorAll(".viewer-skin-header").forEach(header => {
+    header.addEventListener("click", () => {
+      header.closest(".viewer-skin-card").classList.toggle("expanded");
+    });
+  });
+
+  viewerResults.querySelectorAll(".viewer-btn-texture").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = Number(btn.getAttribute("data-index"));
+      const skin = viewerResults._skinsData[idx];
+      const content = document.getElementById(`viewerContent-${idx}`);
+
+      if (typeof dispose3DViewer === "function") dispose3DViewer();
+
+      if (!skin.textureDataUrl) {
+        content.innerHTML = `<p class="viewer-empty">${t("viewer.noTexture")}</p>`;
+        return;
+      }
+
+      content.innerHTML = `<img class="viewer-texture-img" src="${skin.textureDataUrl}" alt="${escapeHtml(skin.name)}">`;
+    });
+  });
+
+  viewerResults.querySelectorAll(".viewer-btn-3d").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = Number(btn.getAttribute("data-index"));
+      const skin = viewerResults._skinsData[idx];
+      const content = document.getElementById(`viewerContent-${idx}`);
+
+      if (!skin.textureDataUrl) {
+        content.innerHTML = `<p class="viewer-empty">${t("viewer.noTexture")}</p>`;
+        return;
+      }
+
+      content.innerHTML = `<canvas class="viewer-3d-canvas"></canvas>`;
+      const canvas = content.querySelector("canvas");
+
+      // Se espera un frame para que el canvas tenga tamaño real en el DOM
+      requestAnimationFrame(() => {
+        open3DViewer(canvas, skin.textureDataUrl, skin.isSlim);
+      });
+    });
+  });
+}
+
+async function handleViewerFile(file) {
+  viewerSelectedFile.textContent = file.name;
+
+  const lowerName = file.name.toLowerCase();
+  const validExtension = lowerName.endsWith(".zip") || lowerName.endsWith(".mcpack");
+
+  if (!validExtension) {
+    viewerSelectedFile.textContent = t("validator.invalidExtSelected");
+    viewerShowMessage(t("validator.invalidExtText"));
+    return;
+  }
+
+  viewerShowMessage(t("viewer.loading"));
+
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const skins = await parseNormalSkinPack(zip);
+
+    if (!skins) {
+      viewerSelectedFile.textContent = t("validator.notPackSelected");
+      viewerShowMessage(t("viewer.notASkinPack"));
+      return;
+    }
+
+    renderViewerSkins(skins);
+
+  } catch (err) {
+    console.error(err);
+    viewerSelectedFile.textContent = t("validator.invalidFileSelected");
+    viewerShowMessage(t("validator.invalidFileText"));
+  }
+}
+
+if (viewerDropzone && viewerZipInput) {
+
+  viewerZipInput.addEventListener("change", (e) => {
+    if (e.target.files[0]) handleViewerFile(e.target.files[0]);
+  });
+
+  viewerDropzone.addEventListener("click", (e) => {
+    if (e.target.closest(".file-button")) return;
+  });
+
+  ["dragenter", "dragover"].forEach(evt => {
+    viewerDropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      viewerDropzone.classList.add("drag");
+    });
+  });
+
+  ["dragleave", "dragend", "drop"].forEach(evt => {
+    viewerDropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      viewerDropzone.classList.remove("drag");
+    });
+  });
+
+  viewerDropzone.addEventListener("drop", e => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleViewerFile(file);
+  });
+}
+
+// ---------- Inicializar ----------
+resetStats();
+
+let savedLang = "en";
+try {
+  const stored = localStorage.getItem("mb4dl_lang");
+  if (stored === "es" || stored === "en") savedLang = stored;
+} catch (e) {}
+
+applyLanguage(savedLang);
