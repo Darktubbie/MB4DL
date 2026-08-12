@@ -284,8 +284,16 @@ const Fixer = {
 
         if(!langFile){
 
-            // Si hay otros .lang, usar su misma carpeta;
-            // si no hay ninguno, usar "texts/" por defecto.
+            // Si hay otros .lang, usar su misma carpeta; si no hay
+            // ninguno, crear "texts/" junto a donde esté skins.json
+            // (no siempre en la raíz del zip): si el pack vive en
+            // "skin.zip/persona/skins.json", el resultado debe ser
+            // "skin.zip/persona/texts/en_US.lang", no "skin.zip/texts/...".
+            let skinFolder =
+                skinFile.includes("/")
+                ? skinFile.substring(0, skinFile.lastIndexOf("/") + 1)
+                : "";
+
             let anyLang =
                 Object.keys(zip.files)
                 .find(x =>
@@ -297,7 +305,7 @@ const Fixer = {
             let folder =
                 anyLang
                 ? anyLang.substring(0, anyLang.lastIndexOf("/") + 1)
-                : "texts/";
+                : `${skinFolder}texts/`;
 
             langFile = `${folder}en_US.lang`;
             isNewFile = true;

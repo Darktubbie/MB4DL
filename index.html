@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MB4DL — Minecraft Bedrock 4D SkinPack Validator</title>
+  <title>MB4DL — Minecraft Bedrock 4D Loader</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 
-  <!-- Librería para leer archivos ZIP -->
+  <!-- Librería para leer/crear archivos ZIP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <!-- Librería para el visualizador 3D de skins -->
@@ -27,9 +27,10 @@
     </div>
 
     <nav class="nav-links">
-      <a href="#validator" class="tab-link active" data-tab="validator" data-i18n="nav.validator">Validator</a>
+      <a href="#home" class="tab-link active" data-tab="home" data-i18n="nav.home">Home</a>
+      <a href="#validator" class="tab-link" data-tab="validator" data-i18n="nav.validator">Skins 4D/5D</a>
+      <a href="#studio" class="tab-link" data-tab="studio" data-i18n="nav.studio">Skin Studio</a>
       <a href="#about" class="tab-link" data-tab="about" data-i18n="nav.about">About</a>
-      <a href="#viewer" class="tab-link" data-tab="viewer" data-i18n="nav.viewer">Skin Viewer</a>
       <a href="#" class="tab-link tab-wip" data-i18n="nav.wip">WIP</a>
     </nav>
 
@@ -40,82 +41,97 @@
   </div>
 </header>
 
-<section class="hero">
-  <div class="hero-overlay"></div>
-  <div class="hero-particles" aria-hidden="true"></div>
-
-  <div class="container hero-content">
-
-    <div class="hero-text">
-
-      <h1 data-i18n="hero.title">CHECK YOUR 4D SKINPACK BEFORE YOU INSTALL IT</h1>
-
-      <p data-i18n-html="hero.subtitle">
-        Automatically analyzes Minecraft Bedrock files like
-        <strong>skins.json</strong>,
-        <strong>geometry.json</strong>,
-        <strong>manifest.json</strong>,
-        <strong>skinpacks.json</strong>,
-        <strong>texts/.lang</strong>
-        and every texture in the pack.
-      </p>
-
-      <div class="hero-buttons">
-        <a href="#validator" class="btn btn-primary tab-link" data-tab="validator" data-i18n="hero.btnStart">Start analysis</a>
-        <a href="#about" class="btn btn-secondary tab-link" data-tab="about" data-i18n="hero.btnChecks">See checks</a>
-      </div>
-
-    </div>
-
-    <div class="hero-card">
-
-      <div class="pixel-title" data-i18n="hero.statusTitle">System status</div>
-
-      <div class="hero-status">
-
-        <div class="status-item">
-          <span class="dot online"></span>
-          <span data-i18n="hero.statusReady">Validator ready</span>
-        </div>
-
-        <div class="status-item">
-          <span class="dot online"></span>
-          <span data-i18n="hero.statusInstant">Instant analysis</span>
-        </div>
-
-        <div class="status-item">
-          <span class="dot online"></span>
-          <span data-i18n="hero.statusPrivate">No files uploaded to any server</span>
-        </div>
-
-      </div>
-
-      <div class="hero-mini-grid">
-
-        <div class="mini-card">
-          <div class="mini-number" id="miniSkins">0</div>
-          <div class="mini-label" data-i18n="hero.miniSkins">Skins</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="mini-number" id="miniErrors">0</div>
-          <div class="mini-label" data-i18n="hero.miniErrors">Errors</div>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
 <main>
 
-<section id="validator" class="section reveal tab-section active-tab">
+<!-- ============ HOME ============ -->
+<section id="home" class="section reveal tab-section active-tab">
+
+  <div class="hero-inline">
+    <div class="hero-overlay"></div>
+    <div class="hero-particles" aria-hidden="true"></div>
+
+    <div class="container hero-content">
+
+      <div class="hero-text">
+
+        <h1 data-i18n="home.title">EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS</h1>
+
+        <p data-i18n="home.subtitle">
+          MB4DL is a free, offline toolbox for Minecraft Bedrock skin packs.
+          Pick what you need below.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="#validator" class="btn btn-primary tab-link" data-tab="validator" data-i18n="home.btnValidator">Check a 4D/5D pack</a>
+          <a href="#studio" class="btn btn-secondary tab-link" data-tab="studio" data-i18n="home.btnStudio">Open Skin Studio</a>
+        </div>
+
+      </div>
+
+      <div class="hero-card">
+
+        <div class="pixel-title" data-i18n="hero.statusTitle">System status</div>
+
+        <div class="hero-status">
+
+          <div class="status-item">
+            <span class="dot online"></span>
+            <span data-i18n="hero.statusReady">Everything ready</span>
+          </div>
+
+          <div class="status-item">
+            <span class="dot online"></span>
+            <span data-i18n="hero.statusInstant">Instant, in your browser</span>
+          </div>
+
+          <div class="status-item">
+            <span class="dot online"></span>
+            <span data-i18n="hero.statusPrivate">No files uploaded to any server</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="container home-cards">
+
+    <a href="#validator" class="card home-card tab-link" data-tab="validator">
+      <div class="home-card-icon">🧩</div>
+      <h3 data-i18n="home.cardValidatorTitle">Skins 4D/5D</h3>
+      <p data-i18n="home.cardValidatorText">Analyze a 4D/5D skin pack for errors, missing files and localization problems, and generate a fixed download.</p>
+    </a>
+
+    <a href="#studio" class="card home-card tab-link" data-tab="studio">
+      <div class="home-card-icon">🧵</div>
+      <h3 data-i18n="home.cardStudioTitle">Skin Studio</h3>
+      <p data-i18n="home.cardStudioText">Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.</p>
+    </a>
+
+    <a href="#about" class="card home-card tab-link" data-tab="about">
+      <div class="home-card-icon">📖</div>
+      <h3 data-i18n="home.cardAboutTitle">About</h3>
+      <p data-i18n="home.cardAboutText">What MB4DL checks, how it works, and why it exists.</p>
+    </a>
+
+  </div>
+
+</section>
+
+<!-- ============ SKINS 4D/5D (VALIDATOR) ============ -->
+<section id="validator" class="section reveal tab-section">
 
   <div class="container">
 
-    <h2 class="section-title" data-i18n="validator.sectionTitle">ANALYZE PACKAGE</h2>
+    <h2 class="section-title" data-i18n="validator.sectionTitle">SKINS 4D/5D VALIDATOR</h2>
+
+    <p class="viewer-intro" data-i18n="validator.tabIntro">
+      Upload a 4D or 5D Minecraft Bedrock skin pack to find broken references,
+      missing files, JSON errors and localization problems, and download an
+      automatically fixed version.
+    </p>
 
     <div class="validator-layout">
 
@@ -208,7 +224,8 @@
 
   <label class="option-inline">
     <input type="checkbox" id="resolveAmbiguousGeometry">
-    <span data-i18n="validator.ambiguousOption">Automatically resolve geometry ambiguities (use the first match when a model's base name, e.g. "ModelName", appears in more than one geometry such as "geometry.ModelName" and "geometry.custom.ModelName")</span>
+    <span data-i18n="validator.ambiguousOptionShort">Auto-resolve geometry ambiguities</span>
+    <button type="button" class="info-btn" data-info="ambiguous" aria-label="More info">?</button>
   </label>
 
 
@@ -285,12 +302,13 @@
     </label>
 
     <label class="fix-option">
-      <input type="checkbox" id="fixGeometry">
-      <span class="fix-option-icon">📐</span>
+      <input type="checkbox" id="syncSkins">
+      <span class="fix-option-icon">🔄</span>
       <span class="fix-option-text">
-        <strong data-i18n="fix.geoTitle">Check geometries</strong>
-        <small data-i18n="fix.geoDesc">Checks that every model exists in geometry.json</small>
+        <strong data-i18n="fix.syncTitle">Sync skins</strong>
+        <small data-i18n="fix.syncDesc">Fixes misspelled model/texture references by matching similar names</small>
       </span>
+      <button type="button" class="info-btn" data-info="syncSkins" aria-label="More info">?</button>
     </label>
 
     <label class="fix-option">
@@ -316,24 +334,173 @@
 
 </section>
 
+<!-- ============ SKIN STUDIO ============ -->
+<section id="studio" class="section reveal tab-section">
+
+  <div class="container">
+
+    <h2 class="section-title" data-i18n="studio.sectionTitle">SKIN STUDIO</h2>
+
+    <p class="viewer-intro" data-i18n="studio.tabIntro">
+      Preview regular Minecraft Bedrock skin packs in 3D, or build your own
+      pack from scratch.
+    </p>
+
+    <div class="sub-tabs">
+      <button type="button" class="sub-tab-btn active" data-subtab="studioViewer" data-i18n="studio.subViewer">Skin Viewer</button>
+      <button type="button" class="sub-tab-btn" data-subtab="studioMaker" data-i18n="studio.subMaker">Skinpack Maker</button>
+    </div>
+
+    <!-- ---- Sub-pestaña: Skin Viewer ---- -->
+    <div id="studioViewer" class="sub-tab-panel active-subtab">
+
+      <div class="card upload-card">
+
+        <div id="viewerDropzone" class="dropzone">
+
+          <div class="drop-icon">⬆</div>
+
+          <h3 data-i18n="viewer.dropTitle">DRAG YOUR SKIN PACK</h3>
+
+          <p data-i18n-html="viewer.dropText">
+            Accepts
+            <strong>.zip</strong>
+            and
+            <strong>.mcpack</strong>
+            Minecraft Bedrock skin pack files.
+          </p>
+
+          <label class="file-button">
+            <span data-i18n="validator.selectFile">Select file</span>
+            <input type="file" id="viewerZipInput" accept=".zip,.mcpack" hidden>
+          </label>
+
+          <div id="viewerSelectedFile" class="selected-file" data-i18n="validator.noFile">
+            No file selected
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="viewerResults" class="skins-preview-grid viewer-grid"></div>
+
+    </div>
+
+    <!-- ---- Sub-pestaña: Skinpack Maker ---- -->
+    <div id="studioMaker" class="sub-tab-panel">
+
+      <p class="viewer-intro" data-i18n="maker.intro">
+        Build a regular Minecraft Bedrock skin pack: import skins, choose
+        their model, and download a ready-to-install .mcpack.
+      </p>
+
+      <div class="card maker-card">
+
+        <h3 class="pixel-title" data-i18n="maker.addSkinTitle">Add a skin</h3>
+
+        <div class="sub-tabs maker-import-tabs">
+          <button type="button" class="sub-tab-btn active" data-importtab="importUpload" data-i18n="maker.importUpload">Upload PNG</button>
+          <button type="button" class="sub-tab-btn" data-importtab="importUrl" data-i18n="maker.importUrl">From URL</button>
+          <button type="button" class="sub-tab-btn" data-importtab="importUsername" data-i18n="maker.importUsername">Java username</button>
+        </div>
+
+        <div id="importUpload" class="import-panel active-subtab">
+          <label class="file-button">
+            <span data-i18n="maker.chooseImage">Choose image</span>
+            <input type="file" id="makerFileInput" accept="image/png" multiple hidden>
+          </label>
+        </div>
+
+        <div id="importUrl" class="import-panel">
+          <div class="maker-inline-form">
+            <input type="text" id="makerUrlInput" class="maker-input" data-i18n-placeholder="maker.urlPlaceholder" placeholder="https://example.com/skin.png">
+            <button type="button" id="makerUrlBtn" class="btn btn-secondary" data-i18n="maker.importBtn">Import</button>
+          </div>
+        </div>
+
+        <div id="importUsername" class="import-panel">
+          <div class="maker-inline-form">
+            <input type="text" id="makerUsernameInput" class="maker-input" data-i18n-placeholder="maker.usernamePlaceholder" placeholder="Notch">
+            <button type="button" id="makerUsernameBtn" class="btn btn-secondary" data-i18n="maker.importBtn">Import</button>
+          </div>
+          <p class="maker-hint" data-i18n="maker.usernameHint">Fetches the current skin of a Minecraft Java Edition account.</p>
+        </div>
+
+        <div id="makerImportStatus" class="maker-status"></div>
+
+      </div>
+
+      <div class="card maker-card">
+        <h3 class="pixel-title" data-i18n="maker.skinsInPack">Skins in this pack</h3>
+        <div id="makerSkinsList" class="maker-skins-list">
+          <p class="maker-empty" data-i18n="maker.noSkinsYet">No skins added yet.</p>
+        </div>
+      </div>
+
+      <div class="card maker-card">
+
+        <h3 class="pixel-title" data-i18n="maker.packSettings">Pack settings</h3>
+
+        <div class="maker-field">
+          <label data-i18n="maker.packName">Pack name</label>
+          <input type="text" id="makerPackName" class="maker-input" data-i18n-placeholder="maker.packNamePlaceholder" placeholder="My Skin Pack">
+        </div>
+
+        <div class="maker-field">
+          <label data-i18n="maker.packDescription">Description (optional)</label>
+          <input type="text" id="makerPackDescription" class="maker-input" data-i18n-placeholder="maker.packDescPlaceholder" placeholder="A collection of custom skins">
+        </div>
+
+        <p class="maker-hint" data-i18n-html="maker.formatHint">
+          Supports Minecraft formatting codes, e.g. <code>&sect;l</code> bold, <code>&sect;c</code> red, <code>&sect;r</code> reset.
+        </p>
+
+        <div class="maker-preview" id="makerNamePreview"></div>
+
+        <div class="maker-field">
+          <label data-i18n="maker.packIcon">Pack icon (optional)</label>
+          <div class="maker-icon-row">
+            <div class="maker-icon-preview" id="makerIconPreview">🧊</div>
+            <label class="file-button">
+              <span data-i18n="maker.chooseIcon">Choose icon</span>
+              <input type="file" id="makerIconInput" accept="image/png" hidden>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <button id="makerGenerateBtn" class="btn btn-primary fix-repair-btn" data-i18n="maker.generateBtn">
+        Download skin pack
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ============ ABOUT ============ -->
 <section id="about" class="section reveal tab-section">
 
   <div class="container about-layout">
 
     <div class="about-text">
 
-      <h2 class="section-title" data-i18n="about.title">BUILT FOR 4D SKINPACKS</h2>
+      <h2 class="section-title" data-i18n="about.title">ABOUT MB4DL</h2>
 
       <p data-i18n-html="about.p1">
-        This tool is designed specifically for
-        <strong>Minecraft Bedrock 4D</strong>
-        projects, including custom geometries, complex models and packs with
-        multiple language files.
+        MB4DL is a free, offline toolbox for
+        <strong>Minecraft Bedrock</strong>
+        skin packs: a validator for 4D/5D packs with custom geometries, a 3D
+        skin viewer, and a skin pack builder.
       </p>
 
       <p data-i18n="about.p2">
         The goal is to catch exactly the mistakes that usually make a skin
-        not show up in-game, a model fail to load, or textures break.
+        not show up in-game, a model fail to load, or textures break — and
+        to make building a pack from scratch simple.
       </p>
 
     </div>
@@ -342,7 +509,7 @@
 
   <div class="container checks-section">
 
-    <h2 class="section-title" data-i18n="checks.sectionTitle">WHAT WE CHECK</h2>
+    <h2 class="section-title" data-i18n="checks.sectionTitle">WHAT THE VALIDATOR CHECKS</h2>
 
     <div class="checks-grid">
 
@@ -408,52 +575,6 @@
 
 </section>
 
-<section id="viewer" class="section reveal tab-section">
-
-  <div class="container">
-
-    <h2 class="section-title" data-i18n="viewer.sectionTitle">SKIN PACK VIEWER</h2>
-
-    <p class="viewer-intro" data-i18n="viewer.intro">
-      Load a regular (non-4D) Minecraft Bedrock skin pack to see each skin's
-      texture and preview it in 3D on its Steve or Alex model.
-    </p>
-
-    <div class="card upload-card">
-
-      <div id="viewerDropzone" class="dropzone">
-
-        <div class="drop-icon">⬆</div>
-
-        <h3 data-i18n="viewer.dropTitle">DRAG YOUR SKIN PACK</h3>
-
-        <p data-i18n-html="viewer.dropText">
-          Accepts
-          <strong>.zip</strong>
-          and
-          <strong>.mcpack</strong>
-          Minecraft Bedrock skin pack files.
-        </p>
-
-        <label class="file-button">
-          <span data-i18n="validator.selectFile">Select file</span>
-          <input type="file" id="viewerZipInput" accept=".zip,.mcpack" hidden>
-        </label>
-
-        <div id="viewerSelectedFile" class="selected-file" data-i18n="validator.noFile">
-          No file selected
-        </div>
-
-      </div>
-
-    </div>
-
-    <div id="viewerResults" class="skins-preview-grid viewer-grid"></div>
-
-  </div>
-
-</section>
-
 </main>
 
 <footer class="footer">
@@ -472,13 +593,24 @@
 
 </footer>
 
-<script src="validator.js?v=6"></script>
+<!-- Ventana flotante de información (?) -->
+<div id="infoPopover" class="info-popover" hidden>
+  <div class="info-popover-content">
+    <button type="button" id="infoPopoverClose" class="info-popover-close" aria-label="Close">✕</button>
+    <h4 id="infoPopoverTitle"></h4>
+    <p id="infoPopoverText"></p>
+  </div>
+</div>
 
-<script src="fixer.js?v=6"></script>
+<script src="validator.js?v=7"></script>
 
-<script src="viewer.js?v=6"></script>
+<script src="fixer.js?v=7"></script>
 
-<script src="app.js?v=6"></script>
+<script src="viewer.js?v=7"></script>
+
+<script src="maker.js?v=7"></script>
+
+<script src="app.js?v=7"></script>
 
 </body>
 </html>

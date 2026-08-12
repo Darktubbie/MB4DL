@@ -14,27 +14,28 @@ const results = document.getElementById("results");
 // ---------- i18n ----------
 const I18N = {
   en: {
-    nav: { validator: "Validator", about: "About", viewer: "Skin Viewer", wip: "WIP" },
+    nav: { home: "Home", validator: "Skins 4D/5D", studio: "Skin Studio", about: "About", wip: "WIP" },
+    home: {
+      title: "EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS",
+      subtitle: "MB4DL is a free, offline toolbox for Minecraft Bedrock skin packs. Pick what you need below.",
+      btnValidator: "Check a 4D/5D pack",
+      btnStudio: "Open Skin Studio",
+      cardValidatorTitle: "Skins 4D/5D",
+      cardValidatorText: "Analyze a 4D/5D skin pack for errors, missing files and localization problems, and generate a fixed download.",
+      cardStudioTitle: "Skin Studio",
+      cardStudioText: "Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.",
+      cardAboutTitle: "About",
+      cardAboutText: "What MB4DL checks, how it works, and why it exists."
+    },
     hero: {
-      title: "CHECK YOUR 4D SKINPACK BEFORE YOU INSTALL IT",
-      subtitle: `Automatically analyzes Minecraft Bedrock files like
-        <strong>skins.json</strong>,
-        <strong>geometry.json</strong>,
-        <strong>manifest.json</strong>,
-        <strong>skinpacks.json</strong>,
-        <strong>texts/.lang</strong>
-        and every texture in the pack.`,
-      btnStart: "Start analysis",
-      btnChecks: "See checks",
       statusTitle: "System status",
-      statusReady: "Validator ready",
-      statusInstant: "Instant analysis",
-      statusPrivate: "No files uploaded to any server",
-      miniSkins: "Skins",
-      miniErrors: "Errors"
+      statusReady: "Everything ready",
+      statusInstant: "Instant, in your browser",
+      statusPrivate: "No files uploaded to any server"
     },
     validator: {
-      sectionTitle: "ANALYZE PACKAGE",
+      sectionTitle: "SKINS 4D/5D VALIDATOR",
+      tabIntro: "Upload a 4D or 5D Minecraft Bedrock skin pack to find broken references, missing files, JSON errors and localization problems, and download an automatically fixed version.",
       dropTitle: "DRAG YOUR SKINPACK",
       dropText: `Accepts
         <strong>.zip</strong>
@@ -52,7 +53,9 @@ const I18N = {
       infoPrivate: "No file is ever sent to any external server.",
       resultsTitle: "Analysis results",
       analyzeBtn: "Analyze package",
-      ambiguousOption: `Automatically resolve geometry ambiguities (use the first match when a model's base name, e.g. "ModelName", appears in more than one geometry such as "geometry.ModelName" and "geometry.custom.ModelName")`,
+      ambiguousOptionShort: "Auto-resolve geometry ambiguities",
+      ambiguousInfoTitle: "What does this do?",
+      ambiguousInfoText: `Sometimes the same model name shows up more than once in geometry.json — for example "geometry.Egg" and "geometry.custom.Egg" both existing at the same time. When that happens, MB4DL can't be 100% sure which one a skin meant to use. With this OFF, it will flag it as an error so you can check by hand. With this ON, it just picks the first match and moves on — faster, but it could occasionally pick the wrong one.`,
       waitingTitle: "Waiting for a package",
       waitingText: "Select or drag a ZIP or MCPACK file to start the analysis.",
       loadingTitle: "Analyzing package",
@@ -84,8 +87,10 @@ const I18N = {
       textsDesc: "Generates missing entries in language files",
       caseTitle: "Fix upper/lowercase",
       caseDesc: "Fixes texture/cape references in skins.json to match real file names",
-      geoTitle: "Check geometries",
-      geoDesc: "Checks that every model exists in geometry.json",
+      syncTitle: "Sync skins",
+      syncDesc: "Fixes misspelled model/texture references by matching similar names",
+      syncInfoTitle: "What does this do?",
+      syncInfoText: `If a skin's "geometry" or "texture" field is misspelled or slightly wrong — say skins.json points to "egg_model" but geometry.json actually has "egg_modle" — this looks through geometry.json and the images in the pack for the closest matching name and fixes the reference automatically. It won't touch anything that's already correct.`,
       dupTitle: "Remove duplicate or unused skins",
       dupDesc: "Removes duplicates and skins whose texture doesn't exist",
       repairBtn: "Create fixed ZIP",
@@ -93,15 +98,15 @@ const I18N = {
       repairError: "Something went wrong while building the fixed package. Check the console for details."
     },
     about: {
-      title: "BUILT FOR 4D SKINPACKS",
-      p1: `This tool is designed specifically for
-        <strong>Minecraft Bedrock 4D</strong>
-        projects, including custom geometries, complex models and packs with
-        multiple language files.`,
-      p2: "The goal is to catch exactly the mistakes that usually make a skin not show up in-game, a model fail to load, or textures break."
+      title: "ABOUT MB4DL",
+      p1: `MB4DL is a free, offline toolbox for
+        <strong>Minecraft Bedrock</strong>
+        skin packs: a validator for 4D/5D packs with custom geometries, a 3D
+        skin viewer, and a skin pack builder.`,
+      p2: "The goal is to catch exactly the mistakes that usually make a skin not show up in-game, a model fail to load, or textures break — and to make building a pack from scratch simple."
     },
     checks: {
-      sectionTitle: "WHAT WE CHECK",
+      sectionTitle: "WHAT THE VALIDATOR CHECKS",
       geoTitle: "Geometries",
       geoText: `Verifies that the identifiers used in
         <strong>skins.json</strong>
@@ -127,6 +132,12 @@ const I18N = {
       consText: "Compares names, paths, duplicate references and overall consistency across every file in the skinpack."
     },
     footer: { text: "Visually inspired by Minecraft.net" },
+    studio: {
+      sectionTitle: "SKIN STUDIO",
+      tabIntro: "Preview regular Minecraft Bedrock skin packs in 3D, or build your own pack from scratch.",
+      subViewer: "Skin Viewer",
+      subMaker: "Skinpack Maker"
+    },
     viewer: {
       sectionTitle: "SKIN PACK VIEWER",
       intro: "Load a regular (non-4D) Minecraft Bedrock skin pack to see each skin's texture and preview it in 3D on its Steve or Alex model.",
@@ -145,6 +156,44 @@ const I18N = {
       noSkins: "No skins were found in this package.",
       loading: "Loading package..."
     },
+    maker: {
+      intro: "Build a regular Minecraft Bedrock skin pack: import skins, choose their model, and download a ready-to-install .mcpack.",
+      addSkinTitle: "Add a skin",
+      importUpload: "Upload PNG",
+      importUrl: "From URL",
+      importUsername: "Java username",
+      chooseImage: "Choose image",
+      urlPlaceholder: "https://example.com/skin.png",
+      importBtn: "Import",
+      usernamePlaceholder: "Notch",
+      usernameHint: "Fetches the current skin of a Minecraft Java Edition account.",
+      skinsInPack: "Skins in this pack",
+      noSkinsYet: "No skins added yet.",
+      skinName: "Name",
+      skinModel: "Model",
+      remove: "Remove",
+      packSettings: "Pack settings",
+      packName: "Pack name",
+      packNamePlaceholder: "My Skin Pack",
+      packDescription: "Description (optional)",
+      packDescPlaceholder: "A collection of custom skins",
+      formatHint: `Supports Minecraft formatting codes, e.g. <code>&sect;l</code> bold, <code>&sect;c</code> red, <code>&sect;r</code> reset. You can also type <code>&amp;</code> instead of <code>&sect;</code> (e.g. <code>&amp;c</code>) if it's easier to type.`,
+      packIcon: "Pack icon (optional)",
+      chooseIcon: "Choose icon",
+      generateBtn: "Download skin pack",
+      importing: "Importing...",
+      importOk: (n) => `Added "${n}".`,
+      importFailUrl: "Couldn't fetch that image (the site may block cross-site downloads). Try saving it and using \"Upload PNG\" instead.",
+      importFailUsername: "Couldn't fetch a skin for that username. Check the spelling, or the account may not have a Java Edition skin.",
+      importFailGeneric: "Couldn't import that image.",
+      needUsername: "Type a Minecraft Java username first.",
+      needUrl: "Paste an image URL first.",
+      needSkins: "Add at least one skin first.",
+      needName: "Give the pack a name first.",
+      generating: "Building pack...",
+      generateError: "Something went wrong while building the pack. Check the console for details.",
+      defaultSkinName: "Skin"
+    },
     js: {
       skinsPreviewTitle: "👕 Detected skins",
       skinPreviewMissingLang: "(no name in lang)",
@@ -157,27 +206,28 @@ const I18N = {
     }
   },
   es: {
-    nav: { validator: "Validador", about: "Acerca de", viewer: "Visor de Skins", wip: "WIP" },
+    nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skin Studio", about: "Acerca de", wip: "WIP" },
+    home: {
+      title: "TODO LO QUE NECESITAS PARA SKINS DE MINECRAFT BEDROCK",
+      subtitle: "MB4DL es una caja de herramientas gratuita y offline para skinpacks de Minecraft Bedrock. Elige lo que necesites abajo.",
+      btnValidator: "Revisar un pack 4D/5D",
+      btnStudio: "Abrir Skin Studio",
+      cardValidatorTitle: "Skins 4D/5D",
+      cardValidatorText: "Analiza un skinpack 4D/5D en busca de errores, archivos faltantes y problemas de localización, y genera una descarga corregida.",
+      cardStudioTitle: "Skin Studio",
+      cardStudioText: "Previsualiza skinpacks normales en 3D, o crea el tuyo desde cero con el Skinpack Maker.",
+      cardAboutTitle: "Acerca de",
+      cardAboutText: "Qué revisa MB4DL, cómo funciona, y por qué existe."
+    },
     hero: {
-      title: "REVISA TU SKINPACK 4D ANTES DE INSTALARLO",
-      subtitle: `Analiza automáticamente archivos de Minecraft Bedrock como
-        <strong>skins.json</strong>,
-        <strong>geometry.json</strong>,
-        <strong>manifest.json</strong>,
-        <strong>skinpacks.json</strong>,
-        <strong>texts/.lang</strong>
-        y todas las texturas del paquete.`,
-      btnStart: "Comenzar análisis",
-      btnChecks: "Ver comprobaciones",
       statusTitle: "Estado del sistema",
-      statusReady: "Validador listo",
-      statusInstant: "Análisis instantáneo",
-      statusPrivate: "Ningún archivo se sube a un servidor",
-      miniSkins: "Skins",
-      miniErrors: "Errores"
+      statusReady: "Todo listo",
+      statusInstant: "Instantáneo, en tu navegador",
+      statusPrivate: "Ningún archivo se sube a un servidor"
     },
     validator: {
-      sectionTitle: "ANALIZAR PAQUETE",
+      sectionTitle: "VALIDADOR DE SKINS 4D/5D",
+      tabIntro: "Sube un skinpack 4D o 5D de Minecraft Bedrock para encontrar referencias rotas, archivos faltantes, errores de JSON y problemas de localización, y descarga una versión corregida automáticamente.",
       dropTitle: "ARRASTRA TU SKINPACK",
       dropText: `Admite archivos
         <strong>.zip</strong>
@@ -195,7 +245,9 @@ const I18N = {
       infoPrivate: "Ningún archivo es enviado a servidores externos.",
       resultsTitle: "Resultados del análisis",
       analyzeBtn: "Analizar paquete",
-      ambiguousOption: `Resolver ambigüedades de geometría automáticamente (usar la primera coincidencia cuando el nombre base del modelo, ej. "NombreDelModelo", aparece en más de una geometría distinta como "geometry.NombreDelModelo" y "geometry.custom.NombreDelModelo")`,
+      ambiguousOptionShort: "Resolver ambigüedades de geometría automáticamente",
+      ambiguousInfoTitle: "¿Qué hace esto?",
+      ambiguousInfoText: `A veces el mismo nombre de modelo aparece más de una vez en geometry.json — por ejemplo "geometry.Egg" y "geometry.custom.Egg" existiendo al mismo tiempo. Cuando eso pasa, MB4DL no puede estar 100% seguro de cuál quiso usar la skin. Con esto DESACTIVADO, se marcará como error para que lo revises a mano. Con esto ACTIVADO, simplemente elige la primera coincidencia y continúa — más rápido, pero podría elegir la incorrecta alguna vez.`,
       waitingTitle: "Esperando un paquete",
       waitingText: "Selecciona o arrastra un archivo ZIP o MCPACK para comenzar el análisis.",
       loadingTitle: "Analizando paquete",
@@ -227,8 +279,10 @@ const I18N = {
       textsDesc: "Genera entradas faltantes en los archivos de idioma",
       caseTitle: "Corregir mayúsculas/minúsculas",
       caseDesc: "Corrige las referencias texture/cape en skins.json para que coincidan con el nombre real del archivo",
-      geoTitle: "Revisar geometrías",
-      geoDesc: "Comprueba que cada modelo exista en geometry.json",
+      syncTitle: "Sincronizar skins",
+      syncDesc: "Corrige referencias de modelo/textura mal escritas buscando el nombre más parecido",
+      syncInfoTitle: "¿Qué hace esto?",
+      syncInfoText: `Si el campo "geometry" o "texture" de una skin está mal escrito o ligeramente incorrecto — por ejemplo skins.json apunta a "egg_model" pero geometry.json en realidad tiene "egg_modle" — esto revisa geometry.json y las imágenes del paquete en busca del nombre más parecido y corrige la referencia automáticamente. No toca nada que ya esté correcto.`,
       dupTitle: "Remover skins repetidas o no usadas",
       dupDesc: "Elimina duplicados y skins cuya textura no existe",
       repairBtn: "Crear ZIP corregido",
@@ -236,15 +290,15 @@ const I18N = {
       repairError: "Ocurrió un problema al generar el paquete corregido. Revisa la consola para más detalles."
     },
     about: {
-      title: "HECHO PARA SKINPACKS 4D",
-      p1: `Esta herramienta está pensada específicamente para proyectos de
-        <strong>Minecraft Bedrock 4D</strong>,
-        incluyendo geometrías personalizadas, modelos complejos y paquetes con
-        múltiples archivos de idioma.`,
-      p2: "El objetivo es detectar exactamente los errores que suelen provocar que una skin no aparezca en el juego, que el modelo no cargue o que las texturas se rompan."
+      title: "ACERCA DE MB4DL",
+      p1: `MB4DL es una caja de herramientas gratuita y offline para paquetes de
+        <strong>Minecraft Bedrock</strong>:
+        un validador para packs 4D/5D con geometrías personalizadas, un visor
+        de skins en 3D, y un creador de skinpacks.`,
+      p2: "El objetivo es detectar exactamente los errores que suelen provocar que una skin no aparezca en el juego, que el modelo no cargue o que las texturas se rompan — y hacer sencillo crear un pack desde cero."
     },
     checks: {
-      sectionTitle: "QUÉ COMPROBAMOS",
+      sectionTitle: "QUÉ REVISA EL VALIDADOR",
       geoTitle: "Geometrías",
       geoText: `Verifica que los identificadores usados en
         <strong>skins.json</strong>
@@ -270,6 +324,12 @@ const I18N = {
       consText: "Compara nombres, rutas, referencias duplicadas y coherencia general entre todos los archivos del skinpack."
     },
     footer: { text: "Inspirado visualmente en Minecraft.net" },
+    studio: {
+      sectionTitle: "SKIN STUDIO",
+      tabIntro: "Previsualiza skinpacks normales de Minecraft Bedrock en 3D, o crea tu propio pack desde cero.",
+      subViewer: "Visor de Skins",
+      subMaker: "Skinpack Maker"
+    },
     viewer: {
       sectionTitle: "VISOR DE SKIN PACKS",
       intro: "Carga un skin pack normal (no 4D) de Minecraft Bedrock para ver la textura de cada skin y previsualizarla en 3D sobre su modelo Steve o Alex.",
@@ -287,6 +347,44 @@ const I18N = {
       notASkinPack: "El archivo no parece ser un skinpack de Minecraft Bedrock.",
       noSkins: "No se encontraron skins en este paquete.",
       loading: "Cargando paquete..."
+    },
+    maker: {
+      intro: "Crea un skinpack normal de Minecraft Bedrock: importa skins, elige su modelo, y descarga un .mcpack listo para instalar.",
+      addSkinTitle: "Agregar una skin",
+      importUpload: "Subir PNG",
+      importUrl: "Desde URL",
+      importUsername: "Usuario de Java",
+      chooseImage: "Elegir imagen",
+      urlPlaceholder: "https://ejemplo.com/skin.png",
+      importBtn: "Importar",
+      usernamePlaceholder: "Notch",
+      usernameHint: "Obtiene la skin actual de una cuenta de Minecraft Java Edition.",
+      skinsInPack: "Skins en este pack",
+      noSkinsYet: "Todavía no se agregó ninguna skin.",
+      skinName: "Nombre",
+      skinModel: "Modelo",
+      remove: "Quitar",
+      packSettings: "Configuración del pack",
+      packName: "Nombre del pack",
+      packNamePlaceholder: "Mi Skin Pack",
+      packDescription: "Descripción (opcional)",
+      packDescPlaceholder: "Una colección de skins personalizadas",
+      formatHint: `Admite códigos de formato de Minecraft, ej. <code>&sect;l</code> negrita, <code>&sect;c</code> rojo, <code>&sect;r</code> reiniciar. También puedes escribir <code>&amp;</code> en vez de <code>&sect;</code> (ej. <code>&amp;c</code>) si te resulta más fácil.`,
+      packIcon: "Ícono del pack (opcional)",
+      chooseIcon: "Elegir ícono",
+      generateBtn: "Descargar skin pack",
+      importing: "Importando...",
+      importOk: (n) => `Se agregó "${n}".`,
+      importFailUrl: "No se pudo obtener esa imagen (el sitio podría bloquear descargas externas). Intenta guardarla y usar \"Subir PNG\" en su lugar.",
+      importFailUsername: "No se pudo obtener una skin para ese usuario. Revisa la ortografía, o la cuenta podría no tener una skin de Java Edition.",
+      importFailGeneric: "No se pudo importar esa imagen.",
+      needUsername: "Primero escribe un nombre de usuario de Minecraft Java.",
+      needUrl: "Primero pega una URL de imagen.",
+      needSkins: "Primero agrega al menos una skin.",
+      needName: "Primero dale un nombre al pack.",
+      generating: "Generando pack...",
+      generateError: "Ocurrió un problema al generar el pack. Revisa la consola para más detalles.",
+      defaultSkinName: "Skin"
     },
     js: {
       skinsPreviewTitle: "👕 Skins detectadas",
@@ -329,6 +427,13 @@ async function applyLanguage(lang) {
     el.innerHTML = t(el.getAttribute("data-i18n-html"));
   });
 
+  // Placeholders de <input> (p. ej. los campos del Skinpack Maker): no son
+  // contenido visible vía textContent/innerHTML, así que necesitan su
+  // propio atributo.
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+  });
+
   document.querySelectorAll(".lang-btn").forEach(btn => {
     btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
   });
@@ -359,6 +464,13 @@ async function applyLanguage(lang) {
 
   if (typeof viewerResults !== "undefined" && viewerResults && !viewerResults._skinsData) {
     viewerShowMessage(t("validator.waitingText"));
+  }
+
+  // El Skinpack Maker genera su lista de skins y su vista previa de forma
+  // dinámica (no vía data-i18n), así que hay que volver a pintarlas cada
+  // vez que cambia el idioma.
+  if (typeof refreshMakerLanguage === "function") {
+    refreshMakerLanguage();
   }
 
   if (analyzeBtn && analyzeBtn.textContent.trim() !== t("validator.loadingBtn") && analyzeBtn.textContent.trim() !== t("validator.analyzingBtn")) {
@@ -909,9 +1021,9 @@ function switchTab(tabId) {
     link.classList.toggle("active", link.getAttribute("data-tab") === tabId);
   });
 
-  // Si salimos de la pestaña del visor, liberamos la escena 3D activa
+  // Al cambiar de pestaña principal liberamos cualquier escena 3D activa
   // para no seguir renderizando de fondo.
-  if (tabId !== "viewer" && typeof dispose3DViewer === "function") {
+  if (typeof dispose3DViewer === "function") {
     dispose3DViewer();
   }
 
@@ -935,6 +1047,89 @@ document.querySelectorAll(".tab-wip").forEach(link => {
     e.preventDefault();
     alert(t("js.comingSoon"));
   });
+});
+
+// ==========================================================
+// Sub-pestañas (dentro de una pestaña principal, p. ej. Skin Studio:
+// Skin Viewer / Skinpack Maker, o los métodos de importación del Maker)
+// ==========================================================
+function switchSubTab(btn) {
+  const targetId = btn.getAttribute("data-subtab") || btn.getAttribute("data-importtab");
+  if (!targetId) return;
+
+  const group = btn.closest(".sub-tabs");
+  if (!group) return;
+
+  // Los botones de este grupo activan paneles hermanos: buscamos el
+  // contenedor padre de "group" y dentro de él los .sub-tab-panel o
+  // .import-panel que correspondan a cada botón del mismo grupo.
+  const container = group.parentElement;
+  if (!container) return;
+
+  group.querySelectorAll(".sub-tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  container.querySelectorAll(":scope > .sub-tab-panel, :scope > .import-panel").forEach(panel => {
+    panel.classList.toggle("active-subtab", panel.id === targetId);
+  });
+
+  // Si la sub-pestaña que se abandona era el Skin Viewer (donde puede
+  // haber una vista 3D activa), la liberamos.
+  if (typeof dispose3DViewer === "function") {
+    dispose3DViewer();
+  }
+}
+
+document.querySelectorAll(".sub-tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchSubTab(btn));
+});
+
+// ==========================================================
+// Ventana flotante de información (botones "?")
+// ==========================================================
+const INFO_CONTENT = {
+  ambiguous: { titleKey: "validator.ambiguousInfoTitle", textKey: "validator.ambiguousInfoText" },
+  syncSkins: { titleKey: "fix.syncInfoTitle", textKey: "fix.syncInfoText" }
+};
+
+const infoPopover = document.getElementById("infoPopover");
+const infoPopoverTitle = document.getElementById("infoPopoverTitle");
+const infoPopoverText = document.getElementById("infoPopoverText");
+const infoPopoverClose = document.getElementById("infoPopoverClose");
+
+function openInfoPopover(key) {
+  const content = INFO_CONTENT[key];
+  if (!content || !infoPopover) return;
+
+  infoPopoverTitle.textContent = t(content.titleKey);
+  infoPopoverText.textContent = t(content.textKey);
+  infoPopover.hidden = false;
+}
+
+function closeInfoPopover() {
+  if (infoPopover) infoPopover.hidden = true;
+}
+
+document.querySelectorAll(".info-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openInfoPopover(btn.getAttribute("data-info"));
+  });
+});
+
+if (infoPopoverClose) {
+  infoPopoverClose.addEventListener("click", closeInfoPopover);
+}
+
+if (infoPopover) {
+  infoPopover.addEventListener("click", (e) => {
+    if (e.target === infoPopover) closeInfoPopover();
+  });
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeInfoPopover();
 });
 
 // ==========================================================
@@ -1094,6 +1289,7 @@ if (viewerDropzone && viewerZipInput) {
     if (file) handleViewerFile(file);
   });
 }
+
 
 // ---------- Inicializar ----------
 resetStats();
