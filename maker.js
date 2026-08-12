@@ -66,6 +66,30 @@ function makerBlobToPng(blob) {
   return makerImageToPng(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
 }
 
+// Muchos hosts de imágenes (y a veces Crafatar) sirven el PNG sin problema
+// como <img>, pero no envían cabeceras CORS, así que fetch() no puede leer
+// los bytes desde nuestro origen. Como respaldo, reintenta a través de
+// wsrv.nl, un proxy de imágenes público que sí agrega esas cabeceras.
+function makerBuildProxyUrl(url) {
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png`;
+}
+
+async function makerFetchBlob(url) {
+  const res = await fetch(url, { mode: "cors" });
+  if (!res.ok) throw new Error("http_" + res.status);
+  return res.blob();
+}
+
+async function makerFetchImageAsPng(url) {
+  try {
+    const blob = await makerFetchBlob(url);
+    return await makerBlobToPng(blob);
+  } catch (directErr) {
+    const blob = await makerFetchBlob(makerBuildProxyUrl(url));
+    return await makerBlobToPng(blob);
+  }
+}
+
 function makerDataUrlToBytes(dataUrl) {
   const base64 = dataUrl.substring(dataUrl.indexOf(",") + 1);
   const binary = atob(base64);
@@ -244,11 +268,7 @@ async function makerImportFromUrl() {
   makerSetStatus(t("maker.importing"));
 
   try {
-    const response = await fetch(url, { mode: "cors" });
-    if (!response.ok) throw new Error("http_" + response.status);
-
-    const blob = await response.blob();
-    const png = await makerBlobToPng(blob);
+    const png = await makerFetchImageAsPng(url);
 
     let suggestedName = "";
     try {
@@ -316,11 +336,7 @@ async function makerImportFromUsername() {
 
     if (!uuid) throw new Error("no_uuid");
 
-    const skinRes = await fetch(`https://crafatar.com/skins/${uuid}`);
-    if (!skinRes.ok) throw new Error("skin_failed");
-
-    const blob = await skinRes.blob();
-    const png = await makerBlobToPng(blob);
+    const png = await makerFetchImageAsPng(`https://crafatar.com/skins/${uuid}`);
 
     makerAddSkin(png.dataUrl, player.username || username);
     makerUsernameInput.value = "";
