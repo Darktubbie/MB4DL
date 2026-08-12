@@ -138,7 +138,7 @@ function makerAddSkin(dataUrl, suggestedName) {
   });
 
   renderMakerSkinsList();
-  makerSetStatus(t("maker.importOk")(name), "success");
+  makerSetStatus(t("maker.importOk").replace("{name}", name), "success");
 }
 
 function renderMakerSkinsList() {

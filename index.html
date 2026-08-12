@@ -31,7 +31,6 @@
       <a href="#validator" class="tab-link" data-tab="validator" data-i18n="nav.validator">Skins 4D/5D</a>
       <a href="#studio" class="tab-link" data-tab="studio" data-i18n="nav.studio">Skin Studio</a>
       <a href="#about" class="tab-link" data-tab="about" data-i18n="nav.about">About</a>
-      <a href="#" class="tab-link tab-wip" data-i18n="nav.wip">WIP</a>
     </nav>
 
     <div class="lang-switch" id="langSwitch">
@@ -57,8 +56,8 @@
         <h1 data-i18n="home.title">EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS</h1>
 
         <p data-i18n="home.subtitle">
-          MB4DL is a free, offline toolbox for Minecraft Bedrock skin packs.
-          Pick what you need below.
+          MB4DL is a free toolbox for Minecraft Bedrock skin packs that
+          runs entirely in your browser. Pick what you need below.
         </p>
 
         <div class="hero-buttons">
@@ -293,20 +292,11 @@
     </label>
 
     <label class="fix-option">
-      <input type="checkbox" id="fixCase">
-      <span class="fix-option-icon">🔠</span>
-      <span class="fix-option-text">
-        <strong data-i18n="fix.caseTitle">Fix upper/lowercase</strong>
-        <small data-i18n="fix.caseDesc">Fixes texture/cape references in skins.json to match real file names</small>
-      </span>
-    </label>
-
-    <label class="fix-option">
       <input type="checkbox" id="syncSkins">
       <span class="fix-option-icon">🔄</span>
       <span class="fix-option-text">
         <strong data-i18n="fix.syncTitle">Sync skins</strong>
-        <small data-i18n="fix.syncDesc">Fixes misspelled model/texture references by matching similar names</small>
+        <small data-i18n="fix.syncDesc">Fixes wrong upper/lowercase and misspelled model/texture references by matching real file names</small>
       </span>
       <button type="button" class="info-btn" data-info="syncSkins" aria-label="More info">?</button>
     </label>
@@ -470,10 +460,11 @@
       <h2 class="section-title" data-i18n="about.title">ABOUT MB4DL</h2>
 
       <p data-i18n-html="about.p1">
-        MB4DL is a free, offline toolbox for
+        MB4DL is a free toolbox for
         <strong>Minecraft Bedrock</strong>
-        skin packs: a validator for 4D/5D packs with custom geometries, a 3D
-        skin viewer, and a skin pack builder.
+        skin packs that runs entirely in your browser — your files are
+        never uploaded to a server: a validator for 4D/5D packs with
+        custom geometries, a 3D skin viewer, and a skin pack builder.
       </p>
 
       <p data-i18n="about.p2">
@@ -565,7 +556,7 @@
     </div>
 
     <div class="footer-text" data-i18n="footer.text">
-      Visually inspired by Minecraft.net
+      Made for the Minecraft Bedrock community
     </div>
 
   </div>

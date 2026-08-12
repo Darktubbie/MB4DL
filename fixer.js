@@ -25,7 +25,6 @@ const Fixer = {
      *   fixJson: true,
      *   syncLocalization: true,
      *   createMissingTexts: true,
-     *   fixCase: true,
      *   syncSkins: true,
      *   removeDuplicatesOrUnused: true
      * }
@@ -127,24 +126,7 @@ const Fixer = {
 
         /*
         ==========================================
-        Corregir mayúsculas/minúsculas
-        ==========================================
-        */
-
-        if(options.fixCase){
-
-            await this.fixFileCase(
-                zip,
-                changes
-            );
-
-        }
-
-
-
-        /*
-        ==========================================
-        Sincronizar skins (geometry / texture)
+        Sincronizar skins (geometry / texture / cape)
         ==========================================
         */
 
@@ -429,107 +411,6 @@ const Fixer = {
 
     /*
     --------------------------------------------------
-    Corregir referencias por mayúsculas
-    --------------------------------------------------
-    */
-
-    async fixFileCase(zip, changes){
-
-
-        let skinFile =
-            Object.keys(zip.files)
-            .find(x => /(^|\/)skins\.json$/i.test(x));
-
-
-        if(!skinFile)
-            return;
-
-
-        let skins;
-
-        try{
-            skins = JSON.parse(
-                await zip.files[skinFile].async("string")
-            );
-        }catch(e){
-            return;
-        }
-
-
-        let pngFiles =
-            Object.keys(zip.files)
-            .filter(
-                f =>
-                /\.png$/i.test(f) &&
-                !zip.files[f].dir
-            );
-
-
-        let modified = false;
-
-
-        for(let skin of skins.skins || []){
-
-            ["texture","cape"].forEach(field=>{
-
-                if(!skin[field])
-                    return;
-
-
-                let exactMatch =
-                    pngFiles.some(
-                        f =>
-                        f.split("/").pop() === skin[field]
-                    );
-
-                if(exactMatch)
-                    return;
-
-
-                let ciMatch =
-                    pngFiles.find(
-                        f =>
-                        f.split("/").pop().toLowerCase()
-                        === skin[field].toLowerCase()
-                    );
-
-                if(ciMatch){
-
-                    let realName =
-                        ciMatch.split("/").pop();
-
-                    changes.push(
-                        `Corregido "${field}" de "${skin.localization_name || "(sin nombre)"}": "${skin[field]}" → "${realName}"`
-                    );
-
-                    skin[field] = realName;
-                    modified = true;
-
-                }
-
-            });
-
-        }
-
-
-        if(modified){
-
-            zip.file(
-                skinFile,
-                JSON.stringify(skins, null, 2)
-            );
-
-        }
-
-    },
-
-
-
-
-
-
-    /*
-    --------------------------------------------------
     Utilidades de similitud de texto (para "Sincronizar skins")
     --------------------------------------------------
     */
@@ -774,6 +655,36 @@ const Fixer = {
 
 
             // ---- texture ----
+            // 1) ¿Ya coincide exactamente (mayúsculas y minúsculas
+            //    incluidas)? No tocar.
+            // 2) ¿Coincide solo si se ignoran mayúsculas/minúsculas? Es
+            //    una corrección segura y de alta confianza: se corrige
+            //    directo, sin pasar por la búsqueda difusa.
+            // 3) Si no coincide de ninguna forma, recién ahí se busca por
+            //    parecido de nombre (más riesgoso, por eso va al final).
+            let texExact =
+                skin.texture &&
+                pngFiles.includes(skin.texture);
+
+            if(!texExact && skin.texture){
+
+                let ciMatch = pngFiles.find(
+                    f => f.toLowerCase() === skin.texture.toLowerCase()
+                );
+
+                if(ciMatch){
+
+                    changes.push(
+                        `Skin sincronizada "${name || "(sin nombre)"}": texture "${skin.texture}" → "${ciMatch}" (coincidían las letras, no las mayúsculas/minúsculas).`
+                    );
+
+                    skin.texture = ciMatch;
+                    modified = true;
+
+                }
+
+            }
+
             let texOk =
                 skin.texture &&
                 pngLower.has(skin.texture.toLowerCase());
@@ -791,6 +702,38 @@ const Fixer = {
 
                     skin.texture = match;
                     modified = true;
+
+                }
+
+            }
+
+
+            // ---- cape (opcional) ----
+            // Mismo criterio que texture, pero sin búsqueda difusa: una
+            // capa no suele compartir nombre con la skin, así que
+            // adivinar por parecido sería poco confiable. Solo se
+            // corrigen mayúsculas/minúsculas, igual que antes hacía
+            // "Fix upper/lowercase".
+            if(skin.cape){
+
+                let capeExact = pngFiles.includes(skin.cape);
+
+                if(!capeExact){
+
+                    let ciMatch = pngFiles.find(
+                        f => f.toLowerCase() === skin.cape.toLowerCase()
+                    );
+
+                    if(ciMatch){
+
+                        changes.push(
+                            `Skin sincronizada "${name || "(sin nombre)"}": cape "${skin.cape}" → "${ciMatch}" (coincidían las letras, no las mayúsculas/minúsculas).`
+                        );
+
+                        skin.cape = ciMatch;
+                        modified = true;
+
+                    }
 
                 }
 

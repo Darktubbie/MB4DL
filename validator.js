@@ -12,6 +12,8 @@ const VALIDATOR_MESSAGES = {
     finalResultTitle: "Resultado final",
     packLocNameTitle: "localization_name (paquete)",
     geometryNullTitle: "geometry.null",
+    noLocalizationName: "(sin localization_name)",
+    missingLocalizationName: "Esta skin no tiene \"localization_name\" en skins.json, así que no se le puede generar un nombre para mostrar. Agrégalo manualmente en skins.json: esto no se puede corregir automáticamente, ya que alguien tiene que elegir el nombre.",
 
     packageLoaded: (c, n) => `Se detectaron ${c} archivos en ${n}.`,
     fileFound: "Archivo encontrado.",
@@ -77,6 +79,8 @@ const VALIDATOR_MESSAGES = {
     finalResultTitle: "Final result",
     packLocNameTitle: "localization_name (package)",
     geometryNullTitle: "geometry.null",
+    noLocalizationName: "(no localization_name)",
+    missingLocalizationName: "This skin has no \"localization_name\" in skins.json, so no display name can be generated for it. Add one manually in skins.json — this can't be fixed automatically, since someone has to choose the name.",
 
     packageLoaded: (c, n) => `Detected ${c} files in ${n}.`,
     fileFound: "File found.",
@@ -674,11 +678,22 @@ async function validateSkinPack(zip, zipName, options = {}) {
 
     // localization
     // Formato correcto: skin.<localization_name del paquete>.<localization_name de la skin>
+    let displayName = null;
+
+    if (!skin.localization_name) {
+
+      // Sin localization_name no hay forma de generar una clave de
+      // en_US.lang con sentido, y el fixer "Sync localization_name" salta
+      // estas skins a propósito (no puede inventar un nombre). Avisar de
+      // esto en vez del mensaje genérico de "clave faltante", que sugiere
+      // (incorrectamente) que ese fix la resolvería.
+      push("error", name, M.missingLocalizationName);
+
+    } else {
+
     const expectedKey = packLocalizationName
       ? `skin.${packLocalizationName}.${name}`
       : `skin.${name}`;
-
-    let displayName = null;
 
     if (enUsPath) {
 
@@ -719,6 +734,8 @@ async function validateSkinPack(zip, zipName, options = {}) {
         push("warning", name, M.locKeyFoundOtherLang(matched));
 
       }
+
+    }
 
     }
 

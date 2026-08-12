@@ -14,10 +14,10 @@ const results = document.getElementById("results");
 // ---------- i18n ----------
 const I18N = {
   en: {
-    nav: { home: "Home", validator: "Skins 4D/5D", studio: "Skin Studio", about: "About", wip: "WIP" },
+    nav: { home: "Home", validator: "Skins 4D/5D", studio: "Skin Studio", about: "About" },
     home: {
       title: "EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS",
-      subtitle: "MB4DL is a free, offline toolbox for Minecraft Bedrock skin packs. Pick what you need below.",
+      subtitle: "MB4DL is a free toolbox for Minecraft Bedrock skin packs that runs entirely in your browser. Pick what you need below.",
       btnValidator: "Check a 4D/5D pack",
       btnStudio: "Open Skin Studio",
       cardValidatorTitle: "Skins 4D/5D",
@@ -85,12 +85,10 @@ const I18N = {
       locDesc: "Links each skin to its entry in texts/.lang",
       textsTitle: "Create missing text entries",
       textsDesc: "Generates missing entries in language files",
-      caseTitle: "Fix upper/lowercase",
-      caseDesc: "Fixes texture/cape references in skins.json to match real file names",
       syncTitle: "Sync skins",
-      syncDesc: "Fixes misspelled model/texture references by matching similar names",
+      syncDesc: "Fixes wrong upper/lowercase and misspelled model/texture references by matching real file names",
       syncInfoTitle: "What does this do?",
-      syncInfoText: `If a skin's "geometry" or "texture" field is misspelled or slightly wrong — say skins.json points to "egg_model" but geometry.json actually has "egg_modle" — this looks through geometry.json and the images in the pack for the closest matching name and fixes the reference automatically. It won't touch anything that's already correct.`,
+      syncInfoText: `If a skin's "texture", "cape" or "geometry" field doesn't match a real file — wrong upper/lowercase (like "Egg.png" vs "egg.png"), or misspelled/slightly wrong (say skins.json points to "egg_model" but geometry.json actually has "egg_modle") — this looks through geometry.json and the images in the pack for the closest matching name and fixes the reference automatically. It won't touch anything that's already correct.`,
       dupTitle: "Remove duplicate or unused skins",
       dupDesc: "Removes duplicates and skins whose texture doesn't exist",
       repairBtn: "Create fixed ZIP",
@@ -99,10 +97,11 @@ const I18N = {
     },
     about: {
       title: "ABOUT MB4DL",
-      p1: `MB4DL is a free, offline toolbox for
+      p1: `MB4DL is a free toolbox for
         <strong>Minecraft Bedrock</strong>
-        skin packs: a validator for 4D/5D packs with custom geometries, a 3D
-        skin viewer, and a skin pack builder.`,
+        skin packs that runs entirely in your browser — your files are
+        never uploaded to a server: a validator for 4D/5D packs with
+        custom geometries, a 3D skin viewer, and a skin pack builder.`,
       p2: "The goal is to catch exactly the mistakes that usually make a skin not show up in-game, a model fail to load, or textures break — and to make building a pack from scratch simple."
     },
     checks: {
@@ -131,7 +130,7 @@ const I18N = {
       consTitle: "Consistency",
       consText: "Compares names, paths, duplicate references and overall consistency across every file in the skinpack."
     },
-    footer: { text: "Visually inspired by Minecraft.net" },
+    footer: { text: "Made for the Minecraft Bedrock community" },
     studio: {
       sectionTitle: "SKIN STUDIO",
       tabIntro: "Preview regular Minecraft Bedrock skin packs in 3D, or build your own pack from scratch.",
@@ -175,7 +174,7 @@ const I18N = {
       chooseIcon: "Choose icon",
       generateBtn: "Download skin pack",
       importing: "Importing...",
-      importOk: (n) => `Added "${n}".`,
+      importOk: 'Added "{name}".',
       importFailGeneric: "Couldn't import that image.",
       needSkins: "Add at least one skin first.",
       needName: "Give the pack a name first.",
@@ -190,15 +189,14 @@ const I18N = {
       rowModel: "Model:",
       rowCape: "Cape:",
       animationsLabel: "Animations",
-      defaultPackDescription: "4D skin pack",
-      comingSoon: "Coming soon!"
+      defaultPackDescription: "4D skin pack"
     }
   },
   es: {
-    nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skin Studio", about: "Acerca de", wip: "WIP" },
+    nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skin Studio", about: "Acerca de" },
     home: {
       title: "TODO LO QUE NECESITAS PARA SKINS DE MINECRAFT BEDROCK",
-      subtitle: "MB4DL es una caja de herramientas gratuita y offline para skinpacks de Minecraft Bedrock. Elige lo que necesites abajo.",
+      subtitle: "MB4DL es una caja de herramientas gratuita para skinpacks de Minecraft Bedrock que funciona por completo en tu navegador. Elige lo que necesites abajo.",
       btnValidator: "Revisar un pack 4D/5D",
       btnStudio: "Abrir Skin Studio",
       cardValidatorTitle: "Skins 4D/5D",
@@ -266,12 +264,10 @@ const I18N = {
       locDesc: "Vincula cada skin con su entrada en texts/.lang",
       textsTitle: "Crear textos faltantes",
       textsDesc: "Genera entradas faltantes en los archivos de idioma",
-      caseTitle: "Corregir mayúsculas/minúsculas",
-      caseDesc: "Corrige las referencias texture/cape en skins.json para que coincidan con el nombre real del archivo",
       syncTitle: "Sincronizar skins",
-      syncDesc: "Corrige referencias de modelo/textura mal escritas buscando el nombre más parecido",
+      syncDesc: "Corrige mayúsculas/minúsculas incorrectas y referencias de modelo/textura mal escritas buscando el nombre real del archivo",
       syncInfoTitle: "¿Qué hace esto?",
-      syncInfoText: `Si el campo "geometry" o "texture" de una skin está mal escrito o ligeramente incorrecto — por ejemplo skins.json apunta a "egg_model" pero geometry.json en realidad tiene "egg_modle" — esto revisa geometry.json y las imágenes del paquete en busca del nombre más parecido y corrige la referencia automáticamente. No toca nada que ya esté correcto.`,
+      syncInfoText: `Si el campo "texture", "cape" o "geometry" de una skin no coincide con un archivo real — ya sea por mayúsculas/minúsculas (como "Egg.png" contra "egg.png"), o por estar mal escrito/ligeramente incorrecto (por ejemplo skins.json apunta a "egg_model" pero geometry.json en realidad tiene "egg_modle") — esto revisa geometry.json y las imágenes del paquete en busca del nombre más parecido y corrige la referencia automáticamente. No toca nada que ya esté correcto.`,
       dupTitle: "Remover skins repetidas o no usadas",
       dupDesc: "Elimina duplicados y skins cuya textura no existe",
       repairBtn: "Crear ZIP corregido",
@@ -280,8 +276,9 @@ const I18N = {
     },
     about: {
       title: "ACERCA DE MB4DL",
-      p1: `MB4DL es una caja de herramientas gratuita y offline para paquetes de
-        <strong>Minecraft Bedrock</strong>:
+      p1: `MB4DL es una caja de herramientas gratuita para paquetes de
+        <strong>Minecraft Bedrock</strong> que funciona por completo en tu
+        navegador — tus archivos nunca se suben a ningún servidor:
         un validador para packs 4D/5D con geometrías personalizadas, un visor
         de skins en 3D, y un creador de skinpacks.`,
       p2: "El objetivo es detectar exactamente los errores que suelen provocar que una skin no aparezca en el juego, que el modelo no cargue o que las texturas se rompan — y hacer sencillo crear un pack desde cero."
@@ -312,7 +309,7 @@ const I18N = {
       consTitle: "Consistencia",
       consText: "Compara nombres, rutas, referencias duplicadas y coherencia general entre todos los archivos del skinpack."
     },
-    footer: { text: "Inspirado visualmente en Minecraft.net" },
+    footer: { text: "Hecho para la comunidad de Minecraft Bedrock" },
     studio: {
       sectionTitle: "SKIN STUDIO",
       tabIntro: "Previsualiza skinpacks normales de Minecraft Bedrock en 3D, o crea tu propio pack desde cero.",
@@ -356,7 +353,7 @@ const I18N = {
       chooseIcon: "Elegir ícono",
       generateBtn: "Descargar skin pack",
       importing: "Importando...",
-      importOk: (n) => `Se agregó "${n}".`,
+      importOk: 'Se agregó "{name}".',
       importFailGeneric: "No se pudo importar esa imagen.",
       needSkins: "Primero agrega al menos una skin.",
       needName: "Primero dale un nombre al pack.",
@@ -371,8 +368,7 @@ const I18N = {
       rowModel: "Modelo:",
       rowCape: "Capa:",
       animationsLabel: "Animaciones",
-      defaultPackDescription: "Paquete de skins 4D",
-      comingSoon: "¡Próximamente!"
+      defaultPackDescription: "Paquete de skins 4D"
     }
   }
 };
@@ -907,9 +903,6 @@ document.getElementById("fixLocalization").checked,
 createMissingTexts:
 document.getElementById("fixTexts").checked,
 
-fixCase:
-document.getElementById("fixCase").checked,
-
 syncSkins:
 document.getElementById("syncSkins").checked,
 
@@ -984,7 +977,7 @@ try {
 }
 
 // ==========================================================
-// Sistema de pestañas (Validador / Acerca de / Visor / WIP)
+// Sistema de pestañas (Validador / Acerca de / Visor)
 // ==========================================================
 function switchTab(tabId) {
   document.querySelectorAll(".tab-section").forEach(sec => {
@@ -1013,13 +1006,6 @@ document.querySelectorAll(".tab-link[data-tab]").forEach(link => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
     switchTab(link.getAttribute("data-tab"));
-  });
-});
-
-document.querySelectorAll(".tab-wip").forEach(link => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    alert(t("js.comingSoon"));
   });
 });
 
