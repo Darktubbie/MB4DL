@@ -1,9 +1,14 @@
 // maker.js
 // Skinpack Maker: permite crear un skinpack normal de Minecraft Bedrock
-// desde cero. Importa skins (PNG local, URL o usuario de Java Edition),
-// deja elegir nombre/modelo (wide o slim) por skin, configura nombre,
-// descripción e ícono del pack (con códigos de formato de Bedrock), y
-// genera un .mcpack descargable con un UUID nuevo en cada generación.
+// desde cero. Importa skins (PNG local), deja elegir nombre/modelo (wide
+// o slim) por skin, configura nombre, descripción e ícono del pack (con
+// códigos de formato de Bedrock), y genera un .mcpack descargable con un
+// UUID nuevo en cada generación.
+//
+// La importación por URL y por usuario de Java Edition se quitó: ambas
+// dependían de que servidores de terceros (hosts de imágenes, Crafatar)
+// enviaran cabeceras CORS, algo fuera de nuestro control y que en la
+// práctica falla seguido. Importar el PNG directamente es 100% confiable.
 //
 // Nota de orden de carga: este script se ejecuta ANTES que app.js, así
 // que nunca debe llamar a t()/mcFormatToHtml()/escapeHtml() (definidas en
@@ -18,10 +23,10 @@ let makerNextId = 1;
 
 // ---------- Utilidades ----------
 
-// Convierte una imagen (desde cualquier URL local tipo blob:/data:) en un
-// PNG "limpio" dibujándola en un canvas. Esto normaliza el formato de
-// salida (siempre PNG real) y sirve como validación: si la imagen no es
-// decodificable, el navegador dispara onerror.
+// Convierte una imagen local (blob:) en un PNG "limpio" dibujándola en un
+// canvas. Esto normaliza el formato de salida (siempre PNG real) y sirve
+// como validación: si la imagen no es decodificable, el navegador dispara
+// onerror.
 function makerImageToPng(sourceUrl) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -59,35 +64,6 @@ function makerImageToPng(sourceUrl) {
 function makerFileToPng(file) {
   const objectUrl = URL.createObjectURL(file);
   return makerImageToPng(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
-}
-
-function makerBlobToPng(blob) {
-  const objectUrl = URL.createObjectURL(blob);
-  return makerImageToPng(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
-}
-
-// Muchos hosts de imágenes (y a veces Crafatar) sirven el PNG sin problema
-// como <img>, pero no envían cabeceras CORS, así que fetch() no puede leer
-// los bytes desde nuestro origen. Como respaldo, reintenta a través de
-// wsrv.nl, un proxy de imágenes público que sí agrega esas cabeceras.
-function makerBuildProxyUrl(url) {
-  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png`;
-}
-
-async function makerFetchBlob(url) {
-  const res = await fetch(url, { mode: "cors" });
-  if (!res.ok) throw new Error("http_" + res.status);
-  return res.blob();
-}
-
-async function makerFetchImageAsPng(url) {
-  try {
-    const blob = await makerFetchBlob(url);
-    return await makerBlobToPng(blob);
-  } catch (directErr) {
-    const blob = await makerFetchBlob(makerBuildProxyUrl(url));
-    return await makerBlobToPng(blob);
-  }
 }
 
 function makerDataUrlToBytes(dataUrl) {
@@ -252,114 +228,6 @@ if (makerFileInput) {
   });
 }
 
-// ---------- Importar: Desde URL ----------
-
-const makerUrlInput = document.getElementById("makerUrlInput");
-const makerUrlBtn = document.getElementById("makerUrlBtn");
-
-async function makerImportFromUrl() {
-  const url = (makerUrlInput.value || "").trim();
-
-  if (!url) {
-    makerSetStatus(t("maker.needUrl"), "error");
-    return;
-  }
-
-  makerSetStatus(t("maker.importing"));
-
-  try {
-    const png = await makerFetchImageAsPng(url);
-
-    let suggestedName = "";
-    try {
-      const path = new URL(url).pathname;
-      suggestedName = decodeURIComponent(path.split("/").pop() || "").replace(/\.[^.]+$/, "");
-    } catch (e) {}
-
-    makerAddSkin(png.dataUrl, suggestedName);
-    makerUrlInput.value = "";
-
-  } catch (err) {
-    console.error(err);
-    makerSetStatus(t("maker.importFailUrl"), "error");
-  }
-}
-
-if (makerUrlBtn) {
-  makerUrlBtn.addEventListener("click", makerImportFromUrl);
-}
-
-if (makerUrlInput) {
-  makerUrlInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      makerImportFromUrl();
-    }
-  });
-}
-
-// ---------- Importar: Usuario de Java ----------
-
-const makerUsernameInput = document.getElementById("makerUsernameInput");
-const makerUsernameBtn = document.getElementById("makerUsernameBtn");
-
-// Obtiene la skin actual de una cuenta de Java Edition sin backend propio:
-// 1) PlayerDB resuelve el nombre de usuario a un UUID (con CORS habilitado).
-// 2) Crafatar sirve la textura real de la skin a partir de ese UUID (CORS
-//    habilitado también). Mojang no expone CORS en sus propias APIs, así
-//    que no se pueden llamar directamente desde el navegador.
-async function makerImportFromUsername() {
-  const username = (makerUsernameInput.value || "").trim();
-
-  if (!username) {
-    makerSetStatus(t("maker.needUsername"), "error");
-    return;
-  }
-
-  if (!/^[A-Za-z0-9_]{1,16}$/.test(username)) {
-    makerSetStatus(t("maker.importFailUsername"), "error");
-    return;
-  }
-
-  makerSetStatus(t("maker.importing"));
-
-  try {
-    const lookupRes = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(username)}`, {
-      headers: { "Accept": "application/json" }
-    });
-
-    if (!lookupRes.ok) throw new Error("lookup_failed");
-
-    const lookupJson = await lookupRes.json();
-    const player = lookupJson && lookupJson.data && lookupJson.data.player;
-    const uuid = player && (player.raw_id || player.id);
-
-    if (!uuid) throw new Error("no_uuid");
-
-    const png = await makerFetchImageAsPng(`https://crafatar.com/skins/${uuid}`);
-
-    makerAddSkin(png.dataUrl, player.username || username);
-    makerUsernameInput.value = "";
-
-  } catch (err) {
-    console.error(err);
-    makerSetStatus(t("maker.importFailUsername"), "error");
-  }
-}
-
-if (makerUsernameBtn) {
-  makerUsernameBtn.addEventListener("click", makerImportFromUsername);
-}
-
-if (makerUsernameInput) {
-  makerUsernameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      makerImportFromUsername();
-    }
-  });
-}
-
 // ---------- Configuración del pack: nombre, descripción, ícono ----------
 
 const makerPackName = document.getElementById("makerPackName");
@@ -462,6 +330,9 @@ async function makerGeneratePack() {
     zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
     // ---- skins.json + texturas ----
+    // Las texturas van en la raíz del paquete (junto a manifest.json y
+    // skins.json), igual que en los skinpacks reales: no en una
+    // subcarpeta "skins/".
     const skinsJson = {
       serialize_name: serializeName,
       localization_name: serializeName,
@@ -483,7 +354,7 @@ async function makerGeneratePack() {
         type: "free"
       });
 
-      zip.file(`skins/${fileName}`, makerDataUrlToBytes(skin.dataUrl));
+      zip.file(fileName, makerDataUrlToBytes(skin.dataUrl));
 
       const key = `skin.${serializeName}.${skinId}`;
       enUsLines.push(`${key}=${displayName}`);
@@ -502,8 +373,15 @@ async function makerGeneratePack() {
       zip.file("pack_icon.png", makerDataUrlToBytes(makerPackIcon.dataUrl));
     }
 
+    // streamFiles:false evita el uso de "data descriptors" (tamaños
+    // escritos después de los datos en vez de en la cabecera local);
+    // algunos antivirus/heurísticas de Windows son más desconfiados con
+    // zips que usan ese modo de streaming, y aquí no hace ninguna falta
+    // porque ya tenemos todos los bytes en memoria de antemano.
     const output = await zip.generateAsync({
       type: "blob",
+      platform: "DOS",
+      streamFiles: false,
       compression: "DEFLATE",
       compressionOptions: { level: 6 }
     });
@@ -537,9 +415,9 @@ if (makerGenerateBtn) {
 
 // ---------- Refresco de idioma ----------
 // app.js llama a esta función (si existe) cada vez que se cambia de
-// idioma, para que la lista de skins ya renderizada, la vista previa del
-// nombre/descripción y el estado de importación queden también
-// traducidos, ya que se generaron dinámicamente y data-i18n no los cubre.
+// idioma, para que la lista de skins ya renderizada y la vista previa del
+// nombre/descripción queden también traducidas, ya que se generaron
+// dinámicamente y data-i18n no las cubre.
 function refreshMakerLanguage() {
   renderMakerSkinsList();
   updateMakerPreview();

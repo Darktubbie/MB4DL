@@ -159,14 +159,7 @@ const I18N = {
     maker: {
       intro: "Build a regular Minecraft Bedrock skin pack: import skins, choose their model, and download a ready-to-install .mcpack.",
       addSkinTitle: "Add a skin",
-      importUpload: "Upload PNG",
-      importUrl: "From URL",
-      importUsername: "Java username",
       chooseImage: "Choose image",
-      urlPlaceholder: "https://example.com/skin.png",
-      importBtn: "Import",
-      usernamePlaceholder: "Notch",
-      usernameHint: "Fetches the current skin of a Minecraft Java Edition account.",
       skinsInPack: "Skins in this pack",
       noSkinsYet: "No skins added yet.",
       skinName: "Name",
@@ -183,11 +176,7 @@ const I18N = {
       generateBtn: "Download skin pack",
       importing: "Importing...",
       importOk: (n) => `Added "${n}".`,
-      importFailUrl: "Couldn't fetch that image (the site may block cross-site downloads). Try saving it and using \"Upload PNG\" instead.",
-      importFailUsername: "Couldn't fetch a skin for that username. Check the spelling, or the account may not have a Java Edition skin.",
       importFailGeneric: "Couldn't import that image.",
-      needUsername: "Type a Minecraft Java username first.",
-      needUrl: "Paste an image URL first.",
       needSkins: "Add at least one skin first.",
       needName: "Give the pack a name first.",
       generating: "Building pack...",
@@ -351,14 +340,7 @@ const I18N = {
     maker: {
       intro: "Crea un skinpack normal de Minecraft Bedrock: importa skins, elige su modelo, y descarga un .mcpack listo para instalar.",
       addSkinTitle: "Agregar una skin",
-      importUpload: "Subir PNG",
-      importUrl: "Desde URL",
-      importUsername: "Usuario de Java",
       chooseImage: "Elegir imagen",
-      urlPlaceholder: "https://ejemplo.com/skin.png",
-      importBtn: "Importar",
-      usernamePlaceholder: "Notch",
-      usernameHint: "Obtiene la skin actual de una cuenta de Minecraft Java Edition.",
       skinsInPack: "Skins en este pack",
       noSkinsYet: "Todavía no se agregó ninguna skin.",
       skinName: "Nombre",
@@ -375,11 +357,7 @@ const I18N = {
       generateBtn: "Descargar skin pack",
       importing: "Importando...",
       importOk: (n) => `Se agregó "${n}".`,
-      importFailUrl: "No se pudo obtener esa imagen (el sitio podría bloquear descargas externas). Intenta guardarla y usar \"Subir PNG\" en su lugar.",
-      importFailUsername: "No se pudo obtener una skin para ese usuario. Revisa la ortografía, o la cuenta podría no tener una skin de Java Edition.",
       importFailGeneric: "No se pudo importar esa imagen.",
-      needUsername: "Primero escribe un nombre de usuario de Minecraft Java.",
-      needUrl: "Primero pega una URL de imagen.",
       needSkins: "Primero agrega al menos una skin.",
       needName: "Primero dale un nombre al pack.",
       generating: "Generando pack...",
@@ -504,9 +482,6 @@ function resetStats() {
   document.getElementById("errorsCount").textContent = "0";
   document.getElementById("warningsCount").textContent = "0";
   document.getElementById("successCount").textContent = "0";
-
-  document.getElementById("miniSkins").textContent = "0";
-  document.getElementById("miniErrors").textContent = "0";
 }
 
 function setStats(stats) {
@@ -514,9 +489,6 @@ function setStats(stats) {
   document.getElementById("errorsCount").textContent = stats.errors || 0;
   document.getElementById("warningsCount").textContent = stats.warnings || 0;
   document.getElementById("successCount").textContent = stats.success || 0;
-
-  document.getElementById("miniSkins").textContent = stats.skins || 0;
-  document.getElementById("miniErrors").textContent = stats.errors || 0;
 }
 
 // ---------- Resultados ----------
@@ -938,8 +910,8 @@ document.getElementById("fixTexts").checked,
 fixCase:
 document.getElementById("fixCase").checked,
 
-fixGeometry:
-document.getElementById("fixGeometry").checked,
+syncSkins:
+document.getElementById("syncSkins").checked,
 
 removeDuplicatesOrUnused:
 document.getElementById("removeDuplicatesOrUnused").checked
@@ -965,6 +937,8 @@ try {
     let output =
     await currentZip.generateAsync({
         type:"blob",
+        platform:"DOS",
+        streamFiles:false,
         compression:"DEFLATE",
         compressionOptions:{ level:6 }
     });

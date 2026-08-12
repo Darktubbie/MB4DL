@@ -42,6 +42,8 @@ const VALIDATOR_MESSAGES = {
     dupLocName: "localization_name duplicado.",
     noGeometryAssigned: "La skin no tiene geometry asignada.",
     geometryResolvedByBaseName: (g, id) => `La geometría "${g}" no coincide exactamente, pero se resolvió por nombre base de modelo con "${id}".`,
+    geometryResolvedByExtendedName: (g, id) =>
+      `La geometría "${g}" no coincide exactamente, pero "${id}" es una versión más larga o más corta del mismo nombre de modelo, así que se usó esa coincidencia (funciona incluso con nombres de más de 3 palabras).`,
     geometryAmbiguousResolved: (g, c, list, id) => `La geometría "${g}" es ambigua: se encontraron ${c} coincidencias por nombre base (${list}). Se continuó de todas formas y se usó "${id}" por ser la primera encontrada.`,
     geometryAmbiguousError: (g, c, list) => `La geometría "${g}" es ambigua: existen ${c} geometrías distintas con el mismo nombre base (${list}). El validador no puede elegir una automáticamente. Activa la opción "Resolver ambigüedades de geometría automáticamente" y vuelve a analizar si quieres continuar de todas formas; de lo contrario, corrige el "geometry" de la skin para que apunte exactamente a una de las coincidencias listadas.`,
     geometryNotFoundForSkin: (g) => `La geometría "${g}" no existe en geometry.json.`,
@@ -105,6 +107,8 @@ const VALIDATOR_MESSAGES = {
     dupLocName: "Duplicate localization_name.",
     noGeometryAssigned: "The skin has no geometry assigned.",
     geometryResolvedByBaseName: (g, id) => `The geometry "${g}" doesn't match exactly, but it was resolved by the model's base name to "${id}".`,
+    geometryResolvedByExtendedName: (g, id) =>
+      `The geometry "${g}" doesn't match exactly, but "${id}" is a longer or shorter version of the same model name, so that match was used (works even with model names of more than 3 words).`,
     geometryAmbiguousResolved: (g, c, list, id) => `The geometry "${g}" is ambiguous: ${c} matches were found by base name (${list}). Continued anyway and used "${id}" as it was the first match found.`,
     geometryAmbiguousError: (g, c, list) => `The geometry "${g}" is ambiguous: there are ${c} different geometries with the same base name (${list}). The validator can't pick one automatically. Enable "Automatically resolve geometry ambiguities" and re-analyze if you want to continue anyway; otherwise, fix the skin's "geometry" so it points exactly to one of the listed matches.`,
     geometryNotFoundForSkin: (g) => `The geometry "${g}" doesn't exist in geometry.json.`,
@@ -290,11 +294,32 @@ async function validateSkinPack(zip, zipName, options = {}) {
   // comparten el nombre base "NombreDelModelo".
   const geometryBaseNames = new Map();
 
-  function getGeometryBaseName(id) {
+  function getGeometrySuffix(id) {
     const m = id.match(/^geometry\.(.+)$/i);
-    if (!m) return null;
-    const parts = m[1].split(".");
+    return m ? m[1] : null;
+  }
+
+  function getGeometryBaseName(id) {
+    const suffix = getGeometrySuffix(id);
+    if (!suffix) return null;
+    const parts = suffix.split(".");
     return parts[parts.length - 1].toLowerCase();
+  }
+
+  // Compara dos sufijos de geometría COMPLETOS (no solo la última
+  // palabra). Esto es lo que permite detectar con precisión modelos con
+  // nombres de varias palabras (ej. "egg.and.friends" o
+  // "egg.and.friends.name"): si uno es una versión truncada o extendida
+  // del otro —respetando límites de punto—, se consideran el mismo
+  // modelo. Comparar solo la última palabra sería impreciso aquí, ya que
+  // "chicken.and.friends" y "egg.and.friends" comparten la última
+  // palabra ("friends") sin ser el mismo modelo en absoluto.
+  function geometrySuffixesRelated(suffixA, suffixB) {
+    if (!suffixA || !suffixB) return false;
+    const a = suffixA.toLowerCase();
+    const b = suffixB.toLowerCase();
+    if (a === b) return true;
+    return a.startsWith(b + ".") || b.startsWith(a + ".");
   }
 
   function addGeometryIdentifier(id) {
@@ -505,13 +530,32 @@ async function validateSkinPack(zip, zipName, options = {}) {
       if (!exactMatch && !caseInsensitiveMatch) {
 
         // ----------------------------------------------------------
-        // Paso adicional: coincidencia por NOMBRE BASE del modelo.
-        // Trata "geometry.custom.NombreDelModelo" como si fuera
-        // "geometry.NombreDelModelo" (y viceversa), comparando solo el
-        // último segmento del identificador.
+        // Paso adicional 1: coincidencia por SUFIJO COMPLETO del
+        // modelo (más preciso, funciona con nombres de varias
+        // palabras). Trata "geometry.egg.and.friends" como el mismo
+        // modelo que "geometry.egg.and.friends.name" (en cualquier
+        // dirección), ya que uno es una versión truncada/extendida del
+        // otro respetando límites de punto.
+        // ----------------------------------------------------------
+        const skinSuffix = getGeometrySuffix(skin.geometry);
+        const suffixCandidates = skinSuffix
+          ? [...geometryIdentifiers].filter(id => geometrySuffixesRelated(skinSuffix, getGeometrySuffix(id)))
+          : [];
+
+        // ----------------------------------------------------------
+        // Paso adicional 2 (respaldo, menos preciso): coincidencia por
+        // NOMBRE BASE del modelo (último segmento tras el último punto
+        // de lo que sigue a "geometry."). Trata "geometry.custom.Egg"
+        // como si fuera "geometry.Egg" (y viceversa), útil cuando solo
+        // cambia el espacio de nombres del modelo. Solo se usa si el
+        // paso 1 no encontró nada, ya que comparar solo la última
+        // palabra es menos confiable en nombres largos.
         // ----------------------------------------------------------
         const skinBaseName = getGeometryBaseName(skin.geometry);
-        const baseCandidates = skinBaseName ? (geometryBaseNames.get(skinBaseName) || []) : [];
+        const baseNameCandidates = skinBaseName ? (geometryBaseNames.get(skinBaseName) || []) : [];
+
+        const usingSuffixMatch = suffixCandidates.length > 0;
+        const baseCandidates = usingSuffixMatch ? suffixCandidates : baseNameCandidates;
 
         if (baseCandidates.length === 1) {
 
@@ -519,7 +563,9 @@ async function validateSkinPack(zip, zipName, options = {}) {
           const resolvedId = baseCandidates[0];
           usedGeometries.add(resolvedId);
 
-          push("warning", name, M.geometryResolvedByBaseName(skin.geometry, resolvedId));
+          push("warning", name, usingSuffixMatch
+            ? M.geometryResolvedByExtendedName(skin.geometry, resolvedId)
+            : M.geometryResolvedByBaseName(skin.geometry, resolvedId));
 
         } else if (baseCandidates.length > 1) {
 
@@ -545,13 +591,16 @@ async function validateSkinPack(zip, zipName, options = {}) {
           push("error", name, M.geometryNotFoundForSkin(skin.geometry));
 
           // Intentar sugerencia: comparar tanto contra el propio texto de
-          // "geometry" como contra el localization_name de la skin.
+          // "geometry" como contra el localization_name de la skin. Se
+          // compara en ambas direcciones porque el nombre real puede ser
+          // más largo O más corto que el escrito en la skin.
           const geoSuffix = skin.geometry.replace(/^geometry\./i, "").toLowerCase();
           const nameLower = name.toLowerCase();
 
           const suggestion = [...geometryIdentifiers].find(id => {
             const idLower = id.toLowerCase();
-            return idLower.includes(geoSuffix) || idLower.includes(nameLower);
+            const idSuffix = idLower.replace(/^geometry\./i, "");
+            return idLower.includes(geoSuffix) || geoSuffix.includes(idSuffix) || idLower.includes(nameLower);
           });
 
           if (suggestion) {

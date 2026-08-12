@@ -399,32 +399,11 @@
 
         <h3 class="pixel-title" data-i18n="maker.addSkinTitle">Add a skin</h3>
 
-        <div class="sub-tabs maker-import-tabs">
-          <button type="button" class="sub-tab-btn active" data-importtab="importUpload" data-i18n="maker.importUpload">Upload PNG</button>
-          <button type="button" class="sub-tab-btn" data-importtab="importUrl" data-i18n="maker.importUrl">From URL</button>
-          <button type="button" class="sub-tab-btn" data-importtab="importUsername" data-i18n="maker.importUsername">Java username</button>
-        </div>
-
-        <div id="importUpload" class="import-panel active-subtab">
+        <div class="import-panel active-subtab">
           <label class="file-button">
             <span data-i18n="maker.chooseImage">Choose image</span>
             <input type="file" id="makerFileInput" accept="image/png" multiple hidden>
           </label>
-        </div>
-
-        <div id="importUrl" class="import-panel">
-          <div class="maker-inline-form">
-            <input type="text" id="makerUrlInput" class="maker-input" data-i18n-placeholder="maker.urlPlaceholder" placeholder="https://example.com/skin.png">
-            <button type="button" id="makerUrlBtn" class="btn btn-secondary" data-i18n="maker.importBtn">Import</button>
-          </div>
-        </div>
-
-        <div id="importUsername" class="import-panel">
-          <div class="maker-inline-form">
-            <input type="text" id="makerUsernameInput" class="maker-input" data-i18n-placeholder="maker.usernamePlaceholder" placeholder="Notch">
-            <button type="button" id="makerUsernameBtn" class="btn btn-secondary" data-i18n="maker.importBtn">Import</button>
-          </div>
-          <p class="maker-hint" data-i18n="maker.usernameHint">Fetches the current skin of a Minecraft Java Edition account.</p>
         </div>
 
         <div id="makerImportStatus" class="maker-status"></div>

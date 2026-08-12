@@ -695,12 +695,6 @@ a{
   display:block;
 }
 
-.maker-import-tabs{
-  margin:0 0 18px;
-  padding-bottom:0;
-  border-bottom:none;
-}
-
 /* ---------- Skinpack Maker ---------- */
 
 .maker-card{
@@ -1572,6 +1566,72 @@ a{
 
   .about-text{
     max-width:100%;
+  }
+
+  /* ---------- Skinpack Maker en móvil ---------- */
+
+  .maker-skins-list{
+    grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+    gap:10px;
+  }
+
+  .maker-icon-row{
+    flex-wrap:wrap;
+  }
+
+  .maker-inline-form{
+    flex-direction:column;
+  }
+
+  .maker-inline-form .maker-input{
+    min-width:0;
+  }
+
+  /* Los campos de texto/select a menos de 16px hacen que iOS Safari
+     haga zoom automático al enfocarlos; en móvil los subimos a 16px sin
+     afectar el tamaño visual en escritorio. */
+  .maker-input,
+  .maker-skin-name-input,
+  .maker-skin-model-select{
+    font-size:16px;
+  }
+
+  /* ---------- Objetivos táctiles más grandes ---------- */
+
+  .info-btn{
+    width:26px;
+    height:26px;
+    min-width:26px;
+    font-size:13px;
+  }
+
+  .sub-tab-btn{
+    padding:10px 14px;
+    font-size:12px;
+  }
+
+  .fix-option{
+    align-items:center;
+  }
+
+  .maker-skin-remove{
+    padding:7px 12px;
+    font-size:12px;
+  }
+
+  /* ---------- Evitar desbordes horizontales ---------- */
+
+  .result-item p,
+  .result-item h4,
+  .pack-info-name,
+  .pack-info-description,
+  .maker-skin-name-input{
+    overflow-wrap:break-word;
+    word-break:break-word;
+  }
+
+  .card{
+    overflow-x:hidden;
   }
 
 }

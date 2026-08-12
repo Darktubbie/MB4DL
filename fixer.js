@@ -26,7 +26,8 @@ const Fixer = {
      *   syncLocalization: true,
      *   createMissingTexts: true,
      *   fixCase: true,
-     *   fixGeometry: true
+     *   syncSkins: true,
+     *   removeDuplicatesOrUnused: true
      * }
      */
 
@@ -143,13 +144,13 @@ const Fixer = {
 
         /*
         ==========================================
-        Geometrías
+        Sincronizar skins (geometry / texture)
         ==========================================
         */
 
-        if(options.fixGeometry){
+        if(options.syncSkins){
 
-            await this.fixGeometry(
+            await this.syncSkins(
                 zip,
                 changes
             );
@@ -529,118 +530,281 @@ const Fixer = {
 
     /*
     --------------------------------------------------
-    Corrección de geometrías
+    Utilidades de similitud de texto (para "Sincronizar skins")
     --------------------------------------------------
     */
 
-    async fixGeometry(zip, changes){
+    // Quita el prefijo "geometry." y la extensión ".png", pasa a
+    // minúsculas y elimina todo lo que no sea letra/número. Así
+    // "Egg_Model", "egg.model" y "geometry.egg.model" se comparan de
+    // forma justa entre sí.
+    normalizeForMatch(str){
+
+        return String(str || "")
+            .replace(/^geometry\./i, "")
+            .replace(/\.png$/i, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+
+    },
 
 
-        let geoFile =
-            Object.keys(zip.files)
-            .find(
-                x =>
-                /(^|\/)geometry\.json$/i.test(x)
-            );
+    // Distancia de Levenshtein (número mínimo de ediciones para pasar de
+    // "a" a "b"). Implementación clásica de dos filas.
+    levenshtein(a, b){
 
+        const m = a.length, n = b.length;
 
+        if(!m) return n;
+        if(!n) return m;
 
-        let available = [];
+        let prev = new Array(n + 1);
+        let curr = new Array(n + 1);
 
+        for(let j = 0; j <= n; j++) prev[j] = j;
 
+        for(let i = 1; i <= m; i++){
 
-        if(geoFile){
+            curr[0] = i;
 
+            for(let j = 1; j <= n; j++){
 
-            try{
+                const cost = a[i - 1] === b[j - 1] ? 0 : 1;
 
+                curr[j] = Math.min(
+                    prev[j] + 1,
+                    curr[j - 1] + 1,
+                    prev[j - 1] + cost
+                );
 
-                let json =
-                    JSON.parse(
-                        await zip.files[geoFile]
-                        .async("string")
-                    );
+            }
 
-
-                if(json["minecraft:geometry"]){
-
-
-                    json["minecraft:geometry"]
-                    .forEach(g=>{
-
-                        if(g?.description?.identifier){
-                            available.push(
-                                g.description.identifier
-                            );
-                        }
-
-                    });
-
-                }
-
-
-                // Formato antiguo: claves de nivel superior tipo
-                // "geometry.egg": { ... }
-                Object.keys(json).forEach(k => {
-                    if(/^geometry\./i.test(k)){
-                        available.push(k);
-                    }
-                });
-
-
-            }catch(e){}
+            [prev, curr] = [curr, prev];
 
         }
 
+        return prev[n];
+
+    },
 
 
-        available.push(
-            ...this.officialGeometry
-        );
+    // Similitud entre 0 (nada que ver) y 1 (idénticos), tras normalizar
+    // ambos textos.
+    similarity(a, b){
 
+        const na = this.normalizeForMatch(a);
+        const nb = this.normalizeForMatch(b);
+
+        if(!na || !nb) return 0;
+        if(na === nb) return 1;
+
+        if(na.includes(nb) || nb.includes(na)){
+            const shorter = Math.min(na.length, nb.length);
+            const longer = Math.max(na.length, nb.length);
+            return 0.75 + 0.25 * (shorter / longer);
+        }
+
+        const dist = this.levenshtein(na, nb);
+        const maxLen = Math.max(na.length, nb.length);
+
+        return maxLen ? 1 - (dist / maxLen) : 0;
+
+    },
+
+
+    // Entre una lista de candidatos y una o más claves de búsqueda,
+    // regresa el candidato más parecido, o null si ninguno alcanza el
+    // umbral mínimo o si los dos mejores están demasiado cerca (en ese
+    // caso es más seguro no adivinar).
+    bestMatch(candidates, keys, threshold = 0.55, margin = 0.08){
+
+        let best = null, bestScore = 0, second = 0;
+
+        for(const candidate of candidates){
+
+            let score = 0;
+
+            for(const key of keys){
+                score = Math.max(score, this.similarity(candidate, key));
+            }
+
+            if(score > bestScore){
+                second = bestScore;
+                bestScore = score;
+                best = candidate;
+            }else if(score > second){
+                second = score;
+            }
+
+        }
+
+        if(!best || bestScore < threshold) return null;
+        if(second > 0 && bestScore - second < margin) return null;
+
+        return best;
+
+    },
+
+
+
+    /*
+    --------------------------------------------------
+    Sincronizar skins: corrige referencias de "geometry" y
+    "texture" mal escritas buscando, dentro de geometry.json y
+    de las imágenes del paquete, el nombre más parecido al
+    localization_name (o al valor actual, si también sirve de
+    pista) de cada skin. No toca nada que ya sea válido: esto
+    es una corrección real (modifica skins.json), no solo un
+    reporte de lo que falta.
+    --------------------------------------------------
+    */
+
+    async syncSkins(zip, changes){
 
 
         let skinFile =
             Object.keys(zip.files)
-            .find(
-                x =>
-                x.endsWith("skins.json")
-            );
-
+            .find(x => x.endsWith("skins.json"));
 
 
         if(!skinFile)
             return;
 
 
+        let skins;
 
-        let skins =
-            JSON.parse(
-                await zip.files[skinFile]
-                .async("string")
+        try{
+            skins = JSON.parse(
+                await zip.files[skinFile].async("string")
             );
+        }catch(e){
+            return;
+        }
 
 
 
-        let availableLower =
-            available.map(id => id.toLowerCase());
+        // Geometrías disponibles: geometry.json (ambos formatos) +
+        // geometrías oficiales de Minecraft.
+        let geoFile =
+            Object.keys(zip.files)
+            .find(x => /(^|\/)geometry\.json$/i.test(x));
+
+        let availableGeometry = [];
+
+        if(geoFile){
+
+            try{
+
+                let json = JSON.parse(
+                    await zip.files[geoFile].async("string")
+                );
+
+                if(json["minecraft:geometry"]){
+                    json["minecraft:geometry"].forEach(g => {
+                        if(g?.description?.identifier){
+                            availableGeometry.push(g.description.identifier);
+                        }
+                    });
+                }
+
+                // Formato antiguo: claves de nivel superior tipo
+                // "geometry.egg": { ... }
+                Object.keys(json).forEach(k => {
+                    if(/^geometry\./i.test(k)){
+                        availableGeometry.push(k);
+                    }
+                });
+
+            }catch(e){}
+
+        }
+
+        let availableGeometryLower =
+            new Set(availableGeometry.map(id => id.toLowerCase()));
+
+        // Las geometrías oficiales son válidas aunque no aparezcan en
+        // geometry.json, pero no tiene sentido "sincronizar" hacia ellas
+        // por similitud de nombre (un modelo humanoide normal no debería
+        // reasignarse por accidente), así que solo se usan para decidir
+        // si la geometría actual YA es válida, no como candidatas.
+        this.officialGeometry.forEach(id => availableGeometryLower.add(id.toLowerCase()));
+
+
+
+        // Texturas disponibles dentro del paquete.
+        let pngFiles =
+            Object.keys(zip.files)
+            .filter(f => /\.png$/i.test(f) && !zip.files[f].dir)
+            .map(f => f.split("/").pop());
+
+        let pngLower =
+            new Set(pngFiles.map(p => p.toLowerCase()));
+
+
+        let modified = false;
 
 
         for(let skin of skins.skins || []){
 
+            let name = skin.localization_name || "";
 
-            if(
+
+            // ---- geometry ----
+            let geoOk =
                 skin.geometry &&
-                !availableLower.includes(
-                    skin.geometry.toLowerCase()
-                )
-            ){
+                availableGeometryLower.has(skin.geometry.toLowerCase());
 
-                changes.push(
-                    `Geometría faltante: ${skin.geometry}`
-                );
+            if(!geoOk && availableGeometry.length){
+
+                let keys = [name, skin.geometry || ""].filter(Boolean);
+                let match = this.bestMatch(availableGeometry, keys);
+
+                if(match){
+
+                    changes.push(
+                        `Skin sincronizada "${name || "(sin nombre)"}": geometry "${skin.geometry || "(vacío)"}" → "${match}" (coincidencia por nombre parecido en geometry.json).`
+                    );
+
+                    skin.geometry = match;
+                    modified = true;
+
+                }
 
             }
+
+
+            // ---- texture ----
+            let texOk =
+                skin.texture &&
+                pngLower.has(skin.texture.toLowerCase());
+
+            if(!texOk && pngFiles.length){
+
+                let keys = [name, skin.texture || ""].filter(Boolean);
+                let match = this.bestMatch(pngFiles, keys);
+
+                if(match){
+
+                    changes.push(
+                        `Skin sincronizada "${name || "(sin nombre)"}": texture "${skin.texture || "(vacío)"}" → "${match}" (coincidencia por nombre parecido con una imagen del paquete).`
+                    );
+
+                    skin.texture = match;
+                    modified = true;
+
+                }
+
+            }
+
+        }
+
+
+        if(modified){
+
+            zip.file(
+                skinFile,
+                JSON.stringify(skins, null, 2)
+            );
 
         }
 
