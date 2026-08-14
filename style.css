@@ -667,26 +667,69 @@ a{
 }
 
 .sub-tab-btn{
-  background:#17191d;
-  border:1px solid #30343c;
+  background:transparent;
+  border:1px solid transparent;
   color:var(--muted);
-  font-weight:700;
+  font-weight:600;
   font-size:13px;
   padding:9px 16px;
-  border-radius:999px;
+  border-radius:8px;
   cursor:pointer;
   transition:.15s;
 }
 
 .sub-tab-btn:hover{
   color:#fff;
-  border-color:var(--green);
 }
 
 .sub-tab-btn.active{
-  background:var(--green);
-  color:#101210;
-  border-color:var(--green);
+  background:rgba(98,216,78,.14);
+  color:var(--green);
+  border-color:transparent;
+  font-weight:700;
+}
+
+/* ---------- Ventana de módulo (estilo "app window") ---------- */
+
+.module-window{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  margin:24px 0;
+}
+
+.module-window-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px 16px;
+  background:var(--panel2);
+  border-bottom:1px solid var(--border);
+}
+
+.module-window-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#3a3d42;
+  flex-shrink:0;
+}
+
+.module-window-title{
+  margin-left:8px;
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:.2px;
+}
+
+.module-window-body{
+  padding:28px;
+}
+
+@media (max-width:640px){
+  .module-window-body{ padding:20px 16px; }
 }
 
 .sub-tab-panel,
@@ -757,6 +800,121 @@ a{
   border-radius:5px;
   padding:1px 5px;
   font-size:11px;
+}
+
+/* ---------- Selector de plataforma (Java / Bedrock) ---------- */
+
+.maker-platform-toggle{
+  display:inline-flex;
+  background:#101113;
+  border:1px solid #262a30;
+  border-radius:999px;
+  padding:3px;
+  margin-bottom:14px;
+  gap:2px;
+}
+
+.maker-platform-btn{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  font-weight:700;
+  font-size:12px;
+  padding:7px 18px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.maker-platform-btn:hover{
+  color:#fff;
+}
+
+.maker-platform-btn.active{
+  background:var(--green);
+  color:#101210;
+}
+
+/* ---------- Selector de colores y formato ---------- */
+
+.maker-codes{
+  background:#101113;
+  border:1px solid #262a30;
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:16px;
+}
+
+.maker-codes-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.maker-codes-row + .maker-codes-row{
+  margin-top:12px;
+}
+
+.maker-codes-label{
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  min-width:52px;
+}
+
+.maker-swatch-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  flex:1;
+}
+
+.maker-swatch{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.18);
+  cursor:pointer;
+  padding:0;
+  transition:transform .12s ease, border-color .12s ease;
+}
+
+.maker-swatch:hover,
+.maker-swatch:focus-visible{
+  transform:scale(1.18);
+  border-color:#fff;
+  outline:none;
+}
+
+.maker-format-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  flex:1;
+}
+
+.maker-format-btn{
+  min-width:30px;
+  height:26px;
+  padding:0 8px;
+  background:#17191d;
+  border:1px solid #30343c;
+  border-radius:6px;
+  color:var(--text);
+  font-weight:800;
+  font-size:12px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.maker-format-btn:hover,
+.maker-format-btn:focus-visible{
+  border-color:var(--green);
+  color:var(--green);
+  outline:none;
 }
 
 .maker-status{
@@ -1662,6 +1820,20 @@ a{
   .maker-skin-remove{
     padding:7px 12px;
     font-size:12px;
+  }
+
+  .maker-swatch{
+    width:30px;
+    height:30px;
+  }
+
+  .maker-format-btn{
+    min-width:36px;
+    height:32px;
+  }
+
+  .maker-platform-btn{
+    padding:9px 20px;
   }
 
   /* ---------- Evitar desbordes horizontales ---------- */
