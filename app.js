@@ -17,7 +17,7 @@ const I18N = {
     nav: { home: "Home", validator: "Skins 4D/5D", studio: "Skin Studio", about: "About" },
     home: {
       title: "EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS",
-      subtitle: "MB4DL is a free toolbox for Minecraft Bedrock skin packs that runs entirely in your browser. Pick what you need below.",
+      subtitle: "MBSM is a free toolbox for Minecraft Bedrock skin packs that runs entirely in your browser. Pick what you need below.",
       btnValidator: "Check a 4D/5D pack",
       btnStudio: "Open Skin Studio",
       cardValidatorTitle: "Skins 4D/5D",
@@ -25,7 +25,7 @@ const I18N = {
       cardStudioTitle: "Skin Studio",
       cardStudioText: "Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.",
       cardAboutTitle: "About",
-      cardAboutText: "What MB4DL checks, how it works, and why it exists."
+      cardAboutText: "What MBSM checks, how it works, and why it exists."
     },
     hero: {
       statusTitle: "System status",
@@ -55,7 +55,7 @@ const I18N = {
       analyzeBtn: "Analyze package",
       ambiguousOptionShort: "Auto-resolve geometry ambiguities",
       ambiguousInfoTitle: "What does this do?",
-      ambiguousInfoText: `Sometimes the same model name shows up more than once in geometry.json — for example "geometry.Egg" and "geometry.custom.Egg" both existing at the same time. When that happens, MB4DL can't be 100% sure which one a skin meant to use. With this OFF, it will flag it as an error so you can check by hand. With this ON, it just picks the first match and moves on — faster, but it could occasionally pick the wrong one.`,
+      ambiguousInfoText: `Sometimes the same model name shows up more than once in geometry.json — for example "geometry.Egg" and "geometry.custom.Egg" both existing at the same time. When that happens, MBSM can't be 100% sure which one a skin meant to use. With this OFF, it will flag it as an error so you can check by hand. With this ON, it just picks the first match and moves on — faster, but it could occasionally pick the wrong one.`,
       waitingTitle: "Waiting for a package",
       waitingText: "Select or drag a ZIP or MCPACK file to start the analysis.",
       loadingTitle: "Analyzing package",
@@ -96,8 +96,8 @@ const I18N = {
       repairError: "Something went wrong while building the fixed package. Check the console for details."
     },
     about: {
-      title: "ABOUT MB4DL",
-      p1: `MB4DL is a free toolbox for
+      title: "ABOUT MBSM",
+      p1: `MBSM is a free toolbox for
         <strong>Minecraft Bedrock</strong>
         skin packs that runs entirely in your browser — your files are
         never uploaded to a server: a validator for 4D/5D packs with
@@ -196,7 +196,7 @@ const I18N = {
     nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skin Studio", about: "Acerca de" },
     home: {
       title: "TODO LO QUE NECESITAS PARA SKINS DE MINECRAFT BEDROCK",
-      subtitle: "MB4DL es una caja de herramientas gratuita para skinpacks de Minecraft Bedrock que funciona por completo en tu navegador. Elige lo que necesites abajo.",
+      subtitle: "MBSM es una caja de herramientas gratuita para skinpacks de Minecraft Bedrock que funciona por completo en tu navegador. Elige lo que necesites abajo.",
       btnValidator: "Revisar un pack 4D/5D",
       btnStudio: "Abrir Skin Studio",
       cardValidatorTitle: "Skins 4D/5D",
@@ -204,7 +204,7 @@ const I18N = {
       cardStudioTitle: "Skin Studio",
       cardStudioText: "Previsualiza skinpacks normales en 3D, o crea el tuyo desde cero con el Skinpack Maker.",
       cardAboutTitle: "Acerca de",
-      cardAboutText: "Qué revisa MB4DL, cómo funciona, y por qué existe."
+      cardAboutText: "Qué revisa MBSM, cómo funciona, y por qué existe."
     },
     hero: {
       statusTitle: "Estado del sistema",
@@ -234,7 +234,7 @@ const I18N = {
       analyzeBtn: "Analizar paquete",
       ambiguousOptionShort: "Resolver ambigüedades de geometría automáticamente",
       ambiguousInfoTitle: "¿Qué hace esto?",
-      ambiguousInfoText: `A veces el mismo nombre de modelo aparece más de una vez en geometry.json — por ejemplo "geometry.Egg" y "geometry.custom.Egg" existiendo al mismo tiempo. Cuando eso pasa, MB4DL no puede estar 100% seguro de cuál quiso usar la skin. Con esto DESACTIVADO, se marcará como error para que lo revises a mano. Con esto ACTIVADO, simplemente elige la primera coincidencia y continúa — más rápido, pero podría elegir la incorrecta alguna vez.`,
+      ambiguousInfoText: `A veces el mismo nombre de modelo aparece más de una vez en geometry.json — por ejemplo "geometry.Egg" y "geometry.custom.Egg" existiendo al mismo tiempo. Cuando eso pasa, MBSM no puede estar 100% seguro de cuál quiso usar la skin. Con esto DESACTIVADO, se marcará como error para que lo revises a mano. Con esto ACTIVADO, simplemente elige la primera coincidencia y continúa — más rápido, pero podría elegir la incorrecta alguna vez.`,
       waitingTitle: "Esperando un paquete",
       waitingText: "Selecciona o arrastra un archivo ZIP o MCPACK para comenzar el análisis.",
       loadingTitle: "Analizando paquete",
@@ -275,8 +275,8 @@ const I18N = {
       repairError: "Ocurrió un problema al generar el paquete corregido. Revisa la consola para más detalles."
     },
     about: {
-      title: "ACERCA DE MB4DL",
-      p1: `MB4DL es una caja de herramientas gratuita para paquetes de
+      title: "ACERCA DE MBSM",
+      p1: `MBSM es una caja de herramientas gratuita para paquetes de
         <strong>Minecraft Bedrock</strong> que funciona por completo en tu
         navegador — tus archivos nunca se suben a ningún servidor:
         un validador para packs 4D/5D con geometrías personalizadas, un visor
@@ -389,7 +389,7 @@ async function applyLanguage(lang) {
   if (!I18N[lang]) return;
   currentLang = lang;
 
-  try { localStorage.setItem("mb4dl_lang", lang); } catch (e) {}
+  try { localStorage.setItem("mbsm_lang", lang); } catch (e) {}
 
   document.documentElement.lang = lang;
 
@@ -1257,7 +1257,7 @@ resetStats();
 
 let savedLang = "en";
 try {
-  const stored = localStorage.getItem("mb4dl_lang");
+  const stored = localStorage.getItem("mbsm_lang");
   if (stored === "es" || stored === "en") savedLang = stored;
 } catch (e) {}
 
