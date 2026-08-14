@@ -4,6 +4,388 @@
 // o una previsualización 3D del modelo con la skin aplicada.
 
 // ----------------------------
+// Geometría OFICIAL de Minecraft Bedrock para el modelo humanoide
+// estándar (Steve = wide, Alex = slim), tomada directamente del
+// player_geometry.json real del juego (solo Steve y Alex; la capa
+// -"geometry.cape"- no se incluye aquí, se maneja aparte con
+// addCapeMesh). Reemplaza al layout UV armado a mano que se usaba
+// antes: se renderiza con el mismo pipeline genérico que ya usan los
+// modelos personalizados de packs 4D/5D (buildCustomGeometryModel),
+// así que el resultado es consistente y confiable en vez de depender
+// de coordenadas de píxeles transcritas manualmente.
+// ----------------------------
+const OFFICIAL_PLAYER_GEOMETRY = {
+  "geometry.npc.steve": {
+    "texturewidth": 64,
+    "textureheight": 64,
+    "bones": [
+      {
+        "name": "root",
+        "pivot": [0, 0, 0]
+      },
+      {
+        "name": "body",
+        "parent": "waist",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 12, -2],
+            "size": [8, 12, 4],
+            "uv": [16, 16]
+          }
+        ]
+      },
+      {
+        "name": "waist",
+        "parent": "root",
+        "pivot": [0, 12, 0]
+      },
+      {
+        "name": "head",
+        "parent": "body",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 24, -4],
+            "size": [8, 8, 8],
+            "uv": [0, 0]
+          }
+        ]
+      },
+      {
+        "name": "cape",
+        "pivot": [0, 24, 3],
+        "parent": "body"
+      },
+      {
+        "name": "hat",
+        "parent": "head",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 24, -4],
+            "size": [8, 8, 8],
+            "uv": [32, 0],
+            "inflate": 0.5
+          }
+        ]
+      },
+      {
+        "name": "leftArm",
+        "parent": "body",
+        "pivot": [5, 22, 0],
+        "cubes": [
+          {
+            "origin": [4, 12, -2],
+            "size": [4, 12, 4],
+            "uv": [32, 48]
+          }
+        ]
+      },
+      {
+        "name": "leftSleeve",
+        "parent": "leftArm",
+        "pivot": [5, 22, 0],
+        "cubes": [
+          {
+            "origin": [4, 12, -2],
+            "size": [4, 12, 4],
+            "uv": [48, 48],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "leftItem",
+        "pivot": [6, 15, 1],
+        "parent": "leftArm"
+      },
+      {
+        "name": "rightArm",
+        "parent": "body",
+        "pivot": [-5, 22, 0],
+        "cubes": [
+          {
+            "origin": [-8, 12, -2],
+            "size": [4, 12, 4],
+            "uv": [40, 16]
+          }
+        ]
+      },
+      {
+        "name": "rightSleeve",
+        "parent": "rightArm",
+        "pivot": [-5, 22, 0],
+        "cubes": [
+          {
+            "origin": [-8, 12, -2],
+            "size": [4, 12, 4],
+            "uv": [40, 32],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "rightItem",
+        "pivot": [-6, 15, 1],
+        "locators": {
+          "lead_hold": [-6, 15, 1]
+        },
+        "parent": "rightArm"
+      },
+      {
+        "name": "leftLeg",
+        "parent": "root",
+        "pivot": [1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-0.1, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [16, 48]
+          }
+        ]
+      },
+      {
+        "name": "leftPants",
+        "parent": "leftLeg",
+        "pivot": [1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-0.1, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 48],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "rightLeg",
+        "parent": "root",
+        "pivot": [-1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-3.9, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 16]
+          }
+        ]
+      },
+      {
+        "name": "rightPants",
+        "parent": "rightLeg",
+        "pivot": [-1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-3.9, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 32],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "jacket",
+        "parent": "body",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 12, -2],
+            "size": [8, 12, 4],
+            "uv": [16, 32],
+            "inflate": 0.25
+          }
+        ]
+      }
+    ]
+  },
+  "geometry.npc.alex": {
+    "texturewidth": 64,
+    "textureheight": 64,
+    "bones": [
+      {
+        "name": "root",
+        "pivot": [0, 0, 0]
+      },
+      {
+        "name": "waist",
+        "parent": "root",
+        "pivot": [0, 12, 0]
+      },
+      {
+        "name": "body",
+        "parent": "waist",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 12, -2],
+            "size": [8, 12, 4],
+            "uv": [16, 16]
+          }
+        ]
+      },
+      {
+        "name": "head",
+        "parent": "body",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 24, -4],
+            "size": [8, 8, 8],
+            "uv": [0, 0]
+          }
+        ]
+      },
+      {
+        "name": "hat",
+        "parent": "head",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 24, -4],
+            "size": [8, 8, 8],
+            "uv": [32, 0],
+            "inflate": 0.5
+          }
+        ]
+      },
+      {
+        "name": "rightLeg",
+        "parent": "root",
+        "pivot": [-1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-3.9, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 16]
+          }
+        ]
+      },
+      {
+        "name": "rightPants",
+        "parent": "rightLeg",
+        "pivot": [-1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-3.9, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 32],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "leftLeg",
+        "parent": "root",
+        "pivot": [1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-0.1, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 16]
+          }
+        ],
+        "mirror": true
+      },
+      {
+        "name": "leftPants",
+        "parent": "leftLeg",
+        "pivot": [1.9, 12, 0],
+        "cubes": [
+          {
+            "origin": [-0.1, 0, -2],
+            "size": [4, 12, 4],
+            "uv": [0, 48],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "leftArm",
+        "parent": "body",
+        "pivot": [5, 21.5, 0],
+        "cubes": [
+          {
+            "origin": [4, 11.5, -2],
+            "size": [3, 12, 4],
+            "uv": [32, 48]
+          }
+        ]
+      },
+      {
+        "name": "leftSleeve",
+        "parent": "leftArm",
+        "pivot": [5, 21.5, 0],
+        "cubes": [
+          {
+            "origin": [4, 11.5, -2],
+            "size": [3, 12, 4],
+            "uv": [48, 48],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "leftItem",
+        "pivot": [6, 14.5, 1],
+        "parent": "leftArm"
+      },
+      {
+        "name": "rightArm",
+        "parent": "body",
+        "pivot": [-5, 21.5, 0],
+        "cubes": [
+          {
+            "origin": [-7, 11.5, -2],
+            "size": [3, 12, 4],
+            "uv": [40, 16]
+          }
+        ]
+      },
+      {
+        "name": "rightSleeve",
+        "parent": "rightArm",
+        "pivot": [-5, 21.5, 0],
+        "cubes": [
+          {
+            "origin": [-7, 11.5, -2],
+            "size": [3, 12, 4],
+            "uv": [40, 32],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "rightItem",
+        "pivot": [-6, 14.5, 1],
+        "locators": {
+          "lead_hold": [-6, 14.5, 1]
+        },
+        "parent": "rightArm"
+      },
+      {
+        "name": "jacket",
+        "parent": "body",
+        "pivot": [0, 24, 0],
+        "cubes": [
+          {
+            "origin": [-4, 12, -2],
+            "size": [8, 12, 4],
+            "uv": [16, 32],
+            "inflate": 0.25
+          }
+        ]
+      },
+      {
+        "name": "cape",
+        "pivot": [0, 24, -3],
+        "parent": "body"
+      }
+    ]
+  }
+}
+;
+
+// ----------------------------
 // Layout UV del formato de skin 64x64 (capa base). Cada cara es
 // [x, y, w, h] en píxeles dentro de la textura, origen arriba-izquierda.
 // Orden de caras: right, left, top, bottom, front, back
@@ -18,14 +400,6 @@ function mcLayoutWide() {
     rightLeg: { right:[0,20,4,12], left:[8,20,4,12],  top:[4,16,4,4],  bottom:[8,16,4,4],  front:[4,20,4,12], back:[12,20,4,12] },
     leftLeg:  { right:[16,52,4,12],left:[24,52,4,12], top:[20,48,4,4], bottom:[24,48,4,4], front:[20,52,4,12],back:[28,52,4,12] }
   };
-}
-
-function mcLayoutSlim() {
-  const layout = mcLayoutWide();
-  // Los brazos slim (Alex) miden 3px de ancho en vez de 4px.
-  layout.rightArm = { right:[40,20,4,12], front:[44,20,3,12], left:[47,20,4,12], back:[51,20,3,12], top:[44,16,3,4], bottom:[47,16,3,4] };
-  layout.leftArm  = { right:[32,52,4,12], front:[36,52,3,12], left:[39,52,4,12], back:[43,52,3,12], top:[36,48,3,4], bottom:[39,48,3,4] };
-  return layout;
 }
 
 // Formato antiguo 64x32: no hay región independiente para brazo/pierna
@@ -43,35 +417,19 @@ function mcLayoutLegacyWide() {
 }
 
 // ----------------------------
-// Layout UV de la SEGUNDA CAPA (overlay/layer2): gorro, chaqueta,
-// mangas y pantalones. Solo existe en el formato de textura 64x64;
-// el formato antiguo 64x32 no tiene esta fila.
-// ----------------------------
-function mcOverlayWide() {
-  return {
-    hat:          { right:[32,8,8,8],  left:[48,8,8,8],  top:[40,0,8,8], bottom:[48,0,8,8], front:[40,8,8,8],  back:[56,8,8,8] },
-    jacket:       { right:[16,36,4,12],left:[28,36,4,12],top:[20,32,8,4],bottom:[28,32,8,4],front:[20,36,8,12],back:[32,36,8,12] },
-    rightSleeve:  { right:[40,36,4,12],left:[48,36,4,12],top:[44,32,4,4],bottom:[48,32,4,4],front:[44,36,4,12],back:[52,36,4,12] },
-    leftSleeve:   { right:[48,52,4,12],left:[56,52,4,12],top:[52,48,4,4],bottom:[56,48,4,4],front:[52,52,4,12],back:[60,52,4,12] },
-    rightPants:   { right:[0,36,4,12], left:[8,36,4,12],  top:[4,32,4,4], bottom:[8,32,4,4], front:[4,36,4,12], back:[12,36,4,12] },
-    leftPants:    { right:[0,52,4,12], left:[8,52,4,12],  top:[4,48,4,4], bottom:[8,48,4,4], front:[4,52,4,12], back:[12,52,4,12] }
-  };
-}
-
-function mcOverlaySlim() {
-  const layout = mcOverlayWide();
-  layout.rightSleeve = { right:[40,36,4,12], front:[44,36,3,12], left:[47,36,4,12], back:[51,36,3,12], top:[44,32,3,4], bottom:[47,32,3,4] };
-  layout.leftSleeve  = { right:[48,52,4,12], front:[52,52,3,12], left:[55,52,4,12], back:[59,52,3,12], top:[52,48,3,4], bottom:[55,48,3,4] };
-  return layout;
-}
-
-// ----------------------------
 // Aplica un layout de caras [x,y,w,h] (en píxeles) a un BoxGeometry,
 // usando el orden de caras estándar de THREE.BoxGeometry:
 // [+x right, -x left, +y top, -y bottom, +z front, -z back]
 // ----------------------------
 function setBoxUV(geometry, layout, texW, texH) {
-  const order = ["right", "left", "top", "bottom", "front", "back"];
+  // NOTA: "right"/"left" en el layout se refieren a las regiones de
+  // píxeles de la textura tal como las nombra el formato de Minecraft,
+  // no directamente al eje +X/-X de three.js. Confirmado con un skin
+  // real que esas dos regiones aparecían intercambiadas en el modelo
+  // (la cara -X del box recibía los píxeles de "right" y viceversa),
+  // así que aquí se emparejan al revés a propósito para que el
+  // resultado se vea correcto.
+  const order = ["left", "right", "top", "bottom", "front", "back"];
   const uvAttr = geometry.attributes.uv;
 
   order.forEach((face, i) => {
@@ -99,22 +457,39 @@ function makePart(w, h, d, layout, texW, texH, material) {
   return new THREE.Mesh(geo, material);
 }
 
-// La segunda capa (gorro/chaqueta/mangas/pantalones) se dibuja como una
-// caja ligeramente más grande que la pieza base, para que sobresalga
-// visualmente igual que en el juego. Las zonas transparentes del PNG se
-// descartan mediante alphaTest en el material.
-function makeOverlayPart(w, h, d, layout, texW, texH, material) {
-  const inflate = 0.5;
-  const geo = new THREE.BoxGeometry(w + inflate * 2, h + inflate * 2, d + inflate * 2);
-  setBoxUV(geo, layout, texW, texH);
-  return new THREE.Mesh(geo, material);
-}
-
 // ----------------------------
 // Construye el modelo del jugador (Steve/Alex) con la textura aplicada.
 // Devuelve un THREE.Group listo para agregar a la escena.
+//
+// Formato moderno (64x64): se renderiza con la geometría OFICIAL de
+// Minecraft (OFFICIAL_PLAYER_GEOMETRY) usando el mismo pipeline genérico
+// que ya usan los modelos personalizados de packs 4D/5D
+// (buildCustomGeometryModel). Esto reemplaza el layout UV armado a mano
+// que se usaba antes, y de paso corrige una inconsistencia real: la
+// segunda capa (overlay) usaba un "inflate" fijo de 0.5 para TODAS las
+// piezas, cuando en el modelo oficial solo el gorro usa 0.5 -la
+// chaqueta, las mangas y los pantalones usan 0.25-, lo que hacía que esa
+// capa se viera más separada/inflada de lo que debería.
+//
+// Formato antiguo (64x32): no tiene segunda capa ni distinción
+// wide/slim, así que se sigue armando a mano con el layout clásico
+// (no hay geometría oficial moderna para este formato).
 // ----------------------------
 function buildPlayerModel(texture, isSlim, texW, texH) {
+
+  const legacy = texH < texW; // 64x32 = formato antiguo
+
+  if (!legacy) {
+    const identifier = isSlim ? "geometry.npc.alex" : "geometry.npc.steve";
+    const model = buildCustomGeometryModel(OFFICIAL_PLAYER_GEOMETRY, identifier, texture, texW, texH);
+
+    if (model) {
+      model.position.y = -12; // centra el modelo verticalmente
+      return model;
+    }
+    // Si por algún motivo no se pudo construir, se sigue de largo y se
+    // usa el layout clásico como respaldo (no debería pasar nunca).
+  }
 
   const material = new THREE.MeshLambertMaterial({
     map: texture,
@@ -123,12 +498,8 @@ function buildPlayerModel(texture, isSlim, texW, texH) {
     side: THREE.FrontSide
   });
 
-  const legacy = texH < texW; // 64x32 = formato antiguo
-  const layout = legacy
-    ? mcLayoutLegacyWide()
-    : (isSlim ? mcLayoutSlim() : mcLayoutWide());
-
-  const armW = (!legacy && isSlim) ? 3 : 4;
+  const layout = mcLayoutLegacyWide();
+  const armW = 4;
 
   const group = new THREE.Group();
 
@@ -155,40 +526,6 @@ function buildPlayerModel(texture, isSlim, texW, texH) {
   const leftLeg = makePart(4, 12, 4, layout.leftLeg, texW, texH, material);
   leftLeg.position.set(2, 6, 0);
   group.add(leftLeg);
-
-  // ----------------------------
-  // Segunda capa (gorro, chaqueta, mangas, pantalones). Solo existe en
-  // el formato de textura 64x64; el formato antiguo 64x32 no la tiene.
-  // ----------------------------
-  if (!legacy) {
-
-    const overlay = isSlim ? mcOverlaySlim() : mcOverlayWide();
-
-    const hat = makeOverlayPart(8, 8, 8, overlay.hat, texW, texH, material);
-    hat.position.copy(head.position);
-    group.add(hat);
-
-    const jacket = makeOverlayPart(8, 12, 4, overlay.jacket, texW, texH, material);
-    jacket.position.copy(body.position);
-    group.add(jacket);
-
-    const rightSleeve = makeOverlayPart(armW, 12, 4, overlay.rightSleeve, texW, texH, material);
-    rightSleeve.position.copy(rightArm.position);
-    group.add(rightSleeve);
-
-    const leftSleeve = makeOverlayPart(armW, 12, 4, overlay.leftSleeve, texW, texH, material);
-    leftSleeve.position.copy(leftArm.position);
-    group.add(leftSleeve);
-
-    const rightPants = makeOverlayPart(4, 12, 4, overlay.rightPants, texW, texH, material);
-    rightPants.position.copy(rightLeg.position);
-    group.add(rightPants);
-
-    const leftPants = makeOverlayPart(4, 12, 4, overlay.leftPants, texW, texH, material);
-    leftPants.position.copy(leftLeg.position);
-    group.add(leftPants);
-
-  }
 
   group.position.y = -12; // centra el modelo verticalmente
 
@@ -894,6 +1231,34 @@ async function parseNormalSkinPack(zip) {
   const pngFiles = fileList.filter(f => /\.png$/i.test(f));
   const skins = skinsJson.skins || [];
 
+  // Resolver el nombre visible desde en_US.lang, igual que hace
+  // parseCustomSkinPack para los packs 4D/5D. Sin esto, el visor
+  // siempre mostraba "(no name in lang)" aunque el paquete sí tuviera
+  // el nombre traducido correctamente.
+  const langPaths = fileList.filter(f => /texts\/.*\.lang$/i.test(f));
+  const enUsPath = langPaths.find(f => /(^|\/)en_US\.lang$/i.test(f));
+
+  const enUsEntries = new Map();
+
+  if (enUsPath) {
+    const text = await zip.file(enUsPath).async("string");
+
+    text.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith("#")) return;
+
+      const eq = line.indexOf("=");
+      if (eq > 0) {
+        enUsEntries.set(line.substring(0, eq).trim(), line.substring(eq + 1).trim());
+      }
+    });
+  }
+
+  const packLocalizationName =
+    (typeof skinsJson.localization_name === "string" && skinsJson.localization_name.trim())
+      ? skinsJson.localization_name.trim()
+      : null;
+
   const results = [];
 
   for (const skin of skins) {
@@ -901,6 +1266,17 @@ async function parseNormalSkinPack(zip) {
     const name = skin.localization_name || "?";
     const geometry = skin.geometry || "";
     const isSlim = /slim/i.test(geometry);
+
+    const expectedKey = packLocalizationName
+      ? `skin.${packLocalizationName}.${name}`
+      : `skin.${name}`;
+
+    const matchedKey =
+      [...enUsEntries.keys()].find(k => k === expectedKey) ||
+      [...enUsEntries.keys()].find(k => k.toLowerCase() === expectedKey.toLowerCase()) ||
+      [...enUsEntries.keys()].find(k => k === `skin.${name}` || k.endsWith(`.${name}`));
+
+    const displayName = matchedKey ? enUsEntries.get(matchedKey) : null;
 
     let texturePath = null;
     let textureDataUrl = null;
@@ -922,6 +1298,7 @@ async function parseNormalSkinPack(zip) {
 
     results.push({
       name,
+      displayName,
       isSlim,
       texturePath,
       textureDataUrl

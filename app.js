@@ -1117,11 +1117,12 @@ function renderViewerSkins(skins) {
 
   viewerResults.innerHTML = skins.map((skin, i) => {
     const modelLabel = skin.isSlim ? t("viewer.modelAlex") : t("viewer.modelSteve");
+    const shownName = skin.displayName || skin.name;
 
     return `
       <div class="viewer-skin-card" data-index="${i}">
         <div class="viewer-skin-header">
-          <div class="viewer-skin-name">${escapeHtml(skin.name)}</div>
+          <div class="viewer-skin-name">${escapeHtml(shownName)}</div>
           <div class="viewer-skin-model">${modelLabel}</div>
         </div>
 
@@ -1158,7 +1159,7 @@ function renderViewerSkins(skins) {
         return;
       }
 
-      content.innerHTML = `<img class="viewer-texture-img" src="${skin.textureDataUrl}" alt="${escapeHtml(skin.name)}">`;
+      content.innerHTML = `<img class="viewer-texture-img" src="${skin.textureDataUrl}" alt="${escapeHtml(skin.displayName || skin.name)}">`;
     });
   });
 
