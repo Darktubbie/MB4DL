@@ -23,7 +23,7 @@
 <header class="topbar">
   <div class="container nav">
     <div class="brand">
-      <span class="brand-mbsm" data-i18n-skip>MBSM</span>
+      <span class="brand-mbsm" data-i18n-skip>MB<span class="brand-accent">SM</span></span>
     </div>
 
     <nav class="nav-links">
@@ -95,26 +95,78 @@
     </div>
   </div>
 
-  <div class="container home-cards">
+  <div class="container home-features">
 
-    <a href="#validator" class="card home-card tab-link" data-tab="validator">
-      <div class="home-card-icon">🧩</div>
-      <h3 data-i18n="home.cardValidatorTitle">Skins 4D/5D</h3>
-      <p data-i18n="home.cardValidatorText">Analyze a 4D/5D skin pack for errors, missing files and localization problems, and generate a fixed download.</p>
-    </a>
+    <div class="section-head">
+      <span class="eyebrow pixel" data-i18n="home.featuresEyebrow">FOUR TOOLS, ONE TOOLBOX</span>
+      <h2 data-i18n="home.featuresTitle">Everything you need for a healthy pack. Nothing that wastes your time.</h2>
+      <p data-i18n="home.featuresText">Each module does exactly one thing, and does it well.</p>
+    </div>
 
-    <a href="#studio" class="card home-card tab-link" data-tab="studio">
-      <div class="home-card-icon">🧵</div>
-      <h3 data-i18n="home.cardStudioTitle">Skin Studio</h3>
-      <p data-i18n="home.cardStudioText">Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.</p>
-    </a>
+    <div class="feature-grid">
+      <a href="#validator" class="card feature-card fc-validator tab-link" data-tab="validator">
+        <span class="tag" data-i18n="home.fcValidatorTag">VALIDATOR</span>
+        <h3 data-i18n="home.fcValidatorTitle">Catch the error before Minecraft does</h3>
+        <p data-i18n="home.fcValidatorText">Checks geometry.json, render controllers and ambiguous or duplicate model names, and tells you exactly which file to fix.</p>
+      </a>
+      <a href="#studio" class="card feature-card fc-viewer tab-link" data-tab="studio">
+        <span class="tag" data-i18n="home.fcViewerTag">3D VIEWER</span>
+        <h3 data-i18n="home.fcViewerTitle">See your model before exporting</h3>
+        <p data-i18n="home.fcViewerText">Preview bones, cubes and pivots of custom geometries with the skin applied, rotating live.</p>
+      </a>
+      <a href="#validator" class="card feature-card fc-fixer tab-link" data-tab="validator">
+        <span class="tag" data-i18n="home.fcFixerTag">AUTO-FIX</span>
+        <h3 data-i18n="home.fcFixerTitle">Fix the obvious stuff automatically</h3>
+        <p data-i18n="home.fcFixerText">Ambiguities, broken references and small details get solved on their own; the rest gets flagged for you.</p>
+      </a>
+      <a href="#studio" class="card feature-card fc-maker tab-link" data-tab="studio">
+        <span class="tag" data-i18n="home.fcMakerTag">MAKER</span>
+        <h3 data-i18n="home.fcMakerTitle">Build a pack from scratch</h3>
+        <p data-i18n="home.fcMakerText">Generates the full skin pack structure — manifest, geometry and textures — without touching a console.</p>
+      </a>
+    </div>
 
-    <a href="#about" class="card home-card tab-link" data-tab="about">
-      <div class="home-card-icon">📖</div>
-      <h3 data-i18n="home.cardAboutTitle">About</h3>
-      <p data-i18n="home.cardAboutText">What MBSM checks, how it works, and why it exists.</p>
-    </a>
+  </div>
 
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow pixel" data-i18n="perks.eyebrow">DETAILS THAT MATTER</span>
+      <h2 data-i18n="perks.title">Built by and for skin creators</h2>
+    </div>
+    <div class="perks">
+      <div class="perk">
+        <div class="ico ico-purple">🔒</div>
+        <h4 data-i18n="perks.p1Title">Nothing leaves your browser</h4>
+        <p data-i18n="perks.p1Text">All analysis runs locally in JavaScript. Your files are never uploaded to a server.</p>
+      </div>
+      <div class="perk">
+        <div class="ico ico-info">🌐</div>
+        <h4 data-i18n="perks.p2Title">Spanish and English</h4>
+        <p data-i18n="perks.p2Text">Full interface in both languages, with automatic browser-language detection.</p>
+      </div>
+      <div class="perk">
+        <div class="ico ico-yellow">🧩</div>
+        <h4 data-i18n="perks.p3Title">Made for 4D and 5D</h4>
+        <p data-i18n="perks.p3Text">Not a generic validator: it understands custom geometries, extra layers and ambiguous models.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="oss">
+      <div>
+        <h3 data-i18n="oss.title">Open source, as it should be</h3>
+        <p data-i18n="oss.text">MBSM is built in the open. Report bugs, request features or check the code yourself.</p>
+      </div>
+      <a href="https://github.com/Darktubbie/MBSM" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="oss.btn">View repository</a>
+    </div>
+  </div>
+
+  <div class="container final-cta">
+    <span class="eyebrow pixel" data-i18n="finalCta.eyebrow">READY?</span>
+    <h2 data-i18n="finalCta.title">Stop guessing why your skin won't load</h2>
+    <p data-i18n="finalCta.text">Open the validator and check your first pack in under a minute.</p>
+    <a href="#validator" class="btn btn-primary tab-link" data-tab="validator" data-i18n="finalCta.btn">Get started</a>
   </div>
 
 </section>
@@ -131,6 +183,15 @@
       missing files, JSON errors and localization problems, and download an
       automatically fixed version.
     </p>
+
+    <div class="module-window">
+      <div class="module-window-bar">
+        <span class="module-window-dot"></span>
+        <span class="module-window-dot"></span>
+        <span class="module-window-dot"></span>
+        <span class="module-window-title" data-i18n="validator.windowTitle">VALIDATOR</span>
+      </div>
+      <div class="module-window-body">
 
     <div class="validator-layout">
 
@@ -320,6 +381,9 @@
 
 </div>
 
+      </div>
+    </div>
+
   </div>
 
 </section>
@@ -343,6 +407,15 @@
 
     <!-- ---- Sub-pestaña: Skin Viewer ---- -->
     <div id="studioViewer" class="sub-tab-panel active-subtab">
+
+      <div class="module-window">
+        <div class="module-window-bar">
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-title" data-i18n="studio.windowTitleViewer">VIEWER</span>
+        </div>
+        <div class="module-window-body">
 
       <div class="card upload-card">
 
@@ -375,6 +448,9 @@
 
       <div id="viewerResults" class="skins-preview-grid viewer-grid"></div>
 
+        </div>
+      </div>
+
     </div>
 
     <!-- ---- Sub-pestaña: Skinpack Maker ---- -->
@@ -385,15 +461,46 @@
         their model, and download a ready-to-install .mcpack.
       </p>
 
+      <div class="module-window">
+        <div class="module-window-bar">
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-title" data-i18n="studio.windowTitleMaker">MAKER</span>
+        </div>
+        <div class="module-window-body">
+
       <div class="card maker-card">
 
         <h3 class="pixel-title" data-i18n="maker.addSkinTitle">Add a skin</h3>
 
-        <div class="import-panel active-subtab">
+        <div class="sub-tabs maker-import-tabs">
+          <button type="button" class="sub-tab-btn active" data-importtab="importUpload" data-i18n="maker.importUpload">Upload PNG</button>
+          <button type="button" class="sub-tab-btn" data-importtab="importUsername" data-i18n="maker.importUsername">Username</button>
+        </div>
+
+        <div id="importUpload" class="import-panel active-subtab">
           <label class="file-button">
             <span data-i18n="maker.chooseImage">Choose image</span>
             <input type="file" id="makerFileInput" accept="image/png" multiple hidden>
           </label>
+          <p class="maker-hint" data-i18n="maker.uploadHint">Accepts 64x64, 64x32 (legacy) and 128x128 skins.</p>
+        </div>
+
+        <div id="importUsername" class="import-panel">
+
+          <div class="maker-platform-toggle" role="group" aria-label="Platform">
+            <button type="button" class="maker-platform-btn active" data-platform="java" data-i18n="maker.platformJava">Java</button>
+            <button type="button" class="maker-platform-btn" data-platform="bedrock" data-i18n="maker.platformBedrock">Bedrock</button>
+          </div>
+
+          <div class="maker-inline-form">
+            <input type="text" id="makerUsernameInput" class="maker-input" data-i18n-placeholder="maker.usernamePlaceholder" placeholder="Notch">
+            <button type="button" id="makerUsernameBtn" class="btn btn-secondary" data-i18n="maker.importBtn">Import</button>
+          </div>
+
+          <p class="maker-hint" id="makerUsernameHint" data-i18n="maker.usernameHintJava">Fetches the current skin of a Minecraft Java Edition account.</p>
+
         </div>
 
         <div id="makerImportStatus" class="maker-status"></div>
@@ -421,9 +528,21 @@
           <input type="text" id="makerPackDescription" class="maker-input" data-i18n-placeholder="maker.packDescPlaceholder" placeholder="A collection of custom skins">
         </div>
 
-        <p class="maker-hint" data-i18n-html="maker.formatHint">
-          Supports Minecraft formatting codes, e.g. <code>&sect;l</code> bold, <code>&sect;c</code> red, <code>&sect;r</code> reset.
-        </p>
+        <div class="maker-codes">
+
+          <div class="maker-codes-row">
+            <span class="maker-codes-label" data-i18n="maker.colorsLabel">Colors</span>
+            <div class="maker-swatch-grid" id="makerColorSwatches"></div>
+          </div>
+
+          <div class="maker-codes-row">
+            <span class="maker-codes-label" data-i18n="maker.formatLabel">Format</span>
+            <div class="maker-format-buttons" id="makerFormatButtons"></div>
+          </div>
+
+          <p class="maker-hint" data-i18n="maker.codesHint">Click a field above, then tap a color or format to insert it there.</p>
+
+        </div>
 
         <div class="maker-preview" id="makerNamePreview"></div>
 
@@ -443,6 +562,9 @@
       <button id="makerGenerateBtn" class="btn btn-primary fix-repair-btn" data-i18n="maker.generateBtn">
         Download skin pack
       </button>
+
+        </div>
+      </div>
 
     </div>
 

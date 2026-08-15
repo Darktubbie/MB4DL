@@ -1,14 +1,21 @@
 // maker.js
 // Skinpack Maker: permite crear un skinpack normal de Minecraft Bedrock
-// desde cero. Importa skins (PNG local), deja elegir nombre/modelo (wide
-// o slim) por skin, configura nombre, descripción e ícono del pack (con
-// códigos de formato de Bedrock), y genera un .mcpack descargable con un
-// UUID nuevo en cada generación.
+// desde cero. Importa skins (PNG local, o por nombre de usuario de Java
+// / Bedrock), detecta automáticamente el modelo (wide/slim) y deja
+// corregirlo a mano, configura nombre, descripción e ícono del pack (con
+// selector de colores y formato de Bedrock), y genera un .mcpack
+// descargable con un UUID nuevo en cada generación.
 //
-// La importación por URL y por usuario de Java Edition se quitó: ambas
-// dependían de que servidores de terceros (hosts de imágenes, Crafatar)
-// enviaran cabeceras CORS, algo fuera de nuestro control y que en la
-// práctica falla seguido. Importar el PNG directamente es 100% confiable.
+// Importación por usuario: usa varios servicios públicos con CORS
+// habilitado (no hay backend propio). Para Java se prueban en orden
+// minotar.net, mc-heads.net y mineskin.eu -todos aceptan el nombre de
+// usuario directamente, sin resolver un UUID antes-. Para Bedrock se usa
+// la API pública de GeyserMC (nombre de usuario/gamertag -> XUID de Xbox
+// -> id de textura), y la textura final se descarga a través de wsrv.nl
+// (un proxy de imágenes con CORS habilitado) porque textures.minecraft.net
+// no envía cabeceras CORS. Nota: la búsqueda por Bedrock solo encuentra
+// resultado si esa cuenta ya se conectó antes a algún servidor con
+// Geyser, ya que así es como funciona la API de GeyserMC.
 //
 // Nota de orden de carga: este script se ejecuta ANTES que app.js, así
 // que nunca debe llamar a t()/mcFormatToHtml()/escapeHtml() (definidas en
@@ -20,13 +27,53 @@
 let makerSkins = [];       // { id, name, model: "wide"|"slim", dataUrl }
 let makerPackIcon = null;  // { dataUrl } | null
 let makerNextId = 1;
+let makerPlatform = "java"; // "java" | "bedrock", para la importación por usuario
+let makerActiveField = null; // <input> de nombre/descripción con foco más reciente
 
 // ---------- Utilidades ----------
+
+// Un skin de Minecraft válido es cuadrado (64x64, 128x128, ...) o tiene
+// la proporción 2:1 del formato antiguo (64x32, 128x64, ...), siempre
+// con el ancho como múltiplo de 64.
+function makerValidDimensions(width, height) {
+  if (!width || !height || width < 64 || width % 64 !== 0) return false;
+  return height === width || width === height * 2;
+}
+
+// Detecta si una textura ya dibujada en un canvas usa el modelo "slim"
+// (Alex, brazos de 3px) en vez de "wide" (Steve, brazos de 4px).
+//
+// Técnica estándar usada por launchers/editores de skins: en el layout
+// 64x64, la manga derecha (capa 2) reserva una franja de 1px que solo se
+// usa en el modelo wide; en las skins slim esa franja queda totalmente
+// transparente. Si esos píxeles son 100% transparentes, es slim.
+// El formato antiguo 64x32 nunca tiene modelo slim.
+function makerDetectSlim(ctx, width, height) {
+  if (height < 64) return false;
+
+  try {
+    const scale = width / 64;
+    const x = Math.round(54 * scale);
+    const y = Math.round(20 * scale);
+    const w = Math.max(1, Math.round(scale));
+    const h = Math.max(1, Math.round(12 * scale));
+
+    const data = ctx.getImageData(x, y, w, h).data;
+
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] !== 0) return false;
+    }
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 // Convierte una imagen local (blob:) en un PNG "limpio" dibujándola en un
 // canvas. Esto normaliza el formato de salida (siempre PNG real) y sirve
 // como validación: si la imagen no es decodificable, el navegador dispara
-// onerror.
+// onerror. De paso calcula el modelo probable (wide/slim).
 function makerImageToPng(sourceUrl) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -49,7 +96,8 @@ function makerImageToPng(sourceUrl) {
         resolve({
           dataUrl: canvas.toDataURL("image/png"),
           width: canvas.width,
-          height: canvas.height
+          height: canvas.height,
+          isSlimGuess: makerDetectSlim(ctx, canvas.width, canvas.height)
         });
       } catch (e) {
         reject(e);
@@ -63,6 +111,11 @@ function makerImageToPng(sourceUrl) {
 
 function makerFileToPng(file) {
   const objectUrl = URL.createObjectURL(file);
+  return makerImageToPng(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
+}
+
+function makerBlobToPng(blob) {
+  const objectUrl = URL.createObjectURL(blob);
   return makerImageToPng(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
 }
 
@@ -125,7 +178,7 @@ function makerSetStatus(message, type) {
 
 // ---------- Lista de skins ----------
 
-function makerAddSkin(dataUrl, suggestedName) {
+function makerAddSkin(dataUrl, suggestedName, modelGuess) {
   const name = (suggestedName && suggestedName.trim())
     ? suggestedName.trim()
     : `${t("maker.defaultSkinName")} ${makerSkins.length + 1}`;
@@ -133,7 +186,7 @@ function makerAddSkin(dataUrl, suggestedName) {
   makerSkins.push({
     id: makerNextId++,
     name,
-    model: "wide",
+    model: modelGuess === "slim" ? "slim" : "wide",
     dataUrl
   });
 
@@ -218,12 +271,148 @@ if (makerFileInput) {
     for (const file of files) {
       try {
         const png = await makerFileToPng(file);
+
+        if (!makerValidDimensions(png.width, png.height)) {
+          makerSetStatus(t("maker.invalidDimensions"), "error");
+          continue;
+        }
+
         const suggestedName = file.name.replace(/\.[^.]+$/, "");
-        makerAddSkin(png.dataUrl, suggestedName);
+        makerAddSkin(png.dataUrl, suggestedName, png.isSlimGuess ? "slim" : "wide");
       } catch (err) {
         console.error(err);
         makerSetStatus(t("maker.importFailGeneric"), "error");
       }
+    }
+  });
+}
+
+// ---------- Importar: por nombre de usuario (Java / Bedrock) ----------
+
+// Todos aceptan el nombre de usuario directamente (sin resolver un UUID
+// antes) y tienen CORS habilitado.
+const MAKER_JAVA_SKIN_SOURCES = [
+  { name: "minotar.net", url: (u) => `https://minotar.net/skin/${u}` },
+  { name: "mc-heads.net", url: (u) => `https://mc-heads.net/skin/${u}` },
+  { name: "mineskin.eu", url: (u) => `https://mineskin.eu/skin/${u}` }
+];
+
+async function makerFetchJavaSkin(username) {
+  const encoded = encodeURIComponent(username.trim());
+
+  for (const source of MAKER_JAVA_SKIN_SOURCES) {
+    try {
+      const res = await fetch(source.url(encoded), { mode: "cors" });
+      if (!res.ok) continue;
+
+      const blob = await res.blob();
+      if (blob.size < 100) continue; // respuesta vacía / placeholder de error
+
+      const png = await makerBlobToPng(blob);
+      if (!makerValidDimensions(png.width, png.height)) continue;
+
+      return png;
+    } catch (e) {
+      // intentar la siguiente fuente
+    }
+  }
+
+  return null;
+}
+
+// GeyserMC expone una API pública para convertir un gamertag de
+// Bedrock/Xbox a su XUID, y de ahí a la última skin que subió a un
+// servidor con Geyser. La textura final se baja a través de wsrv.nl
+// (proxy de imágenes con CORS) porque textures.minecraft.net no envía
+// cabeceras CORS.
+async function makerFetchBedrockSkin(gamertag) {
+  try {
+    const xuidRes = await fetch(
+      `https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(gamertag.trim())}`,
+      { mode: "cors" }
+    );
+    if (!xuidRes.ok) return null;
+
+    const xuidJson = await xuidRes.json();
+    if (!xuidJson || !xuidJson.xuid) return null;
+
+    const skinRes = await fetch(`https://api.geysermc.org/v2/skin/${xuidJson.xuid}`, { mode: "cors" });
+    if (!skinRes.ok) return null;
+
+    const skinJson = await skinRes.json();
+    if (!skinJson || !skinJson.texture_id) return null;
+
+    const textureUrl =
+      `https://wsrv.nl/?url=${encodeURIComponent(`textures.minecraft.net/texture/${skinJson.texture_id}`)}&output=png`;
+
+    const texRes = await fetch(textureUrl, { mode: "cors" });
+    if (!texRes.ok) return null;
+
+    const blob = await texRes.blob();
+    const png = await makerBlobToPng(blob);
+    if (!makerValidDimensions(png.width, png.height)) return null;
+
+    return png;
+  } catch (e) {
+    return null;
+  }
+}
+
+const makerUsernameInput = document.getElementById("makerUsernameInput");
+const makerUsernameBtn = document.getElementById("makerUsernameBtn");
+const makerUsernameHint = document.getElementById("makerUsernameHint");
+
+document.querySelectorAll(".maker-platform-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    makerPlatform = btn.getAttribute("data-platform") === "bedrock" ? "bedrock" : "java";
+
+    document.querySelectorAll(".maker-platform-btn").forEach(b => {
+      b.classList.toggle("active", b === btn);
+    });
+
+    if (makerUsernameHint) {
+      makerUsernameHint.textContent = t(
+        makerPlatform === "bedrock" ? "maker.usernameHintBedrock" : "maker.usernameHintJava"
+      );
+    }
+  });
+});
+
+async function makerImportFromUsername() {
+  const username = (makerUsernameInput.value || "").trim();
+
+  if (!username) {
+    makerSetStatus(t("maker.needUsername"), "error");
+    return;
+  }
+
+  makerSetStatus(t("maker.importing"));
+
+  const png = makerPlatform === "bedrock"
+    ? await makerFetchBedrockSkin(username)
+    : await makerFetchJavaSkin(username);
+
+  if (!png) {
+    makerSetStatus(
+      t(makerPlatform === "bedrock" ? "maker.importFailUsernameBedrock" : "maker.importFailUsernameJava"),
+      "error"
+    );
+    return;
+  }
+
+  makerAddSkin(png.dataUrl, username, png.isSlimGuess ? "slim" : "wide");
+  makerUsernameInput.value = "";
+}
+
+if (makerUsernameBtn) {
+  makerUsernameBtn.addEventListener("click", makerImportFromUsername);
+}
+
+if (makerUsernameInput) {
+  makerUsernameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      makerImportFromUsername();
     }
   });
 }
@@ -253,6 +442,98 @@ function updateMakerPreview() {
 
 if (makerPackName) makerPackName.addEventListener("input", updateMakerPreview);
 if (makerPackDescription) makerPackDescription.addEventListener("input", updateMakerPreview);
+
+// ---------- Selector de colores y formato ----------
+// Insertan el código § correspondiente en el campo (nombre o
+// descripción) que tuvo el foco más recientemente, en la posición del
+// cursor -igual que si el usuario lo hubiera tecleado a mano-. Así los
+// códigos de Bedrock quedan accesibles con un toque, sin tener que
+// escribir el símbolo § (difícil en la mayoría de los teclados) ni
+// memorizar el atajo &.
+[makerPackName, makerPackDescription].forEach(field => {
+  if (!field) return;
+  field.addEventListener("focus", () => { makerActiveField = field; });
+});
+
+// Nombres de los 16 colores estándar + 11 colores de material exclusivos
+// de Bedrock, en el mismo orden/valores que MC_COLORS (app.js) para que
+// la vista previa coincida exactamente con el swatch elegido.
+const MAKER_COLOR_CODES = [
+  ["0", "#000000", "colorBlack"], ["1", "#0000AA", "colorDarkBlue"],
+  ["2", "#00AA00", "colorDarkGreen"], ["3", "#00AAAA", "colorDarkAqua"],
+  ["4", "#AA0000", "colorDarkRed"], ["5", "#AA00AA", "colorDarkPurple"],
+  ["6", "#FFAA00", "colorGold"], ["7", "#AAAAAA", "colorGray"],
+  ["8", "#555555", "colorDarkGray"], ["9", "#5555FF", "colorBlue"],
+  ["a", "#55FF55", "colorGreen"], ["b", "#55FFFF", "colorAqua"],
+  ["c", "#FF5555", "colorRed"], ["d", "#FF55FF", "colorLightPurple"],
+  ["e", "#FFFF55", "colorYellow"], ["f", "#FFFFFF", "colorWhite"],
+  ["g", "#DDD605", "colorMinecoinGold"], ["h", "#E3D4D1", "colorQuartz"],
+  ["i", "#CECACA", "colorIron"], ["j", "#443A3B", "colorNetherite"],
+  ["m", "#971607", "colorRedstone"], ["n", "#B4684D", "colorCopper"],
+  ["p", "#DEB12D", "colorGoldMaterial"], ["q", "#47A036", "colorEmerald"],
+  ["s", "#2CBAA8", "colorDiamond"], ["t", "#21497B", "colorLapis"],
+  ["u", "#9A5CC6", "colorAmethyst"]
+];
+
+// Solo los códigos que son de verdad funciones de FORMATO en Bedrock
+// (§n y §m, a diferencia de Java, son colores de material acá, no
+// subrayado/tachado -por eso no aparecen como "formato"-).
+const MAKER_FORMAT_CODES = [
+  ["l", "B", "formatBold"], ["o", "I", "formatItalic"],
+  ["k", "?", "formatObfuscated"], ["r", "R", "formatReset"]
+];
+
+function makerInsertCode(code) {
+  const field = makerActiveField || makerPackName;
+  if (!field) return;
+
+  const start = field.selectionStart != null ? field.selectionStart : field.value.length;
+  const end = field.selectionEnd != null ? field.selectionEnd : field.value.length;
+
+  field.value = field.value.slice(0, start) + "§" + code + field.value.slice(end);
+  field.focus();
+
+  const caret = start + 2;
+  field.setSelectionRange(caret, caret);
+
+  updateMakerPreview();
+}
+
+function renderMakerCodePickers() {
+  const swatchGrid = document.getElementById("makerColorSwatches");
+  const formatRow = document.getElementById("makerFormatButtons");
+
+  if (swatchGrid) {
+    swatchGrid.innerHTML = MAKER_COLOR_CODES.map(([code, hex, nameKey]) => `
+      <button
+        type="button"
+        class="maker-swatch"
+        style="background:${hex}"
+        data-code="${code}"
+        title="${escapeHtml(t("maker." + nameKey))}"
+        aria-label="${escapeHtml(t("maker." + nameKey))}"
+      ></button>
+    `).join("");
+  }
+
+  if (formatRow) {
+    formatRow.innerHTML = MAKER_FORMAT_CODES.map(([code, label, nameKey]) => `
+      <button
+        type="button"
+        class="maker-format-btn"
+        data-code="${code}"
+        title="${escapeHtml(t("maker." + nameKey))}"
+        aria-label="${escapeHtml(t("maker." + nameKey))}"
+      >${label}</button>
+    `).join("");
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const swatch = e.target.closest(".maker-swatch, .maker-format-btn");
+  if (!swatch) return;
+  makerInsertCode(swatch.getAttribute("data-code"));
+});
 
 if (makerIconInput) {
   makerIconInput.addEventListener("change", async (e) => {
@@ -421,4 +702,10 @@ if (makerGenerateBtn) {
 function refreshMakerLanguage() {
   renderMakerSkinsList();
   updateMakerPreview();
+  renderMakerCodePickers();
+
+  const hintEl = document.getElementById("makerUsernameHint");
+  if (hintEl) {
+    hintEl.textContent = t(makerPlatform === "bedrock" ? "maker.usernameHintBedrock" : "maker.usernameHintJava");
+  }
 }
