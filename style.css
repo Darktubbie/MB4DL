@@ -669,7 +669,7 @@ a{
   border-color:var(--red);
 }
 
-/* ---------- Sub-pestañas (Skin Studio) ---------- */
+/* ---------- Sub-pestañas (Classic Skins) ---------- */
 
 .sub-tabs{
   display:flex;
@@ -2068,4 +2068,282 @@ a{
     overflow-x:hidden;
   }
 
+}
+/* =========================================================================
+   4D/5D Viewer (SkinGeo Viewer)
+   Namespace CSS propio (prefijo "sg-") para no chocar con nada existente.
+   Reutiliza exclusivamente las variables de color ya definidas en :root
+   (--bg, --panel, --border, --purple, --purple-dark, --red, --yellow,
+   --info, --text, --muted, --shadow) -- no se introduce ninguna paleta
+   nueva.
+   ========================================================================= */
+
+.sg-viewer-layout{
+  display:grid;
+  grid-template-columns:.85fr 1.15fr;
+  gap:24px;
+  margin-bottom:24px;
+}
+
+.sg-sidebar{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.sg-dropzone-compact{
+  padding:16px 12px;
+}
+.sg-dropzone-compact .drop-icon{
+  font-size:20px;
+  margin-bottom:6px;
+}
+.sg-dz-hint{
+  font-size:11.5px;
+  color:var(--muted);
+  line-height:1.5;
+  margin:4px 0 10px;
+}
+
+.sg-field-label{
+  display:block;
+  font-size:11px;
+  letter-spacing:.6px;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.sg-select{
+  width:100%;
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:13px;
+  font-family:inherit;
+}
+
+.sg-controls{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  transition:opacity .15s;
+}
+.sg-controls.controls-disabled{
+  opacity:.4;
+  pointer-events:none;
+}
+
+.sg-stats-grid{
+  grid-template-columns:1fr 1fr;
+}
+
+.sg-toggle-list{
+  display:flex;
+  flex-direction:column;
+}
+.sg-toggle-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 0;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  color:var(--text);
+}
+.sg-toggle-row:last-child{ border-bottom:none; }
+
+.sg-switch{
+  width:36px; height:20px; border-radius:999px;
+  background:var(--border);
+  position:relative; cursor:pointer; flex-shrink:0;
+  transition:.15s;
+}
+.sg-switch.on{ background:var(--purple); }
+.sg-switch::after{
+  content:""; position:absolute; top:2px; left:2px;
+  width:16px; height:16px; border-radius:50%;
+  background:#fff; transition:.15s;
+}
+.sg-switch.on::after{ transform:translateX(16px); }
+
+.sg-log-box{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  font-size:11.5px;
+  color:var(--muted);
+  max-height:150px;
+  overflow-y:auto;
+  font-family:ui-monospace,'SFMono-Regular',Menlo,monospace;
+  line-height:1.6;
+}
+.sg-log-box .err{ color:var(--red); }
+.sg-log-box .ok{ color:var(--purple); }
+.sg-log-box .warn{ color:var(--yellow); }
+
+.sg-viewport-card{
+  padding:0;
+  overflow:hidden;
+  min-height:480px;
+  display:flex;
+}
+
+.sg-viewer-host{
+  position:relative;
+  width:100%;
+  min-height:480px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(168,85,247,.06), transparent 60%),
+    #0c0d10;
+}
+
+.sg-three-viewer{
+  width:100%; height:100%; min-height:480px; display:block;
+}
+
+.sg-blockbench-viewer{
+  width:100%; min-height:480px;
+  display:none;
+  flex-direction:column;
+  position:static;
+}
+
+.sg-viewport-overlay{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:10px;
+  pointer-events:none;
+  text-align:center;
+  padding:20px;
+}
+.sg-overlay-ico{ font-size:34px; opacity:.5; }
+.sg-viewport-overlay h2{ font-size:16px; color:var(--muted); font-weight:600; }
+.sg-viewport-overlay p{ font-size:12.5px; color:var(--muted); max-width:38ch; }
+
+.sg-viewport-toolbar{
+  position:absolute; top:16px; right:16px;
+  display:flex; gap:8px;
+  z-index:5;
+}
+.sg-vt-btn{
+  background:rgba(27,29,32,.85);
+  border:1px solid var(--border);
+  color:var(--text);
+  width:34px; height:34px;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  font-size:14px;
+  backdrop-filter:blur(6px);
+}
+.sg-vt-btn:hover{ border-color:var(--purple); color:var(--purple); }
+.sg-vt-btn.active{ border-color:var(--purple); color:var(--purple); background:rgba(168,85,247,.12); }
+
+.sg-model-badge{
+  position:absolute; bottom:16px; left:16px;
+  background:rgba(27,29,32,.85);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 12px;
+  font-size:11.5px;
+  color:var(--muted);
+  backdrop-filter:blur(6px);
+  max-width:60vw;
+  z-index:5;
+  pointer-events:none;
+}
+.sg-model-badge strong{ color:var(--text); }
+
+/* ---------- panel de Blockbench Web embebido (clases generadas por
+   blockbench.js -- se mantienen sin el prefijo "sg-" porque ya son
+   suficientemente especificas ("bb-") y no chocan con nada de MBSM) ---------- */
+.bb-frame-wrap{
+  flex:1 1 auto;
+  min-height:280px;
+  border-bottom:1px solid var(--border);
+  background:#000;
+}
+.bb-frame{
+  width:100%; height:100%; min-height:280px;
+  border:none; display:block;
+}
+.bb-status-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
+.bb-status{
+  padding:10px 16px;
+  font-size:12.5px;
+  color:var(--muted);
+  flex:1 1 auto;
+  min-width:0;
+}
+.bb-status.ok{ color:var(--purple); }
+.bb-status.err{ color:var(--red); }
+.bb-status.warn{ color:var(--yellow); }
+.bb-collapse-btn{
+  flex:0 0 auto;
+  margin-right:10px;
+  width:28px; height:28px;
+  border-radius:7px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  font-size:13px;
+  line-height:1;
+  cursor:pointer;
+}
+.bb-collapse-btn:hover{ border-color:var(--purple); color:var(--purple); }
+.bb-instructions{
+  padding:12px 16px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.6;
+  max-height:220px;
+  overflow-y:auto;
+}
+.bb-instructions ol{ margin:8px 0 8px 18px; }
+.bb-instructions code{
+  background:var(--panel); border:1px solid var(--border);
+  color:var(--purple); padding:1px 5px; border-radius:4px; font-size:11px;
+}
+.bb-dl-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--purple); color:#1a0f26;
+  padding:8px 14px; border-radius:8px; font-size:12px; font-weight:700;
+  text-decoration:none; margin:6px 8px 6px 0;
+}
+.bb-dl-btn:hover{ background:var(--purple-dark); color:#fff; }
+.bb-note{ font-size:11.5px; color:var(--muted); margin-top:6px; }
+
+@media (max-width:980px){
+  .sg-viewer-layout{
+    grid-template-columns:1fr;
+  }
+  .sg-viewport-card, .sg-viewer-host, .sg-three-viewer, .sg-blockbench-viewer{
+    min-height:60vh;
+  }
+}
+
+@media (max-width:640px){
+  .sg-viewport-toolbar{ top:10px; right:10px; gap:6px; }
+  .sg-model-badge{
+    left:10px; bottom:10px;
+    max-width:calc(100vw - 20px);
+    font-size:11px;
+  }
+  .sg-vt-btn{ width:40px; height:40px; font-size:16px; }
+  .sg-switch{ width:42px; height:24px; }
+  .sg-switch::after{ width:20px; height:20px; }
+  .sg-switch.on::after{ transform:translateX(18px); }
+
+  .bb-status-row{ flex-wrap:wrap; }
+  .bb-status{ padding:10px 14px; line-height:1.5; }
+  .bb-collapse-btn{ margin:4px 10px; }
+  .bb-instructions{ padding:14px; font-size:12.5px; }
 }

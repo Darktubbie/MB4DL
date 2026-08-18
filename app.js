@@ -14,15 +14,15 @@ const results = document.getElementById("results");
 // ---------- i18n ----------
 const I18N = {
   en: {
-    nav: { home: "Home", validator: "Skins 4D/5D", studio: "Skin Studio", about: "About" },
+    nav: { home: "Home", validator: "Skins 4D/5D", studio: "Classic Skins", about: "About" },
     home: {
       title: "EVERYTHING YOU NEED FOR MINECRAFT BEDROCK SKINS",
-      subtitle: "MBSM is a free toolbox for Minecraft Bedrock skin packs that runs entirely in your browser. Pick what you need below.",
+      subtitle: "MBSM is a free toolbox for Minecraft Bedrock skin packs that runs almost entirely in your browser. Pick what you need below.",
       btnValidator: "Check a 4D/5D pack",
-      btnStudio: "Open Skin Studio",
+      btnStudio: "Open Classic Skins",
       cardValidatorTitle: "Skins 4D/5D",
       cardValidatorText: "Analyze a 4D/5D skin pack for errors, missing files and localization problems, and generate a fixed download.",
-      cardStudioTitle: "Skin Studio",
+      cardStudioTitle: "Classic Skins",
       cardStudioText: "Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.",
       cardAboutTitle: "About",
       cardAboutText: "What MBSM checks, how it works, and why it exists.",
@@ -45,8 +45,8 @@ const I18N = {
     perks: {
       eyebrow: "DETAILS THAT MATTER",
       title: "Built by and for skin creators",
-      p1Title: "Nothing leaves your browser",
-      p1Text: "All analysis runs locally in JavaScript. Your files are never uploaded to a server.",
+      p1Title: "Local by default",
+      p1Text: "Validating, fixing, previewing and building skin packs all runs locally in JavaScript — nothing is uploaded anywhere. The one exception: sending a 4D model to the embedded Blockbench Web editor briefly sends that model's data to web.blockbench.net so it can open it.",
       p2Title: "Spanish and English",
       p2Text: "Full interface in both languages, with automatic browser-language detection.",
       p3Title: "Made for 4D and 5D",
@@ -70,9 +70,9 @@ const I18N = {
       statusPrivate: "No files uploaded to any server"
     },
     validator: {
-      sectionTitle: "SKINS 4D/5D VALIDATOR",
+      sectionTitle: "SKINS 4D/5D",
       windowTitle: "VALIDATOR",
-      tabIntro: "Upload a 4D or 5D Minecraft Bedrock skin pack to find broken references, missing files, JSON errors and localization problems, and download an automatically fixed version.",
+      tabIntro: "Everything for 4D/5D Minecraft Bedrock skin packs: validate and automatically fix broken references, missing files or JSON errors, or preview your 5D and 4D models live in 3D without leaving MBSM.",
       dropTitle: "DRAG YOUR SKINPACK",
       dropText: `Accepts
         <strong>.zip</strong>
@@ -111,7 +111,31 @@ const I18N = {
       invalidFileSelected: "Couldn't open the file.",
       internalErrorTitle: "Internal error",
       internalErrorText: "Something went wrong during the package analysis.",
-      needPackAlert: "Load a skinpack first."
+      needPackAlert: "Load a skinpack first.",
+      subValidator: "Validator"
+    },
+    sg: {
+      subViewer: "4D/5D Viewer",
+      tabIntro: "Live 3D preview for 4D/5D geometries: 5D models (poly_mesh) render directly here, 4D models (cubes) open in an embedded Blockbench Web editor, all without leaving MBSM.",
+      windowTitle: "4D/5D VIEWER",
+      fieldPack: "Full pack (optional)",
+      dzPackHint: ".zip / .mcpack — reads geometry.json (4D+5D) and pairs textures via skins.json",
+      fieldGeo: "Geometry (.geo.json)",
+      dzGeoHint: "Legacy format — detects 4D/5D per model",
+      fieldTex: "Texture (.png)",
+      dzTexHint: "PNG, any size that's a multiple of 64",
+      fieldModel: "Detected model",
+      statBones: "Bones",
+      statCubes: "Cubes / Polys",
+      toggleSpin: "Auto-rotate",
+      toggleWire: "Wireframe",
+      toggleGrid: "Floor / grid",
+      togglePivots: "Show pivots",
+      btnReset: "Frame model (5D only)",
+      fieldLog: "Log",
+      logWaiting: "Waiting for files…",
+      emptyTitle: "Nothing to render yet",
+      emptyText: "Upload a .zip/.mcpack pack, or a loose geometry + texture, to see the 3D model (5D) or the embedded Blockbench editor (4D)."
     },
     fix: {
       title: "Available fixes",
@@ -136,9 +160,12 @@ const I18N = {
       title: "ABOUT MBSM",
       p1: `MBSM is a free toolbox for
         <strong>Minecraft Bedrock</strong>
-        skin packs that runs entirely in your browser — your files are
-        never uploaded to a server: a validator for 4D/5D packs with
-        custom geometries, a 3D skin viewer, and a skin pack builder.`,
+        skin packs that runs almost entirely in your browser: a validator
+        for 4D/5D packs with custom geometries, a 3D skin viewer, a 4D/5D
+        viewer with an embedded Blockbench Web editor, and a skin pack
+        builder. The only thing that ever leaves your browser is a 4D
+        model's data when you send it to that embedded Blockbench editor —
+        everything else stays local.`,
       p2: "The goal is to catch exactly the mistakes that usually make a skin not show up in-game, a model fail to load, or textures break — and to make building a pack from scratch simple."
     },
     checks: {
@@ -169,7 +196,7 @@ const I18N = {
     },
     footer: { text: "Made for the Minecraft Bedrock community" },
     studio: {
-      sectionTitle: "SKIN STUDIO",
+      sectionTitle: "CLASSIC SKINS",
       tabIntro: "Preview regular Minecraft Bedrock skin packs in 3D, or build your own pack from scratch.",
       subViewer: "Skin Viewer",
       subMaker: "Skinpack Maker",
@@ -260,15 +287,15 @@ const I18N = {
     }
   },
   es: {
-    nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skin Studio", about: "Acerca de" },
+    nav: { home: "Inicio", validator: "Skins 4D/5D", studio: "Skins Clásicas", about: "Acerca de" },
     home: {
       title: "TODO LO QUE NECESITAS PARA SKINS DE MINECRAFT BEDROCK",
-      subtitle: "MBSM es una caja de herramientas gratuita para skinpacks de Minecraft Bedrock que funciona por completo en tu navegador. Elige lo que necesites abajo.",
+      subtitle: "MBSM es una caja de herramientas gratuita para skinpacks de Minecraft Bedrock que funciona casi por completo en tu navegador. Elige lo que necesites abajo.",
       btnValidator: "Revisar un pack 4D/5D",
-      btnStudio: "Abrir Skin Studio",
+      btnStudio: "Abrir Skins Clásicas",
       cardValidatorTitle: "Skins 4D/5D",
       cardValidatorText: "Analiza un skinpack 4D/5D en busca de errores, archivos faltantes y problemas de localización, y genera una descarga corregida.",
-      cardStudioTitle: "Skin Studio",
+      cardStudioTitle: "Skins Clásicas",
       cardStudioText: "Previsualiza skinpacks normales en 3D, o crea el tuyo desde cero con el Skinpack Maker.",
       cardAboutTitle: "Acerca de",
       cardAboutText: "Qué revisa MBSM, cómo funciona, y por qué existe.",
@@ -291,8 +318,8 @@ const I18N = {
     perks: {
       eyebrow: "DETALLES QUE IMPORTAN",
       title: "Pensado por y para creadores de skins",
-      p1Title: "Nada sale de tu navegador",
-      p1Text: "Todo el análisis corre localmente con JavaScript. Tus archivos nunca se suben a un servidor.",
+      p1Title: "Local por defecto",
+      p1Text: "Validar, reparar, previsualizar y crear skin packs corre todo localmente en JavaScript — no se sube nada a ningún lado. La única excepción: al enviar un modelo 4D al editor Blockbench Web integrado, los datos de ese modelo se envían brevemente a web.blockbench.net para que pueda abrirlo.",
       p2Title: "Español e inglés",
       p2Text: "Interfaz completa en ambos idiomas, con detección automática del idioma del navegador.",
       p3Title: "Pensado para 4D y 5D",
@@ -316,9 +343,9 @@ const I18N = {
       statusPrivate: "Ningún archivo se sube a un servidor"
     },
     validator: {
-      sectionTitle: "VALIDADOR DE SKINS 4D/5D",
+      sectionTitle: "SKINS 4D/5D",
       windowTitle: "VALIDADOR",
-      tabIntro: "Sube un skinpack 4D o 5D de Minecraft Bedrock para encontrar referencias rotas, archivos faltantes, errores de JSON y problemas de localización, y descarga una versión corregida automáticamente.",
+      tabIntro: "Todo para skinpacks 4D/5D de Minecraft Bedrock: valida y repara automáticamente referencias rotas, archivos faltantes o errores de JSON, o previsualiza tus modelos 5D y 4D en 3D en vivo sin salir de MBSM.",
       dropTitle: "ARRASTRA TU SKINPACK",
       dropText: `Admite archivos
         <strong>.zip</strong>
@@ -357,7 +384,31 @@ const I18N = {
       invalidFileSelected: "No se pudo abrir el archivo.",
       internalErrorTitle: "Error interno",
       internalErrorText: "Ocurrió un problema durante el análisis del paquete.",
-      needPackAlert: "Primero carga un skinpack."
+      needPackAlert: "Primero carga un skinpack.",
+      subValidator: "Validador"
+    },
+    sg: {
+      subViewer: "Visor 4D/5D",
+      tabIntro: "Vista previa 3D en vivo para geometrías 4D/5D: los modelos 5D (poly_mesh) se renderizan aquí mismo, los modelos 4D (cubes) se abren en un editor Blockbench Web integrado, todo sin salir de MBSM.",
+      windowTitle: "VISOR 4D/5D",
+      fieldPack: "Pack completo (opcional)",
+      dzPackHint: ".zip / .mcpack — lee geometry.json (4D+5D) y empareja texturas vía skins.json",
+      fieldGeo: "Geometría (.geo.json)",
+      dzGeoHint: "Formato legacy — detecta 4D/5D por modelo",
+      fieldTex: "Textura (.png)",
+      dzTexHint: "PNG, cualquier tamaño múltiplo de 64",
+      fieldModel: "Modelo detectado",
+      statBones: "Huesos",
+      statCubes: "Cubos / Polys",
+      toggleSpin: "Auto-rotar",
+      toggleWire: "Wireframe",
+      toggleGrid: "Piso / cuadrícula",
+      togglePivots: "Mostrar pivotes",
+      btnReset: "Encuadrar modelo (solo 5D)",
+      fieldLog: "Registro",
+      logWaiting: "Esperando archivos…",
+      emptyTitle: "Todavía no hay nada que renderizar",
+      emptyText: "Sube un pack .zip/.mcpack, o una geometría + textura por separado, para ver el modelo en 3D (5D) o en el editor Blockbench integrado (4D)."
     },
     fix: {
       title: "Correcciones disponibles",
@@ -381,10 +432,13 @@ const I18N = {
     about: {
       title: "ACERCA DE MBSM",
       p1: `MBSM es una caja de herramientas gratuita para paquetes de
-        <strong>Minecraft Bedrock</strong> que funciona por completo en tu
-        navegador — tus archivos nunca se suben a ningún servidor:
-        un validador para packs 4D/5D con geometrías personalizadas, un visor
-        de skins en 3D, y un creador de skinpacks.`,
+        <strong>Minecraft Bedrock</strong> que funciona casi por completo en
+        tu navegador: un validador para packs 4D/5D con geometrías
+        personalizadas, un visor de skins en 3D, un visor 4D/5D con un
+        editor Blockbench Web integrado, y un creador de skinpacks. Lo único
+        que sale de tu navegador son los datos de un modelo 4D cuando lo
+        envías a ese editor Blockbench integrado — todo lo demás se queda
+        local.`,
       p2: "El objetivo es detectar exactamente los errores que suelen provocar que una skin no aparezca en el juego, que el modelo no cargue o que las texturas se rompan — y hacer sencillo crear un pack desde cero."
     },
     checks: {
@@ -415,7 +469,7 @@ const I18N = {
     },
     footer: { text: "Hecho para la comunidad de Minecraft Bedrock" },
     studio: {
-      sectionTitle: "SKIN STUDIO",
+      sectionTitle: "SKINS CLÁSICAS",
       tabIntro: "Previsualiza skinpacks normales de Minecraft Bedrock en 3D, o crea tu propio pack desde cero.",
       subViewer: "Visor de Skins",
       subMaker: "Skinpack Maker",
@@ -1144,7 +1198,7 @@ document.querySelectorAll(".tab-link[data-tab]").forEach(link => {
 });
 
 // ==========================================================
-// Sub-pestañas (dentro de una pestaña principal, p. ej. Skin Studio:
+// Sub-pestañas (dentro de una pestaña principal, p. ej. Classic Skins:
 // Skin Viewer / Skinpack Maker, o los métodos de importación del Maker)
 // ==========================================================
 function switchSubTab(btn) {
@@ -1396,3 +1450,17 @@ try {
 } catch (e) {}
 
 applyLanguage(savedLang);
+
+// ==========================================================
+// 4D/5D Viewer (SkinGeo Viewer) -- inicializacion perezosa: solo
+// arranca Three.js/Blockbench la primera vez que el usuario entra a
+// esa subpestana, para no gastar recursos si nunca la abre. No toca
+// switchTab()/switchSubTab() ni viewer.js.
+// ==========================================================
+(function () {
+  var sgTabBtn = document.querySelector('.sub-tab-btn[data-subtab="sgTabViewer"]');
+  if (!sgTabBtn) return;
+  sgTabBtn.addEventListener("click", function () {
+    if (typeof SkinGeoViewer !== "undefined") SkinGeoViewer.init();
+  });
+})();

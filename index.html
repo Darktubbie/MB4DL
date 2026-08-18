@@ -29,7 +29,7 @@
     <nav class="nav-links">
       <a href="#home" class="tab-link active" data-tab="home" data-i18n="nav.home">Home</a>
       <a href="#validator" class="tab-link" data-tab="validator" data-i18n="nav.validator">Skins 4D/5D</a>
-      <a href="#studio" class="tab-link" data-tab="studio" data-i18n="nav.studio">Skin Studio</a>
+      <a href="#studio" class="tab-link" data-tab="studio" data-i18n="nav.studio">Classic Skins</a>
       <a href="#about" class="tab-link" data-tab="about" data-i18n="nav.about">About</a>
     </nav>
 
@@ -57,12 +57,12 @@
 
         <p data-i18n="home.subtitle">
           MBSM is a free toolbox for Minecraft Bedrock skin packs that
-          runs entirely in your browser. Pick what you need below.
+          runs almost entirely in your browser. Pick what you need below.
         </p>
 
         <div class="hero-buttons">
           <a href="#validator" class="btn btn-primary tab-link" data-tab="validator" data-i18n="home.btnValidator">Check a 4D/5D pack</a>
-          <a href="#studio" class="btn btn-secondary tab-link" data-tab="studio" data-i18n="home.btnStudio">Open Skin Studio</a>
+          <a href="#studio" class="btn btn-secondary tab-link" data-tab="studio" data-i18n="home.btnStudio">Open Classic Skins</a>
         </div>
 
       </div>
@@ -136,8 +136,8 @@
     <div class="perks">
       <div class="perk">
         <div class="ico ico-purple">🔒</div>
-        <h4 data-i18n="perks.p1Title">Nothing leaves your browser</h4>
-        <p data-i18n="perks.p1Text">All analysis runs locally in JavaScript. Your files are never uploaded to a server.</p>
+        <h4 data-i18n="perks.p1Title">Local by default</h4>
+        <p data-i18n="perks.p1Text">Validating, fixing, previewing and building skin packs all runs locally in JavaScript — nothing is uploaded anywhere. The one exception: sending a 4D model to the embedded Blockbench Web editor briefly sends that model's data to web.blockbench.net so it can open it.</p>
       </div>
       <div class="perk">
         <div class="ico ico-info">🌐</div>
@@ -176,13 +176,21 @@
 
   <div class="container">
 
-    <h2 class="section-title" data-i18n="validator.sectionTitle">SKINS 4D/5D VALIDATOR</h2>
+    <h2 class="section-title" data-i18n="validator.sectionTitle">SKINS 4D/5D</h2>
 
     <p class="viewer-intro" data-i18n="validator.tabIntro">
-      Upload a 4D or 5D Minecraft Bedrock skin pack to find broken references,
-      missing files, JSON errors and localization problems, and download an
-      automatically fixed version.
+      Everything for 4D/5D Minecraft Bedrock skin packs: validate and
+      automatically fix broken references, missing files or JSON errors, or
+      preview your 5D and 4D models live in 3D without leaving MBSM.
     </p>
+
+    <div class="sub-tabs">
+      <button type="button" class="sub-tab-btn active" data-subtab="sgTabValidator" data-i18n="validator.subValidator">Validator</button>
+      <button type="button" class="sub-tab-btn" data-subtab="sgTabViewer" data-i18n="sg.subViewer">4D/5D Viewer</button>
+    </div>
+
+    <!-- ---- Sub-pestaña: Validator (contenido original, sin cambios) ---- -->
+    <div id="sgTabValidator" class="sub-tab-panel active-subtab">
 
     <div class="module-window">
       <div class="module-window-bar">
@@ -384,16 +392,157 @@
       </div>
     </div>
 
+    </div>
+    <!-- ---- /Sub-pestaña: Validator ---- -->
+
+    <!-- ---- Sub-pestaña: 4D/5D Viewer (SkinGeo Viewer) ---- -->
+    <div id="sgTabViewer" class="sub-tab-panel">
+
+      <p class="viewer-intro" data-i18n="sg.tabIntro">
+        Live 3D preview for 4D/5D geometries: 5D models (poly_mesh) render
+        directly here, 4D models (cubes) open in an embedded Blockbench Web
+        editor, all without leaving MBSM.
+      </p>
+
+      <div class="module-window">
+        <div class="module-window-bar">
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-dot"></span>
+          <span class="module-window-title" data-i18n="sg.windowTitle">4D/5D VIEWER</span>
+        </div>
+        <div class="module-window-body">
+
+          <div class="sg-viewer-layout">
+
+            <div class="card sg-sidebar">
+
+              <div>
+                <span class="sg-field-label" data-i18n="sg.fieldPack">Full pack (optional)</span>
+                <div id="sgDzPack" class="dropzone sg-dropzone-compact">
+                  <div class="drop-icon">📦</div>
+                  <p class="sg-dz-hint" data-i18n="sg.dzPackHint">.zip / .mcpack — reads geometry.json (4D+5D) and pairs textures via skins.json</p>
+                  <label class="file-button">
+                    <span data-i18n="validator.selectFile">Select file</span>
+                    <input type="file" id="sgInputPack" accept=".zip,.mcpack,.mcaddon" hidden>
+                  </label>
+                  <div id="sgDzPackName" class="selected-file"></div>
+                </div>
+              </div>
+
+              <div>
+                <span class="sg-field-label" data-i18n="sg.fieldGeo">Geometry (.geo.json)</span>
+                <div id="sgDzGeo" class="dropzone sg-dropzone-compact">
+                  <div class="drop-icon">🦴</div>
+                  <p class="sg-dz-hint" data-i18n="sg.dzGeoHint">Legacy format — detects 4D/5D per model</p>
+                  <label class="file-button">
+                    <span data-i18n="validator.selectFile">Select file</span>
+                    <input type="file" id="sgInputGeo" accept=".json" hidden>
+                  </label>
+                  <div id="sgDzGeoName" class="selected-file"></div>
+                </div>
+              </div>
+
+              <div>
+                <span class="sg-field-label" data-i18n="sg.fieldTex">Texture (.png)</span>
+                <div id="sgDzTex" class="dropzone sg-dropzone-compact">
+                  <div class="drop-icon">🖼️</div>
+                  <p class="sg-dz-hint" data-i18n="sg.dzTexHint">PNG, any size that's a multiple of 64</p>
+                  <label class="file-button">
+                    <span data-i18n="validator.selectFile">Select file</span>
+                    <input type="file" id="sgInputTex" accept=".png,image/png" hidden>
+                  </label>
+                  <div id="sgDzTexName" class="selected-file"></div>
+                </div>
+              </div>
+
+              <div id="sgModelSelectWrap" style="display:none;">
+                <span class="sg-field-label" data-i18n="sg.fieldModel">Detected model</span>
+                <select id="sgModelSelect" class="sg-select"></select>
+              </div>
+
+              <div id="sgRenderer5dControls" class="sg-controls">
+                <div class="stats-grid sg-stats-grid">
+                  <div class="stat-box">
+                    <div class="stat-number" id="sgStatBones">–</div>
+                    <div class="stat-label" data-i18n="sg.statBones">Bones</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-number" id="sgStatCubes">–</div>
+                    <div class="stat-label" data-i18n="sg.statCubes">Cubes / Polys</div>
+                  </div>
+                </div>
+
+                <div class="sg-toggle-list">
+                  <div class="sg-toggle-row">
+                    <span data-i18n="sg.toggleSpin">Auto-rotate</span>
+                    <div class="sg-switch on" id="sgToggleSpin"></div>
+                  </div>
+                  <div class="sg-toggle-row">
+                    <span data-i18n="sg.toggleWire">Wireframe</span>
+                    <div class="sg-switch" id="sgToggleWire"></div>
+                  </div>
+                  <div class="sg-toggle-row">
+                    <span data-i18n="sg.toggleGrid">Floor / grid</span>
+                    <div class="sg-switch on" id="sgToggleGrid"></div>
+                  </div>
+                  <div class="sg-toggle-row">
+                    <span data-i18n="sg.togglePivots">Show pivots</span>
+                    <div class="sg-switch" id="sgTogglePivots"></div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary" id="sgBtnReset" disabled data-i18n="sg.btnReset">Frame model (5D only)</button>
+              </div>
+
+              <div>
+                <span class="sg-field-label" data-i18n="sg.fieldLog">Log</span>
+                <div class="sg-log-box" id="sgLog" data-i18n="sg.logWaiting">Waiting for files…</div>
+              </div>
+
+            </div>
+
+            <div class="card sg-viewport-card">
+              <div id="sgViewerHost" class="sg-viewer-host">
+                <div id="sgThreeViewer" class="sg-three-viewer"></div>
+                <div id="sgBlockbenchViewer" class="sg-blockbench-viewer"></div>
+
+                <div class="sg-viewport-overlay" id="sgEmptyState">
+                  <div class="sg-overlay-ico">🧊</div>
+                  <h2 data-i18n="sg.emptyTitle">Nothing to render yet</h2>
+                  <p data-i18n="sg.emptyText">Upload a .zip/.mcpack pack, or a loose geometry + texture, to see the 3D model (5D) or the embedded Blockbench editor (4D).</p>
+                </div>
+
+                <div class="sg-viewport-toolbar" id="sgViewportToolbar">
+                  <div class="sg-vt-btn" id="sgVtWire" title="Wireframe">◫</div>
+                  <div class="sg-vt-btn active" id="sgVtGrid" title="Grid">▦</div>
+                  <div class="sg-vt-btn active" id="sgVtSpin" title="Auto-rotate">↻</div>
+                </div>
+
+                <div class="sg-model-badge" id="sgModelBadge" style="display:none;">
+                  <strong id="sgModelBadgeName">—</strong> · <span id="sgModelBadgeMeta">—</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <!-- ---- /Sub-pestaña: 4D/5D Viewer ---- -->
+
   </div>
 
 </section>
 
-<!-- ============ SKIN STUDIO ============ -->
+<!-- ============ CLASSIC SKINS ============ -->
 <section id="studio" class="section reveal tab-section">
 
   <div class="container">
 
-    <h2 class="section-title" data-i18n="studio.sectionTitle">SKIN STUDIO</h2>
+    <h2 class="section-title" data-i18n="studio.sectionTitle">CLASSIC SKINS</h2>
 
     <p class="viewer-intro" data-i18n="studio.tabIntro">
       Preview regular Minecraft Bedrock skin packs in 3D, or build your own
@@ -584,9 +733,12 @@
       <p data-i18n-html="about.p1">
         MBSM is a free toolbox for
         <strong>Minecraft Bedrock</strong>
-        skin packs that runs entirely in your browser — your files are
-        never uploaded to a server: a validator for 4D/5D packs with
-        custom geometries, a 3D skin viewer, and a skin pack builder.
+        skin packs that runs almost entirely in your browser: a validator
+        for 4D/5D packs with custom geometries, a 3D skin viewer, a 4D/5D
+        viewer with an embedded Blockbench Web editor, and a skin pack
+        builder. The only thing that ever leaves your browser is a 4D
+        model's data when you send it to that embedded Blockbench editor —
+        everything else stays local.
       </p>
 
       <p data-i18n="about.p2">
@@ -701,6 +853,13 @@
 <script src="viewer.js?v=7"></script>
 
 <script src="maker.js?v=7"></script>
+
+<!-- Modulos de SkinGeo Viewer -- herramienta 4D/5D Viewer,
+     completamente independiente de viewer.js de arriba. -->
+<script src="skinpack.js?v=1"></script>
+<script src="renderer5d.js?v=1"></script>
+<script src="blockbench.js?v=1"></script>
+<script src="skinGeoViewer.js?v=1"></script>
 
 <script src="app.js?v=7"></script>
 
