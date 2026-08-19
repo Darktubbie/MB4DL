@@ -98,7 +98,7 @@
   <div class="container home-features">
 
     <div class="section-head">
-      <span class="eyebrow pixel" data-i18n="home.featuresEyebrow">FOUR TOOLS, ONE TOOLBOX</span>
+      <span class="eyebrow pixel" data-i18n="home.featuresEyebrow">ALL THE TOOLS, ONE TOOLBOX</span>
       <h2 data-i18n="home.featuresTitle">Everything you need for a healthy pack. Nothing that wastes your time.</h2>
       <p data-i18n="home.featuresText">Each module does exactly one thing, and does it well.</p>
     </div>
@@ -109,17 +109,22 @@
         <h3 data-i18n="home.fcValidatorTitle">Catch the error before Minecraft does</h3>
         <p data-i18n="home.fcValidatorText">Checks geometry.json, render controllers and ambiguous or duplicate model names, and tells you exactly which file to fix.</p>
       </a>
-      <a href="#studio" class="card feature-card fc-viewer tab-link" data-tab="studio">
-        <span class="tag" data-i18n="home.fcViewerTag">3D VIEWER</span>
-        <h3 data-i18n="home.fcViewerTitle">See your model before exporting</h3>
-        <p data-i18n="home.fcViewerText">Preview bones, cubes and pivots of custom geometries with the skin applied, rotating live.</p>
+      <a href="#validator" class="card feature-card fc-viewer tab-link" data-tab="validator" data-subtab="sgTabViewer">
+        <span class="tag" data-i18n="home.fcViewerTag">4D/5D VIEWER</span>
+        <h3 data-i18n="home.fcViewerTitle">See your 4D/5D model before exporting</h3>
+        <p data-i18n="home.fcViewerText">Preview bones, cubes and pivots of custom geometries with the skin applied, rotating live — or send 4D models straight to an embedded Blockbench editor.</p>
       </a>
       <a href="#validator" class="card feature-card fc-fixer tab-link" data-tab="validator">
         <span class="tag" data-i18n="home.fcFixerTag">AUTO-FIX</span>
         <h3 data-i18n="home.fcFixerTitle">Fix the obvious stuff automatically</h3>
         <p data-i18n="home.fcFixerText">Ambiguities, broken references and small details get solved on their own; the rest gets flagged for you.</p>
       </a>
-      <a href="#studio" class="card feature-card fc-maker tab-link" data-tab="studio">
+      <a href="#studio" class="card feature-card fc-classic-viewer tab-link" data-tab="studio" data-subtab="studioViewer">
+        <span class="tag" data-i18n="home.fcClassicViewerTag">3D VIEWER</span>
+        <h3 data-i18n="home.fcClassicViewerTitle">Preview your classic skin in 3D</h3>
+        <p data-i18n="home.fcClassicViewerText">See a regular Minecraft Bedrock skin applied to the Steve/Alex model, rotating live, before using it in-game.</p>
+      </a>
+      <a href="#studio" class="card feature-card fc-maker tab-link" data-tab="studio" data-subtab="studioMaker">
         <span class="tag" data-i18n="home.fcMakerTag">MAKER</span>
         <h3 data-i18n="home.fcMakerTitle">Build a pack from scratch</h3>
         <p data-i18n="home.fcMakerText">Generates the full skin pack structure — manifest, geometry and textures — without touching a console.</p>

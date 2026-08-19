@@ -57,7 +57,14 @@ const SkinGeoViewer = (function () {
   function showPanelFor(type) {
     const is4D = type === "4D";
     $("sgThreeViewer").style.display = is4D ? "none" : "block";
-    $("sgBlockbenchViewer").style.display = is4D ? "block" : "none";
+    // OJO: tiene que ser "flex", no "block" -- .sg-blockbench-viewer está
+    // definido en CSS como flex-direction:column para que el iframe
+    // (.bb-frame-wrap, flex:1 1 auto) crezca y llene el espacio sobrante y
+    // la barra de estado quede siempre pegada abajo. Con "block" ese
+    // layout no se activa: los hijos se apilan en flujo normal y el
+    // espacio extra del min-height queda como hueco vacío al final, sin
+    // que el iframe lo aproveche.
+    $("sgBlockbenchViewer").style.display = is4D ? "flex" : "none";
     $("sgViewportToolbar").style.display = is4D ? "none" : "flex";
     // La placa flotante con el nombre/medidas del modelo solo tiene sentido
     // sobre el canvas 3D fijo del Renderer5D. En 4D, Blockbench ya muestra

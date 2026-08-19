@@ -131,11 +131,13 @@ const BlockbenchPanel = (function () {
     state.collapseBtn.type = "button";
     state.collapseBtn.title = "Minimizar/expandir este panel";
     state.collapseBtn.textContent = "▾";
+    state.collapseBtn.style.display = "none";
     state.collapseBtn.addEventListener("click", toggleCollapsed);
     statusRow.appendChild(state.statusEl);
     statusRow.appendChild(state.collapseBtn);
 
     state.instructionsEl = el("div", "bb-instructions");
+    state.instructionsEl.style.display = "none";
 
     hostEl.appendChild(frameWrap);
     hostEl.appendChild(statusRow);
@@ -161,10 +163,21 @@ const BlockbenchPanel = (function () {
   }
 
   function setInstructions(html) {
+    const hasContent = !!html;
     state.instructionsEl.innerHTML = html || "";
+    // Sin contenido, no tiene sentido reservar el padding vacío del
+    // bloque ni mostrar un botón de colapsar que no colapsaría nada --
+    // así la barra de estado queda como el último elemento visible,
+    // pegada al final del panel (sin hueco muerto debajo).
+    state.collapseBtn.style.display = hasContent ? "" : "none";
+    if (!hasContent) {
+      state.instructionsEl.style.display = "none";
+      return;
+    }
     // Si llegan instrucciones nuevas mientras estaba minimizado, se
     // respeta la preferencia del usuario (se quedan ocultas hasta que
     // pulse expandir) — solo se actualiza el contenido interno.
+    state.instructionsEl.style.display = state.collapsed ? "none" : "";
   }
 
   // Heurística de detección de bloqueo por X-Frame-Options/CSP: cuando la
@@ -417,13 +430,10 @@ const BlockbenchPanel = (function () {
     if (urlLen <= safeLimit) {
       loadByURL(geoDef);
       renderPostURLSafetyNet(geoDef, textureInfo);
-      // Por defecto, tras un envío normal por URL, se deja el panel de
-      // instrucciones colapsado: solo queda visible la línea de estado
-      // ("Geometría ... enviada a Blockbench por URL.") y el botón para
-      // expandir, así el panel de Blockbench recupera ese espacio. Si
-      // luego se detecta una carga sospechosamente rápida (posible 414),
-      // flagSuspectedURLFailure() lo vuelve a expandir automáticamente.
-      collapseInstructions();
+      // El panel de instrucciones/aviso queda VISIBLE por defecto tras un
+      // envío normal por URL -- no se colapsa automáticamente. El usuario
+      // decide cuándo ocultarlo (para ganar espacio de visualización) con
+      // el botón ▾/▸ de la barra de estado, que siempre está disponible.
     } else {
       loadByFile(geoDef, textureInfo);
     }
@@ -462,7 +472,11 @@ const BlockbenchPanel = (function () {
     renderDownloadButtons(document.getElementById("bbSafetyButtons"), false);
   }
 
-  function show() { state.host.style.display = "block"; ensureFrameLoaded(); }
+  // "flex", no "block" -- state.host (.sg-blockbench-viewer) es una
+  // columna flex para que el iframe (.bb-frame-wrap, flex:1 1 auto)
+  // crezca y la barra de estado quede pegada abajo. Con "block" esa
+  // distribución no se activa y el espacio extra queda como hueco vacío.
+  function show() { state.host.style.display = "flex"; ensureFrameLoaded(); }
   function hide() { state.host.style.display = "none"; }
 
   return { init, loadModel, show, hide };

@@ -26,18 +26,21 @@ const I18N = {
       cardStudioText: "Preview regular skin packs in 3D, or build your own from scratch with the Skinpack Maker.",
       cardAboutTitle: "About",
       cardAboutText: "What MBSM checks, how it works, and why it exists.",
-      featuresEyebrow: "FOUR TOOLS, ONE TOOLBOX",
+      featuresEyebrow: "ALL THE TOOLS, ONE TOOLBOX",
       featuresTitle: "Everything you need for a healthy pack. Nothing that wastes your time.",
       featuresText: "Each module does exactly one thing, and does it well.",
       fcValidatorTag: "VALIDATOR",
       fcValidatorTitle: "Catch the error before Minecraft does",
       fcValidatorText: "Checks geometry.json, render controllers and ambiguous or duplicate model names, and tells you exactly which file to fix.",
-      fcViewerTag: "3D VIEWER",
-      fcViewerTitle: "See your model before exporting",
-      fcViewerText: "Preview bones, cubes and pivots of custom geometries with the skin applied, rotating live.",
+      fcViewerTag: "4D/5D VIEWER",
+      fcViewerTitle: "See your 4D/5D model before exporting",
+      fcViewerText: "Preview bones, cubes and pivots of custom geometries with the skin applied, rotating live — or send 4D models straight to an embedded Blockbench editor.",
       fcFixerTag: "AUTO-FIX",
       fcFixerTitle: "Fix the obvious stuff automatically",
       fcFixerText: "Ambiguities, broken references and small details get solved on their own; the rest gets flagged for you.",
+      fcClassicViewerTag: "3D VIEWER",
+      fcClassicViewerTitle: "Preview your classic skin in 3D",
+      fcClassicViewerText: "See a regular Minecraft Bedrock skin applied to the Steve/Alex model, rotating live, before using it in-game.",
       fcMakerTag: "MAKER",
       fcMakerTitle: "Build a pack from scratch",
       fcMakerText: "Generates the full skin pack structure — manifest, geometry and textures — without touching a console."
@@ -299,18 +302,21 @@ const I18N = {
       cardStudioText: "Previsualiza skinpacks normales en 3D, o crea el tuyo desde cero con el Skinpack Maker.",
       cardAboutTitle: "Acerca de",
       cardAboutText: "Qué revisa MBSM, cómo funciona, y por qué existe.",
-      featuresEyebrow: "CUATRO HERRAMIENTAS, UNA CAJA",
+      featuresEyebrow: "TODAS LAS HERRAMIENTAS, UNA CAJA",
       featuresTitle: "Todo lo que necesitas para un pack sano. Nada que te haga perder tiempo.",
       featuresText: "Cada módulo hace exactamente una cosa, y la hace bien.",
       fcValidatorTag: "VALIDADOR",
       fcValidatorTitle: "Encuentra el error antes que Minecraft",
       fcValidatorText: "Revisa geometry.json, render controllers y nombres de modelo duplicados o ambiguos, y te dice exactamente qué archivo corregir.",
-      fcViewerTag: "VISOR 3D",
-      fcViewerTitle: "Mira tu modelo antes de exportar",
-      fcViewerText: "Previsualiza huesos, cubos y pivotes de geometrías personalizadas con la skin aplicada, girando en vivo.",
+      fcViewerTag: "VISOR 4D/5D",
+      fcViewerTitle: "Mira tu modelo 4D/5D antes de exportar",
+      fcViewerText: "Previsualiza huesos, cubos y pivotes de geometrías personalizadas con la skin aplicada, girando en vivo — o envía modelos 4D directo a un editor Blockbench integrado.",
       fcFixerTag: "REPARADOR",
       fcFixerTitle: "Corrige lo evidente automáticamente",
       fcFixerText: "Ambigüedades, referencias rotas y detalles menores se resuelven solos; el resto te lo señala para que decidas tú.",
+      fcClassicViewerTag: "VISOR 3D",
+      fcClassicViewerTitle: "Previsualiza tu skin clásica en 3D",
+      fcClassicViewerText: "Mira una skin normal de Minecraft Bedrock aplicada al modelo Steve/Alex, girando en vivo, antes de usarla en el juego.",
       fcMakerTag: "CONSTRUCTOR",
       fcMakerTitle: "Arma un pack desde cero",
       fcMakerText: "Genera la estructura completa de un skin pack — manifest, geometría y texturas — sin tocar una consola."
@@ -1194,6 +1200,18 @@ document.querySelectorAll(".tab-link[data-tab]").forEach(link => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
     switchTab(link.getAttribute("data-tab"));
+
+    // Si el link también apunta a una sub-pestaña concreta (p. ej. una
+    // tarjeta de la home que debe abrir "4D/5D Studio > 4D/5D Viewer"),
+    // simulamos el click real sobre ese botón de sub-pestaña en vez de
+    // duplicar la lógica de switchSubTab() -- así se dispara también el
+    // hook de inicialización perezosa de SkinGeoViewer si corresponde.
+    const subtabId = link.getAttribute("data-subtab");
+    if (subtabId) {
+      const target = document.getElementById(link.getAttribute("data-tab"));
+      const subBtn = target && target.querySelector('.sub-tab-btn[data-subtab="' + subtabId + '"]');
+      if (subBtn) subBtn.click();
+    }
   });
 });
 
