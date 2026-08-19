@@ -138,7 +138,36 @@ const I18N = {
       fieldLog: "Log",
       logWaiting: "Waiting for files…",
       emptyTitle: "Nothing to render yet",
-      emptyText: "Upload a .zip/.mcpack pack, or a loose geometry + texture, to see the 3D model (5D) or the embedded Blockbench editor (4D)."
+      emptyText: "Upload a .zip/.mcpack pack, or a loose geometry + texture, to see the 3D model (5D) or the embedded Blockbench editor (4D).",
+      tagMixed: "MIXED",
+      tagEmpty: "EMPTY",
+      bbTogglePanel: "Minimize/expand this panel",
+      bbExpandPanel: "Expand this panel",
+      bbCollapsePanel: "Minimize this panel",
+      bbLoadingFrame: "Loading Blockbench Web inside the panel…",
+      bbFrameReady: "Blockbench Web ready.",
+      bbCheckingEmbed: "Checking whether Blockbench Web can be embedded before loading the model…",
+      bbBlockedStatus: "⚠ web.blockbench.net can't be embedded inside MBSM (its server is blocking embedding via X-Frame-Options or CSP). This can't be worked around from the browser without the remote server's cooperation — it isn't a bug in MBSM.",
+      bbBlockedInstructions: "<p>As an alternative, the files are prepared anyway so you can open them yourself in Blockbench, without losing your place in MBSM:</p>",
+      bbUrlSent: (id) => `Geometry "${id}" [4D] sent to Blockbench by URL.`,
+      bbSuspectedFail: (id, ms) => `⚠ Geometry "${id}" [4D] was sent by URL, but the panel "finished loading" in just ${ms} ms — too fast for a real Blockbench startup. The server likely rejected the URL for being too long (something like "414 URI Too Long"). This can't be confirmed for certain from here (there's no way to read the actual response of a cross-origin iframe), so check the panel on the right: if it's black/blank or shows an error, use the manual download below.`,
+      bbDownloadGeo: (name) => `⬇ Download geometry (${name})`,
+      bbDownloadTex: (name) => `⬇ Download texture (${name})`,
+      bbNoTexture: "No texture paired in skins.json for this model — only the geometry is prepared.",
+      bbReopenHint: "Download these files and open them with Ctrl+O (or Blockbench's menu) from wherever web.blockbench.net does load — the embedding block doesn't depend on MBSM.",
+      bbTooLargeStatus: (id) => `Geometry "${id}" [4D] is too large to send by URL (Blockbench rejects it). It was prepared as a file to open inside the panel without that limit.`,
+      bbFileInstructionsHtml: `
+        <p><strong>How to load it without leaving the panel:</strong></p>
+        <ol>
+          <li>Download the geometry file below (and the texture, if it appears).</li>
+          <li>Click inside the Blockbench panel on the right and use <em>File → Open</em> to open the downloaded file.</li>
+          <li>Select the downloaded <code>.geo.json</code>. Blockbench opens it without going through the URL, so there's no size limit.</li>
+          <li>With the model open, add the downloaded texture (drag it onto the canvas or use <em>Textures → Add Texture</em>). Blockbench will assign it using the UV the geometry already carries (texturewidth/textureheight, per-face UV, mirror, inflate — all of that travels intact inside the .geo.json, none of it depends on the URL).</li>
+        </ol>
+      `,
+      bbSafetyNetIntro: (id) => `The geometry "${id}" was sent to Blockbench by URL.`,
+      bbSafetyNetTextureNote: "Blockbench Web doesn't support receiving geometry and texture at the same time by URL, so the texture needs to be added inside the panel.",
+      bbSafetyNetWarningHtml: `⚠ If the Blockbench panel stays black, blank, or shows an error like <code>"Error: URI Too Long"</code>, this model was actually too large for Blockbench's server to accept by URL — that limit is set by their server and this page can't verify it from here. Use the buttons below to download it yourself and open it inside the panel with <code>Ctrl+O</code> (then drag in the texture afterwards).`
     },
     fix: {
       title: "Available fixes",
@@ -414,7 +443,36 @@ const I18N = {
       fieldLog: "Registro",
       logWaiting: "Esperando archivos…",
       emptyTitle: "Todavía no hay nada que renderizar",
-      emptyText: "Sube un pack .zip/.mcpack, o una geometría + textura por separado, para ver el modelo en 3D (5D) o en el editor Blockbench integrado (4D)."
+      emptyText: "Sube un pack .zip/.mcpack, o una geometría + textura por separado, para ver el modelo en 3D (5D) o en el editor Blockbench integrado (4D).",
+      tagMixed: "MIXTO",
+      tagEmpty: "VACÍO",
+      bbTogglePanel: "Minimizar/expandir este panel",
+      bbExpandPanel: "Expandir este panel",
+      bbCollapsePanel: "Minimizar este panel",
+      bbLoadingFrame: "Cargando Blockbench Web dentro del panel…",
+      bbFrameReady: "Blockbench Web listo.",
+      bbCheckingEmbed: "Comprobando si Blockbench Web puede embeberse antes de cargar el modelo…",
+      bbBlockedStatus: "⚠ web.blockbench.net no se puede embeber dentro de MBSM (su servidor está bloqueando el embebido, vía X-Frame-Options o CSP). Esto no se puede evitar desde el navegador sin cooperación del servidor remoto — no es un fallo de MBSM.",
+      bbBlockedInstructions: "<p>Como alternativa, se preparan los archivos igualmente para que los abras tú mismo en Blockbench, sin perder tu sitio en MBSM:</p>",
+      bbUrlSent: (id) => `Geometría "${id}" [4D] enviada a Blockbench por URL.`,
+      bbSuspectedFail: (id, ms) => `⚠ La geometría "${id}" [4D] se envió por URL, pero el panel "terminó de cargar" en solo ${ms} ms — demasiado rápido para ser un arranque real de Blockbench. Es probable que el servidor haya rechazado la URL por ser demasiado larga (algo como "414 URI Too Long"). No se puede confirmar desde aquí con certeza (no hay forma de leer la respuesta real de un iframe de otro origen), así que revisa el panel de la derecha: si está en negro/blanco o muestra un error, usa la descarga manual de abajo.`,
+      bbDownloadGeo: (name) => `⬇ Descargar geometría (${name})`,
+      bbDownloadTex: (name) => `⬇ Descargar textura (${name})`,
+      bbNoTexture: "No hay textura emparejada en skins.json para este modelo — solo se prepara la geometría.",
+      bbReopenHint: "Descarga estos archivos y ábrelos con Ctrl+O (o el menú de Blockbench) desde donde web.blockbench.net sí cargue — el bloqueo de embebido no depende de MBSM.",
+      bbTooLargeStatus: (id) => `Geometría "${id}" [4D] es demasiado grande para enviarla por URL (Blockbench la rechaza). Se preparó como archivo para abrir dentro del panel sin ese límite.`,
+      bbFileInstructionsHtml: `
+        <p><strong>Cómo cargarla sin salir del panel:</strong></p>
+        <ol>
+          <li>Descarga el archivo de geometría de abajo (y la textura, si aparece).</li>
+          <li>Haz clic dentro del panel de Blockbench de la derecha y usa <em>File → Open</em> para abrir el archivo descargado.</li>
+          <li>Selecciona el <code>.geo.json</code> descargado. Blockbench lo abre sin pasar por la URL, así que no hay límite de tamaño.</li>
+          <li>Con el modelo abierto, añade la textura descargada (arrástrala sobre el lienzo o usa <em>Textures → Add Texture</em>). Blockbench la asignará usando el UV que ya trae la geometría (texturewidth/textureheight, UV por cara, mirror, inflate — todo eso viaja intacto dentro del .geo.json, no depende de la URL).</li>
+        </ol>
+      `,
+      bbSafetyNetIntro: (id) => `La geometría "${id}" se envió a Blockbench por URL.`,
+      bbSafetyNetTextureNote: "Blockbench Web no admite recibir geometría y textura a la vez por URL, así que la textura hay que añadirla dentro del panel.",
+      bbSafetyNetWarningHtml: `⚠ Si el panel de Blockbench se queda en negro, en blanco, o muestra un texto de error como <code>"Error: URI Too Long"</code>, es que este modelo era, en realidad, demasiado grande para que el servidor de Blockbench lo aceptara por URL — ese límite lo impone su servidor y esta página no puede comprobarlo desde aquí. Usa los botones de abajo para descargarlo tú mismo y ábrelo dentro del panel con <code>Ctrl+O</code> (y arrastra la textura después).`
     },
     fix: {
       title: "Correcciones disponibles",
@@ -569,13 +627,14 @@ const I18N = {
 
 let currentLang = "en";
 
-function t(key) {
+function t(key, ...args) {
   const parts = key.split(".");
   let node = I18N[currentLang];
   for (const p of parts) {
     if (!node) return key;
     node = node[p];
   }
+  if (typeof node === "function") return node(...args);
   return typeof node === "string" ? node : key;
 }
 
@@ -633,6 +692,13 @@ async function applyLanguage(lang) {
   if (typeof viewerResults !== "undefined" && viewerResults && !viewerResults._skinsData) {
     viewerShowMessage(t("validator.waitingText"));
   }
+
+  // Re-pinta el texto ya mostrado del visor 4D/5D en el nuevo idioma
+  // (estado/instrucciones de Blockbench, y los tags MIXTO/VACÍO del
+  // selector de modelos si corresponde). No reintenta ninguna acción con
+  // efectos secundarios -- solo cambia el idioma del texto ya calculado.
+  if (typeof BlockbenchPanel !== "undefined") BlockbenchPanel.refreshLanguage();
+  if (typeof SkinGeoViewer !== "undefined") SkinGeoViewer.refreshLanguage();
 
   // El Skinpack Maker genera su lista de skins y su vista previa de forma
   // dinámica (no vía data-i18n), así que hay que volver a pintarlas cada
@@ -883,6 +949,28 @@ function renderPackInfo(packInfo) {
 }
 
 // ---------- Preview de skins ----------
+// Etiqueta 4D/5D coloreada para el validador -- misma clase visual que
+// usa el selector de modelos del visor 4D/5D (azul=4D, morado=5D), para
+// que ambos apartados se vean consistentes. Cualquier tipo que no sea
+// exactamente "4D" o "5D" (geometría mixta, o "VACÍO"/vacía si llegara a
+// aparecer) usa una clase neutra y su texto se traduce según el idioma
+// actual en vez de mostrar la palabra en español fija.
+function renderGeometryTypeTag(type) {
+  if (type === "4D" || type === "5D") {
+    return `<span class="sg-model-tag sg-model-tag-${type.toLowerCase()}">${type}</span> `;
+  }
+  if (type === "MIXTO") {
+    return `<span class="sg-model-tag sg-model-tag-other">${escapeHtml(t("sg.tagMixed"))}</span> `;
+  }
+  if (type === "VACÍO") {
+    return `<span class="sg-model-tag sg-model-tag-other">${escapeHtml(t("sg.tagEmpty"))}</span> `;
+  }
+  if (type) {
+    return `<span class="sg-model-tag sg-model-tag-other">${escapeHtml(type)}</span> `;
+  }
+  return "";
+}
+
 function renderSkinsPreview(skinDetails) {
   if (!skinDetails || !skinDetails.length) return "";
 
@@ -911,11 +999,15 @@ function renderSkinsPreview(skinDetails) {
       ? "skin-preview-card skin-preview-card-warning"
       : "skin-preview-card";
 
+    const geometryTypeTagHtml = skin.geometry
+      ? renderGeometryTypeTag(skin.geometryType)
+      : "";
+
     return `
       <div class="${cardClass}">
         <div class="skin-preview-displayname">${displayNameHtml}</div>
         <div class="skin-preview-row"><span>${t("js.rowName")}</span> ${escapeHtml(skin.name)}</div>
-        <div class="skin-preview-row"><span>${t("js.rowModel")}</span> ${escapeHtml(skin.geometry || "—")}</div>
+        <div class="skin-preview-row"><span>${t("js.rowModel")}</span> ${geometryTypeTagHtml}${escapeHtml(skin.geometry || "—")}</div>
         ${skin.cape ? `<div class="skin-preview-row"><span>${t("js.rowCape")}</span> ${escapeHtml(skin.cape)}</div>` : ""}
         ${animationsHtml}
       </div>

@@ -405,6 +405,36 @@ async function validateSkinPack(zip, zipName, options = {}) {
     }
 
     // ----------------------------
+    // Detección de tipo (4D/5D) por identificador de geometría, para
+    // mostrar una etiqueta junto a cada skin detectada. Misma lógica que
+    // el visor 4D/5D (por huesos individuales: "cubes" = 4D, "poly_mesh"
+    // = 5D -- nunca por format_version ni por el nombre del modelo).
+    // Deliberadamente self-contenido: no depende de SkinPack (del visor
+    // 4D/5D) para que el validador siga siendo un módulo independiente.
+    // ----------------------------
+    function findGeometryBones(id) {
+      if (usingFallbackOnly || !geo || !id) return null;
+      if (geo[id] && Array.isArray(geo[id].bones)) return geo[id].bones;
+      const list = geo["minecraft:geometry"];
+      if (Array.isArray(list)) {
+        const entry = list.find(g => g && g.description && g.description.identifier === id);
+        if (entry && Array.isArray(entry.bones)) return entry.bones;
+      }
+      return null;
+    }
+
+    function detectGeometryTypeById(id) {
+      const bones = findGeometryBones(id);
+      if (!bones) return null;
+      const hasCubes = bones.some(b => Array.isArray(b.cubes) && b.cubes.length > 0);
+      const hasPolyMesh = bones.some(b => b.poly_mesh && Array.isArray(b.poly_mesh.positions) && Array.isArray(b.poly_mesh.polys));
+      if (hasCubes && hasPolyMesh) return "MIXTO";
+      if (hasPolyMesh) return "5D";
+      if (hasCubes) return "4D";
+      return null;
+    }
+
+    // ----------------------------
     // Detección de "geometry.null" (entrada de relleno típica de
     // paquetes 4D). Cuando aparece, se activa además la validación
     // de animaciones dentro de skins.json. No se marca como advertencia
@@ -770,6 +800,7 @@ async function validateSkinPack(zip, zipName, options = {}) {
       name,
       displayName,
       geometry: skin.geometry || null,
+      geometryType: skin.geometry ? detectGeometryTypeById(skin.geometry) : null,
       cape: skin.cape || null,
       animations: skin.animations || null,
       hasIssue

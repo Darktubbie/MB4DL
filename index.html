@@ -463,7 +463,14 @@
 
               <div id="sgModelSelectWrap" style="display:none;">
                 <span class="sg-field-label" data-i18n="sg.fieldModel">Detected model</span>
-                <select id="sgModelSelect" class="sg-select"></select>
+                <div class="sg-model-select" id="sgModelSelect">
+                  <button type="button" class="sg-model-select-trigger" id="sgModelSelectTrigger">
+                    <span class="sg-model-tag" id="sgModelSelectTag">—</span>
+                    <span class="sg-model-select-label" id="sgModelSelectLabel">—</span>
+                    <span class="sg-model-select-arrow">▾</span>
+                  </button>
+                  <div class="sg-model-select-list" id="sgModelSelectList"></div>
+                </div>
               </div>
 
               <div id="sgRenderer5dControls" class="sg-controls">

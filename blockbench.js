@@ -37,7 +37,7 @@
       geometry.json y el .png ya emparejados, y el panel guía al usuario
       a abrirlos DENTRO del propio Blockbench embebido (Ctrl+O / arrastrar
       desde el sistema de archivos) — sin salir de la pestaña ni de
-      SkinGeo Viewer. Esa apertura de archivo local no tiene el límite de
+      MBSM. Esa apertura de archivo local no tiene el límite de
       la URL porque no viaja por la URL en absoluto.
 
    4. Sobre si el iframe realmente se puede embeber: no hay forma de leer
@@ -96,7 +96,13 @@ const BlockbenchPanel = (function () {
     collapsed: false,
     frameStatus: "idle", // idle | probing | ok | blocked
     currentGeoDef: null,
-    currentTextureInfo: null // { blob, filename } | null
+    currentTextureInfo: null, // { blob, filename } | null
+    // Qué mensaje de estado/instrucciones se mostró por última vez, con
+    // los datos mínimos para volver a pintarlo (nunca para repetir la
+    // acción en sí -- ver refreshLanguage()). Sin esto, cambiar de idioma
+    // mientras el panel está abierto dejaría el texto ya mostrado fijo en
+    // el idioma anterior hasta la próxima interacción.
+    lastAction: null
   };
 
   function el(tag, cls, html) {
@@ -129,7 +135,7 @@ const BlockbenchPanel = (function () {
     state.statusEl = el("div", "bb-status");
     state.collapseBtn = el("button", "bb-collapse-btn");
     state.collapseBtn.type = "button";
-    state.collapseBtn.title = "Minimizar/expandir este panel";
+    state.collapseBtn.title = t("sg.bbTogglePanel");
     state.collapseBtn.textContent = "▾";
     state.collapseBtn.style.display = "none";
     state.collapseBtn.addEventListener("click", toggleCollapsed);
@@ -148,7 +154,7 @@ const BlockbenchPanel = (function () {
     state.collapsed = !state.collapsed;
     state.instructionsEl.style.display = state.collapsed ? "none" : "";
     state.collapseBtn.textContent = state.collapsed ? "▸" : "▾";
-    state.collapseBtn.title = state.collapsed ? "Expandir este panel" : "Minimizar este panel";
+    state.collapseBtn.title = state.collapsed ? t("sg.bbExpandPanel") : t("sg.bbCollapsePanel");
   }
 
   // Fuerzan un estado concreto (a diferencia de toggleCollapsed, que
@@ -226,7 +232,8 @@ const BlockbenchPanel = (function () {
   function ensureFrameLoaded() {
     if (state.frameStatus === "ok" || state.frameStatus === "probing") return;
     state.frameStatus = "probing";
-    setStatus("Cargando Blockbench Web dentro del panel…", "info");
+    state.lastAction = { type: "loading" };
+    setStatus(t("sg.bbLoadingFrame"), "info");
     state.iframe.src = BB_URL;
     detectFrameBlocked(state.iframe, (blocked) => {
       if (blocked) {
@@ -234,7 +241,8 @@ const BlockbenchPanel = (function () {
         showBlockedFallback();
       } else {
         state.frameStatus = "ok";
-        setStatus("Blockbench Web listo.", "ok");
+        state.lastAction = { type: "ready" };
+        setStatus(t("sg.bbFrameReady"), "ok");
         // Una vez confirmado que carga, reintenta la carga pendiente si la había.
         if (state.currentGeoDef) loadIntoFrame(state.currentGeoDef, state.currentTextureInfo);
       }
@@ -242,13 +250,10 @@ const BlockbenchPanel = (function () {
   }
 
   function showBlockedFallback() {
-    setStatus(
-      "⚠ web.blockbench.net no se puede embeber dentro de SkinGeo Viewer (su servidor está bloqueando el embebido, vía X-Frame-Options o CSP). " +
-      "Esto no se puede evitar desde el navegador sin cooperación del servidor remoto — no es un fallo de SkinGeo Viewer.",
-      "err"
-    );
+    state.lastAction = { type: "blocked" };
+    setStatus(t("sg.bbBlockedStatus"), "err");
     setInstructions(`
-      <p>Como alternativa, se preparan los archivos igualmente para que los abras tú mismo en Blockbench, sin perder tu sitio en SkinGeo Viewer:</p>
+      ${t("sg.bbBlockedInstructions")}
       <div id="bbFallbackButtons"></div>
     `);
     renderDownloadButtons(document.getElementById("bbFallbackButtons"), true);
@@ -325,7 +330,8 @@ const BlockbenchPanel = (function () {
     }, { once: true });
 
     state.iframe.src = url;
-    setStatus(`Geometría "${geoDef.id}" [4D] enviada a Blockbench por URL.`, "ok");
+    state.lastAction = { type: "urlLoaded", geoDef };
+    setStatus(t("sg.bbUrlSent", geoDef.id), "ok");
   }
 
   // Se dispara cuando la navegación del iframe "terminó" demasiado rápido
@@ -336,10 +342,8 @@ const BlockbenchPanel = (function () {
   // sospecha, no como hecho confirmado, y siempre se ofrece la descarga
   // manual para que el usuario decida.
   function flagSuspectedURLFailure(geoDef, elapsedMs) {
-    setStatus(
-      `⚠ La geometría "${geoDef.id}" [4D] se envió por URL, pero el panel "terminó de cargar" en solo ${Math.round(elapsedMs)} ms — demasiado rápido para ser un arranque real de Blockbench. Es probable que el servidor haya rechazado la URL por ser demasiado larga (algo como "414 URI Too Long"). No se puede confirmar desde aquí con certeza (no hay forma de leer la respuesta real de un iframe de otro origen), así que revisa el panel de la derecha: si está en negro/blanco o muestra un error, usa la descarga manual de abajo.`,
-      "warn"
-    );
+    state.lastAction = { type: "suspectedFail", geoDef, elapsedMs };
+    setStatus(t("sg.bbSuspectedFail", geoDef.id, Math.round(elapsedMs)), "warn");
     expandInstructions(); // se expande solo para que se vea el aviso
     renderPostURLSafetyNet(geoDef, state.currentTextureInfo);
   }
@@ -356,7 +360,7 @@ const BlockbenchPanel = (function () {
     const geoName = geoDef.id + ".geo.json";
 
     const geoBtn = el("a", "bb-dl-btn");
-    geoBtn.textContent = "⬇ Descargar geometría (" + geoName + ")";
+    geoBtn.textContent = t("sg.bbDownloadGeo", geoName);
     geoBtn.href = URL.createObjectURL(geoBlob);
     geoBtn.download = geoName;
     container.appendChild(geoBtn);
@@ -364,35 +368,26 @@ const BlockbenchPanel = (function () {
     if (state.currentTextureInfo && state.currentTextureInfo.blob) {
       const texBtn = el("a", "bb-dl-btn");
       const texName = state.currentTextureInfo.filename || (geoDef.id + ".png");
-      texBtn.textContent = "⬇ Descargar textura (" + texName + ")";
+      texBtn.textContent = t("sg.bbDownloadTex", texName);
       texBtn.href = URL.createObjectURL(state.currentTextureInfo.blob);
       texBtn.download = texName;
       container.appendChild(texBtn);
     } else {
-      const noTex = el("div", "bb-note", "No hay textura emparejada en skins.json para este modelo — solo se prepara la geometría.");
+      const noTex = el("div", "bb-note", t("sg.bbNoTexture"));
       container.appendChild(noTex);
     }
 
     if (includeReopenHint) {
-      const hint = el("div", "bb-note",
-        "Descarga estos archivos y ábrelos con Ctrl+O (o el menú de Blockbench) desde donde web.blockbench.net sí cargue — el bloqueo de embebido no depende de SkinGeo Viewer.");
+      const hint = el("div", "bb-note", t("sg.bbReopenHint"));
       container.appendChild(hint);
     }
   }
 
   function loadByFile(geoDef, textureInfo) {
-    setStatus(
-      `Geometría "${geoDef.id}" [4D] es demasiado grande para enviarla por URL (Blockbench la rechaza). Se preparó como archivo para abrir dentro del panel sin ese límite.`,
-      "warn"
-    );
+    state.lastAction = { type: "fileLoaded", geoDef };
+    setStatus(t("sg.bbTooLargeStatus", geoDef.id), "warn");
     setInstructions(`
-      <p><strong>Cómo cargarla sin salir del panel:</strong></p>
-      <ol>
-        <li>Descarga el archivo de geometría de abajo (y la textura, si aparece).</li>
-        <li>Haz clic dentro del panel de Blockbench de la derecha y usa <em>File → Open</em> para abrir el archivo descargado.</li>
-        <li>Selecciona el <code>.geo.json</code> descargado. Blockbench lo abre sin pasar por la URL, así que no hay límite de tamaño.</li>
-        <li>Con el modelo abierto, añade la textura descargada (arrástrala sobre el lienzo o usa <em>Textures → Add Texture</em>). Blockbench la asignará usando el UV que ya trae la geometría (texturewidth/textureheight, UV por cara, mirror, inflate — todo eso viaja intacto dentro del .geo.json, no depende de la URL).</li>
-      </ol>
+      ${t("sg.bbFileInstructionsHtml")}
       <div id="bbFileButtons"></div>
     `);
     renderDownloadButtons(document.getElementById("bbFileButtons"), false);
@@ -414,7 +409,8 @@ const BlockbenchPanel = (function () {
       // resolver, loadIntoFrame() se dispara solo desde ensureFrameLoaded.
       ensureFrameLoaded();
       if (state.frameStatus === "blocked") return; // ya se mostró el fallback
-      setStatus("Comprobando si Blockbench Web puede embeberse antes de cargar el modelo…", "info");
+      state.lastAction = { type: "checkingEmbed" };
+      setStatus(t("sg.bbCheckingEmbed"), "info");
       return;
     }
 
@@ -461,12 +457,9 @@ const BlockbenchPanel = (function () {
   function renderPostURLSafetyNet(geoDef, textureInfo) {
     const needsTextureStep = !!textureInfo;
     setInstructions(`
-      <p>La geometría "${geoDef.id}" se envió a Blockbench por URL.
-      ${needsTextureStep
-        ? "Blockbench Web no admite recibir geometría y textura a la vez por URL, así que la textura hay que añadirla dentro del panel."
-        : ""
-      }</p>
-      <p class="bb-note" style="margin-top:0;">⚠ Si el panel de Blockbench se queda en negro, en blanco, o muestra un texto de error como <code>"Error: URI Too Long"</code>, es que este modelo era, en realidad, demasiado grande para que el servidor de Blockbench lo aceptara por URL — ese límite lo impone su servidor y esta página no puede comprobarlo desde aquí. Usa los botones de abajo para descargarlo tú mismo y ábrelo dentro del panel con <code>Ctrl+O</code> (y arrastra la textura después).</p>
+      <p>${t("sg.bbSafetyNetIntro", geoDef.id)}
+      ${needsTextureStep ? t("sg.bbSafetyNetTextureNote") : ""}</p>
+      <p class="bb-note" style="margin-top:0;">${t("sg.bbSafetyNetWarningHtml")}</p>
       <div id="bbSafetyButtons"></div>
     `);
     renderDownloadButtons(document.getElementById("bbSafetyButtons"), false);
@@ -479,5 +472,54 @@ const BlockbenchPanel = (function () {
   function show() { state.host.style.display = "flex"; ensureFrameLoaded(); }
   function hide() { state.host.style.display = "none"; }
 
-  return { init, loadModel, show, hide };
+  // Vuelve a pintar el estado/instrucciones actuales en el idioma nuevo.
+  // A propósito NO reintenta ninguna acción con efectos secundarios
+  // (nunca reasigna iframe.src, nunca reinicia el temporizador de
+  // "carga sospechosamente rápida") -- solo regenera el texto ya
+  // calculado a partir del contexto guardado en state.lastAction.
+  function refreshLanguage() {
+    if (!state.collapseBtn) return; // el panel todavía no se inicializó (carga perezosa)
+    state.collapseBtn.title = state.collapsed ? t("sg.bbExpandPanel") : t("sg.bbCollapsePanel");
+
+    const a = state.lastAction;
+    if (!a) return;
+
+    switch (a.type) {
+      case "loading":
+        setStatus(t("sg.bbLoadingFrame"), "info");
+        break;
+      case "ready":
+        setStatus(t("sg.bbFrameReady"), "ok");
+        break;
+      case "checkingEmbed":
+        setStatus(t("sg.bbCheckingEmbed"), "info");
+        break;
+      case "blocked":
+        setStatus(t("sg.bbBlockedStatus"), "err");
+        setInstructions(`
+          ${t("sg.bbBlockedInstructions")}
+          <div id="bbFallbackButtons"></div>
+        `);
+        renderDownloadButtons(document.getElementById("bbFallbackButtons"), true);
+        break;
+      case "urlLoaded":
+        setStatus(t("sg.bbUrlSent", a.geoDef.id), "ok");
+        renderPostURLSafetyNet(a.geoDef, state.currentTextureInfo);
+        break;
+      case "suspectedFail":
+        setStatus(t("sg.bbSuspectedFail", a.geoDef.id, Math.round(a.elapsedMs)), "warn");
+        renderPostURLSafetyNet(a.geoDef, state.currentTextureInfo);
+        break;
+      case "fileLoaded":
+        setStatus(t("sg.bbTooLargeStatus", a.geoDef.id), "warn");
+        setInstructions(`
+          ${t("sg.bbFileInstructionsHtml")}
+          <div id="bbFileButtons"></div>
+        `);
+        renderDownloadButtons(document.getElementById("bbFileButtons"), false);
+        break;
+    }
+  }
+
+  return { init, loadModel, show, hide, refreshLanguage };
 })();

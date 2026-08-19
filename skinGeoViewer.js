@@ -185,24 +185,75 @@ const SkinGeoViewer = (function () {
      Selección de modelo -> enruta a 5D (Three.js) o 4D (Blockbench)
      --------------------------------------------------------------------- */
 
+  // "4D"/"5D" son etiquetas neutras (no se traducen). Los casos borde que
+  // devuelve SkinPack.detectGeometryType -- "MIXTO" (cubes + poly_mesh en
+  // el mismo modelo) y "VACÍO" (ningún bone con contenido) -- sí son
+  // palabras en español y deben respetar el idioma actual de la UI.
+  function tagDisplayText(type) {
+    if (type === "4D" || type === "5D") return type;
+    if (type === "MIXTO") return (typeof t === "function") ? t("sg.tagMixed") : type;
+    if (type === "VACÍO") return (typeof t === "function") ? t("sg.tagEmpty") : type;
+    return type;
+  }
+
   function populateModelSelect(options) {
-    const sel = $("sgModelSelect");
-    sel.innerHTML = "";
+    const list = $("sgModelSelectList");
+    list.innerHTML = "";
+
     options.forEach((opt, i) => {
-      const o = document.createElement("option");
-      o.value = i;
-      o.textContent = opt.label;
-      sel.appendChild(o);
+      const geoDef = state.geoData[opt.geoIndex];
+      const type = geoDef ? geoDef.type : "4D";
+
+      const item = document.createElement("div");
+      item.className = "sg-model-select-item";
+      item.dataset.index = i;
+
+      const tag = document.createElement("span");
+      tag.className = "sg-model-tag sg-model-tag-" + ((type === "4D" || type === "5D") ? type.toLowerCase() : "other");
+      tag.textContent = tagDisplayText(type);
+
+      const name = document.createElement("span");
+      name.className = "sg-model-select-item-name";
+      name.textContent = geoDef ? geoDef.id : opt.label;
+
+      item.appendChild(tag);
+      item.appendChild(name);
+      item.addEventListener("click", () => {
+        closeModelSelect();
+        selectModelOption(options[i]);
+      });
+      list.appendChild(item);
     });
+
     $("sgModelSelectWrap").style.display = options.length ? "block" : "none";
-    sel.onchange = () => selectModelOption(options[parseInt(sel.value, 10)]);
     state.currentOptions = options;
+  }
+
+  function closeModelSelect() {
+    $("sgModelSelect").classList.remove("open");
+  }
+
+  function updateModelSelectTrigger(geoDef, selectedIndex) {
+    const type = geoDef.type;
+    const tagEl = $("sgModelSelectTag");
+    tagEl.textContent = tagDisplayText(type);
+    tagEl.className = "sg-model-tag sg-model-tag-" + ((type === "4D" || type === "5D") ? type.toLowerCase() : "other");
+    $("sgModelSelectLabel").textContent = geoDef.id || "modelo";
+
+    $("sgModelSelectList").querySelectorAll(".sg-model-select-item").forEach(el => {
+      el.classList.toggle("active", parseInt(el.dataset.index, 10) === selectedIndex);
+    });
   }
 
   async function selectModelOption(opt) {
     state.selectedGeo = opt.geoIndex;
     const geoDef = state.geoData[opt.geoIndex];
     if (!geoDef) return;
+
+    if (state.currentOptions) {
+      const idx = state.currentOptions.indexOf(opt);
+      if (idx !== -1) updateModelSelectTrigger(geoDef, idx);
+    }
 
     $("sgEmptyState").style.display = "none";
     $("sgModelBadge").style.display = "block";
@@ -317,10 +368,30 @@ const SkinGeoViewer = (function () {
 
     $("sgBtnReset").addEventListener("click", () => Renderer5D.frameCamera());
 
+    $("sgModelSelectTrigger").addEventListener("click", (e) => {
+      e.stopPropagation();
+      $("sgModelSelect").classList.toggle("open");
+    });
+    document.addEventListener("click", (e) => {
+      if (!$("sgModelSelect").contains(e.target)) closeModelSelect();
+    });
+
     // Panel 5D visible por defecto hasta que se cargue algo.
     showPanelFor("5D");
   }
 
-  return { init };
+  // Vuelve a pintar los tags del selector de modelos (relevante solo para
+  // los casos borde MIXTO/VACÍO, que sí son palabras traducibles -- "4D"
+  // y "5D" son etiquetas neutras). No reselecciona nada ni vuelve a tocar
+  // el modelo cargado.
+  function refreshLanguage() {
+    if (state.currentOptions) populateModelSelect(state.currentOptions);
+    if (state.geoData && state.selectedGeo !== null && state.currentOptions) {
+      const idx = state.currentOptions.findIndex(o => o.geoIndex === state.selectedGeo);
+      if (idx !== -1) updateModelSelectTrigger(state.geoData[state.selectedGeo], idx);
+    }
+  }
+
+  return { init, refreshLanguage };
 
 })();
